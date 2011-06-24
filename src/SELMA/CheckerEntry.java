@@ -15,11 +15,11 @@ public class CheckerEntry extends IdEntry {
 	public String toString() {
 		String s = "";
 		s += " [";
-		
+
 		s+=level;
-		
+
 		s+=",";
-		
+
 		if (type == null)
 			s+="NULL";
 		else
@@ -39,7 +39,7 @@ public class CheckerEntry extends IdEntry {
 			}
 
 		s+=",";
-		
+
 		if (kind == null)
 			s+="NULL";
 		else
@@ -53,7 +53,7 @@ public class CheckerEntry extends IdEntry {
 			}
 
 		s+="]";
-		
+
 		return s;
 	}
 

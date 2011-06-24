@@ -9,38 +9,38 @@ public class SymbolTable<Entry extends IdEntry> {
 	private int nextAddr = 0;
     private int currentLevel;
     private Map<String, Stack<Entry>> entries;
-    
-    
+
+
     public int nextAddr(){
     	return nextAddr;
     }
-    
-	/** 
-     * Constructor. 
-     * @ensure  this.currentLevel() == -1 
+
+	/**
+     * Constructor.
+     * @ensure  this.currentLevel() == -1
      */
-    public SymbolTable() { 
+    public SymbolTable() {
     	currentLevel = -1;
-        entries = new HashMap<String, Stack<Entry>>(); 
+        entries = new HashMap<String, Stack<Entry>>();
     }
 
-    /** 
-     * Opens a new scope. 
-     * @ensure  this.currentLevel() == old.currentLevel()+1 
+    /**
+     * Opens a new scope.
+     * @ensure  this.currentLevel() == old.currentLevel()+1
      */
     public void openScope()  {
         currentLevel++;
     }
 
-    /** 
-     * Closes the current scope. All identifiers in 
+    /**
+     * Closes the current scope. All identifiers in
      * the current scope will be removed from the SymbolTable.
      * @require old.currentLevel() > -1
-     * @ensure  this.currentLevel() == old.currentLevel()-1 
+     * @ensure  this.currentLevel() == old.currentLevel()-1
      */
     public void closeScope() {
     	for (Map.Entry<String, Stack<Entry>> entry: entries.entrySet()){
-    		Stack<Entry> stack = entry.getValue(); 
+    		Stack<Entry> stack = entry.getValue();
     		if ((stack != null) && (!stack.isEmpty()) && (stack.peek().level >= currentLevel)){
     			stack.pop();
     			nextAddr--;
@@ -52,21 +52,21 @@ public class SymbolTable<Entry extends IdEntry> {
     /** Returns the current scope level. */
     public int currentLevel() {
         return currentLevel;
-    }    
+    }
 
-    /** 
-     * Enters an id together with an entry into this SymbolTable using the 
+    /**
+     * Enters an id together with an entry into this SymbolTable using the
      * current scope level. The entry's level is set to currentLevel().
      * @require String != null && String != "" && entry != null
      * @ensure  this.retrieve(id).getLevel() == currentLevel()
-     * @throws  SymbolTableException when there is no valid current scope level, 
-     *          or when the id is already declared on the current level. 
+     * @throws  SymbolTableException when there is no valid current scope level,
+     *          or when the id is already declared on the current level.
      */
-    public void enter(Tree tree, Entry entry) throws SymbolTableException { 
+    public void enter(Tree tree, Entry entry) throws SymbolTableException {
     	String id = tree.getText();
     	if (currentLevel < 0) {
         	throw new SymbolTableException(tree, "Not in a valid scope.");
-        } 
+        }
         Stack<Entry> s = entries.get(id);
         if (s==null) {
         	s = new Stack<Entry>();
@@ -83,12 +83,12 @@ public class SymbolTable<Entry extends IdEntry> {
         }
     }
 
-    
-    /** 
+
+    /**
      * Get the Entry corresponding with id whose level is the highest.
      * In other words, the method returns the Entry that is defined last.
      * @return  Entry of this id on the highest level
-     *          null if this SymbolTable does not contain id 
+     *          null if this SymbolTable does not contain id
      */
     public Entry retrieve(Tree tree) throws SymbolTableException{
     	String id = tree.getText();
@@ -96,28 +96,28 @@ public class SymbolTable<Entry extends IdEntry> {
     	if (s==null||s.isEmpty())
     		throw new SymbolTableException(tree, "Entry not found: "+id);
     	return s.peek();
-    }    
-    
+    }
+
     public String toString(){
     	String s = "";
     	for (Map.Entry<String, Stack<Entry>> entry: entries.entrySet()){
-    		Stack<Entry> stack = entry.getValue(); 
+    		Stack<Entry> stack = entry.getValue();
     		s+=entry.getKey();
    			s+=stack.toString();
     	}
     	return s;
     }
 }
-    
+
 /** Exception class to signal problems with the SymbolTable */
 class SymbolTableException extends RecognitionException {
     public static final long serialVersionUID = 24362462L; // for Serializable
     private String msg;
     public SymbolTableException(Tree tree, String msg) {
-    	super(); 
-        this.msg = tree.getText() + 
-        " (" + tree.getLine() + 
-        ":" + tree.getCharPositionInLine() + 
+    	super();
+        this.msg = tree.getText() +
+        " (" + tree.getLine() +
+        ":" + tree.getCharPositionInLine() +
         ") " + msg;
     }
     public String getMessage() {

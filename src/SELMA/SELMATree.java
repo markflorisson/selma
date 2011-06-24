@@ -3,20 +3,20 @@ import java.util.Arrays;
 
 import org.antlr.runtime.tree.*;
 import org.antlr.runtime.Token;
-	
+
 public class SELMATree extends CommonTree {
 	public SELMATree(){
 		super();
 	}
-	
+
 	public SELMATree(Token t){
 		super(t);
 	}
-	
+
 	public SELMATree(SELMATree t){
 		super(t);
 	}
-	
+
 	public enum SR_Type {INT,BOOL,CHAR,VOID};
 	public enum SR_Kind {VAR, CONST};
 
@@ -57,11 +57,11 @@ public class SELMATree extends CommonTree {
 		return buf.toString();
 	}
 
-	
+
 	public String toString() {
 		String s = super.toString();
 		s += " [";
-		
+
 		if (SR_type == null)
 			s+="NULL";
 		else
@@ -81,7 +81,7 @@ public class SELMATree extends CommonTree {
 			}
 
 		s+=",";
-		
+
 		if (SR_kind == null)
 			s+="NULL";
 		else
@@ -95,7 +95,7 @@ public class SELMATree extends CommonTree {
 			}
 
 		s+="]";
-		
+
 		return s;
 	}
 }
