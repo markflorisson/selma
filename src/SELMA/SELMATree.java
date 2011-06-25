@@ -26,6 +26,7 @@ public class SELMATree extends CommonTree {
 	public String toStringTree() {
 		return toStringTree(1);
 	}
+
 	public String toStringTree(int level) {
 		if ( children==null || children.size()==0 ) {
 			return this.toString();

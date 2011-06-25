@@ -3,6 +3,7 @@ package SELMA;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
+import java.io.InputStream;
 
 import org.antlr.runtime.*;             // ANTLR runtime library
 import org.antlr.runtime.tree.*;        // For ANTLR's Tree classes
@@ -14,34 +15,52 @@ public class SELMA {
     private static boolean  opt_ast             = false,
                             opt_dot             = false,
                             opt_no_checker      = false,
-							opt_code_generator	= false;
+                            opt_code_generator	= false;
+
+    private static String inputFilename;
+    private static InputStream inputFile;
 
     public static void parseOptions(String[] args) {
-    	for (int i=0; i<args.length; i++) {
+        int i;
+
+        for (i = 0; i < args.length && args[i].startsWith("-"); i++) {
             if (args[i].equals("-ast"))
                 opt_ast = true;
             else if (args[i].equals("-dot"))
                 opt_dot = true;
-            else if (args[i].equals("-code_generator")){
-				opt_code_generator = true;
-				}
+            else if (args[i].equals("-code_generator"))
+                opt_code_generator = true;
             else if (args[i].equals("-no_checker"))
                 opt_no_checker = true;
             else {
-            	System.err.println("error: unknown option '" + args[i] + "'");
+                System.err.println("selma [options] file.selma");
+                System.err.println("error: unknown option '" + args[i] + "'");
                 System.err.println("valid options: -ast -dot " +
-                                   "-no_checker");
+                                   "-no_checker -code_generator");
                 System.exit(1);
             }
         }
+
+        if (i < args.length) {
+            inputFilename = args[i];
+            try {
+                inputFile = new FileInputStream(inputFilename);
+            } catch (FileNotFoundException e) {
+                System.err.println("No such file or directory: " + e.getMessage());
+                System.exit(1);
+            }
+        } else {
+            System.err.println("No filename provided, reading from stdin.");
+            inputFilename = "<stdin>";
+            inputFile = System.in;
+        }
     }
 
-    public static void main(String[] args) throws FileNotFoundException {
-        System.setIn(new FileInputStream("simple.SELMA"));
-    	parseOptions(args);
+    public static void main(String[] args) {
+        parseOptions(args);
         CommonTree tree;
         try {
-            SELMALexer lexer = new SELMALexer(new ANTLRInputStream(System.in));
+            SELMALexer lexer = new SELMALexer(new ANTLRInputStream(inputFile));
             CommonTokenStream tokens = new CommonTokenStream(lexer);
 
             if (! opt_no_checker) {      // check the AST
@@ -64,21 +83,24 @@ public class SELMA {
             }
 
 
-			if ( opt_code_generator) {  // code the AST
-	               // generate TAM assembler code using string template
+            if ( opt_code_generator) {  // code the AST
+                // generate Jasmin assembler code using string template
 
                 // read templates (src of code: [Parr 2007, p. 216])
-                FileReader groupFileR = new FileReader("g-files/SELMACode.stg");
-                StringTemplateGroup templates
-                    = new StringTemplateGroup(groupFileR);
+                FileReader groupFileR = new FileReader("g-files/SELMACodeJasmin.stg");
+                StringTemplateGroup templates =
+                        new StringTemplateGroup(groupFileR);
                 groupFileR.close();
 
+                //System.out.println(templates.getTemplateNames());
+                StringTemplate template = templates.getTemplateDefinition("program");
+                template.setAttribute("source_file", inputFilename);
+                template.setAttribute("class_name", "HelloWorld");
+
                 CommonTreeNodeStream nodes = new CommonTreeNodeStream(tree);
-                SELMACompiler codegenerator
-                    = new SELMACompiler(nodes);
+                SELMACompiler codegenerator = new SELMACompiler(nodes);
                 codegenerator.setTemplateLib(templates);
-                SELMACompiler.program_return r
-                    = codegenerator.program();
+                SELMACompiler.program_return r = codegenerator.program();
                 StringTemplate output = (StringTemplate) r.getTemplate();
                 System.out.println(output.toString());
             }
