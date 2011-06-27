@@ -22,11 +22,21 @@ options {
 
 @members {
   public SymbolTable<CompilerEntry> st = new SymbolTable<CompilerEntry>();
+  int curStackDepth;
+  int maxStackDepth;
+
+  private void incrStackDepth() {
+  	if (++curStackDepth > maxStackDepth)
+  		maxStackDepth = curStackDepth;
+  }
 }
 
 program
-  : ^(BEGIN {st.openScope();} compoundexpression {st.closeScope();} END)
-  -> program( instructions={$compoundexpression.st}, source_file={SELMA.inputFilename} )
+  : ^(node=BEGIN {st.openScope();} compoundexpression {st.closeScope();} END)
+  -> program(instructions={$compoundexpression.st},
+             source_file={SELMA.inputFilename},
+             stack_limit={maxStackDepth},
+             locals_limit={$node.localsCount})
   ;
 
 compoundexpression
@@ -61,46 +71,51 @@ declaration
   -> declareConst(id={$id.text},value={Character.getNumericValue($val.text.charAt(1))},type={"CHAR"},addr={st.nextAddr()-1})
   ;
 
+expression_statement
+  : ^(EXPRESSION_STATEMENT e1=expression) { curStackDepth--; }
+  -> popStack()
+  ;
+
 expression
 //double arg expression
-  : ^(MULT e1=expression e2=expression)
-  -> biExpr(e1={$e1.st},e2={$e2.st},op={"mult"})
+  : ^(MULT e1=expression e2=expression) { curStackDepth--; }
+  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"imul"})
 
-  | ^(DIV e1=expression e2=expression)
-  -> biExpr(e1={$e1.st},e2={$e2.st},op={"div"})
+  | ^(DIV e1=expression e2=expression) { curStackDepth--; }
+  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"idiv"})
 
-  | ^(MOD e1=expression e2=expression)
-  -> biExpr(e1={$e1.st},e2={$e2.st},op={"mod"})
+  | ^(MOD e1=expression e2=expression) { curStackDepth--; }
+  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"imod"})
 
-  | ^(PLUS e1=expression e2=expression)
-  -> biExpr(e1={$e1.st},e2={$e2.st},op={"add"})
+  | ^(PLUS e1=expression e2=expression) { curStackDepth--; }
+  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"iadd"})
 
-  | ^(MINUS e1=expression e2=expression)
-  -> biExpr(e1={$e1.st},e2={$e2.st},op={"sub"})
+  | ^(MINUS e1=expression e2=expression) { curStackDepth--; }
+  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"isub"})
 
-  | ^(RELS e1=expression e2=expression)
-  -> biExpr(e1={$e1.st},e2={$e2.st},op={"lt"})
+  | ^(OR e1=expression e2=expression) { curStackDepth--; }
+  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"or"})
 
-  | ^(RELSE e1=expression e2=expression)
-  -> biExpr(e1={$e1.st},e2={$e2.st},op={"le"})
+  | ^(AND e1=expression e2=expression) { curStackDepth--; }
+  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"and"})
 
-  | ^(RELG e1=expression e2=expression)
-  -> biExpr(e1={$e1.st},e2={$e2.st},op={"gt"})
+  | ^(RELS e1=expression e2=expression) { curStackDepth--; }
+  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmplt"})
 
-  | ^(RELGE e1=expression e2=expression)
-  -> biExpr(e1={$e1.st},e2={$e2.st},op={"ge"})
+  | ^(RELSE e1=expression e2=expression) { curStackDepth--; }
+  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmple"})
 
-  | ^(OR e1=expression e2=expression)
-  -> biExpr(e1={$e1.st},e2={$e2.st},op={"or"})
+  | ^(RELG e1=expression e2=expression) { curStackDepth--; }
+  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmpgt"})
 
-  | ^(AND e1=expression e2=expression)
-  -> biExpr(e1={$e1.st},e2={$e2.st},op={"and"})
+  | ^(RELGE e1=expression e2=expression) { curStackDepth--; }
+  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmpge"})
 
-  | ^(RELE e1=expression e2=expression)
-  -> biExpr(e1={$e1.st},e2={$e2.st},op={"eq"})
+  | ^(RELE e1=expression e2=expression) { curStackDepth--; }
+  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmpeq"})
 
-  | ^(RELNE e1=expression e2=expression)
-  -> biExpr(e1={$e1.st},e2={$e2.st},op={"neq"})
+  | ^(RELNE e1=expression e2=expression) { curStackDepth--; }
+  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmpne"})
 
 //single arg expression
   | ^(UPLUS e1=expression)
@@ -115,39 +130,43 @@ expression
 //CONDITIONAL
   | ^(IF ec1=compoundexpression THEN ec2=compoundexpression (ELSE ec3=compoundexpression)?)
   -> if(ec1={$ec1.st},ec2={$ec2.st},ec3={$ec3.st})
-  | ^(WHILE ec1=compoundexpression DO ec2=compoundexpression OD)
+  | ^(WHILE ec1=compoundexpression DO ec2=compoundexpression OD) { curStackDepth--; }
   -> while(ec1={$ec1.st},ec2={$ec2.st})
 
 //IO
-  | ^(READ (id=ID)+)
+  | ^(READ id=ID)
+  	-> read(id={$id.text}, addr={st.retrieve($id).addr}, dup_top={TRUE})
+
+  | ^(READ id1=ID (id2=ID)+) { curStackDepth--; }
+	-> read(id={$id1.text}, dup_top={FALSE})
 
   | ^(PRINT expression+)
 
 //ASSIGN
 //  | ^(BECOMES expression expression)
-  | ^(BECOMES node=ID e1=expression) { boolean isint = ($node.type == NUMBER  || 
-  							$node.type == BOOLEAN || 
+  | ^(BECOMES node=ID e1=expression) { boolean isint = ($node.type == NUMBER  ||
+  							$node.type == BOOLEAN ||
   							$node.type == LETTER); }
   	-> assign(id={$node.text},
   		  type={$node.type},
   		  addr={st.retrieve($node).addr},
-  		  e1={$e1.st}, 
+  		  e1={$e1.st},
   		  isint={isint})
 
 //closedcompound
   | LCURLY {st.openScope();} compoundexpression {st.closeScope();} RCURLY
 
 //VALUES
-  | node=NUMBER { int num = Integer.parseInt($node.text); }
+  | node=NUMBER { incrStackDepth(); int num = Integer.parseInt($node.text); }
     -> loadNum(val={$node.text}, iconst={num >= -1 && num <= 5}, bipush={num >= -128 && num <= 127})
 
-  | node=BOOLEAN
+  | node=BOOLEAN { incrStackDepth(); }
     -> loadNum(val={($node.type==TRUE)?1:0}, iconst={TRUE})
 
-  | node=LETTER
+  | node=LETTER { incrStackDepth(); }
     -> loadNum(val={Character.getNumericValue($node.text.charAt(1))}, iconst={FALSE}, bipush={TRUE})
 
-  | node=ID
+  | node=ID { incrStackDepth(); }
     -> loadVal(id={$node.text}, addr={st.retrieve($node).addr})
   ;
 

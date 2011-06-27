@@ -6,10 +6,11 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.Tree;
 
 public class SymbolTable<Entry extends IdEntry> {
-	private int nextAddr = 0;
+	public int nextAddr = 0;
     private int currentLevel;
     private Map<String, Stack<Entry>> entries;
 
+    int localCount;
 
     public int nextAddr(){
     	return nextAddr;
@@ -70,7 +71,7 @@ public class SymbolTable<Entry extends IdEntry> {
         Stack<Entry> s = entries.get(id);
         if (s==null) {
         	s = new Stack<Entry>();
-        	entry.level=currentLevel;
+        	entry.level = currentLevel;
         	s.push(entry);
         	entries.put(id, s);
         	nextAddr++;
@@ -106,6 +107,19 @@ public class SymbolTable<Entry extends IdEntry> {
    			s+=stack.toString();
     	}
     	return s;
+    }
+
+    /* Get the locals limit for this stack frame */
+    public int  getLocalsCount() {
+        int localCount = 0;
+
+        for (Stack<Entry> stack : entries.values()) {
+            if (stack.size() > 0 && stack.peek().level >= currentLevel) {
+                localCount++;
+            }
+        }
+
+        return localCount;
     }
 }
 

@@ -24,7 +24,11 @@ options {
 }
 
 program
-	: ^(BEGIN {st.openScope();} compoundexpression {st.closeScope();} END)
+    : ^(node=BEGIN
+        {st.openScope();}
+        compoundexpression
+        {$node.localsCount = st.getLocalsCount(); st.closeScope();}
+        END)
 	;
 
 compoundexpression //do not open and close scope here (IF/WHILE)

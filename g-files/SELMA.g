@@ -54,9 +54,6 @@ tokens {
 	CHAR		= 'character';
 
 	// keywords
-	BEGIN		= 'begin';
-	END		= 'end.';
-
 	IF		= 'if';
 	THEN		= 'then';
 	ELSE		= 'else';
@@ -72,7 +69,10 @@ tokens {
 	UMIN;
 	UPLUS;
 
+	BEGIN;
+	END;
 	COMPOUND;
+	EXPRESSION_STATEMENT;
 
 }
 
@@ -98,7 +98,7 @@ compoundexpression
 
 cmp
   : ((declaration SEMICOLON!)* expression SEMICOLON!)+
-	;
+  ;
 
 //declaration
 
@@ -121,6 +121,12 @@ type
 // note:
 // - arithmetic can be "invisible" due to all the *-s that's why it is nested
 // - assignment can be "invisible" due to the ? that's why it can also be only a identifier
+
+expression_statement
+	: expression SEMICOLON
+		-> ^(EXPRESSION_STATEMENT expression)
+	;
+
 
 expression
 	: expr_assignment

@@ -2,41 +2,57 @@
 
 group SELMA;
 
-program(instructions, source_file) ::= <<
+program(instructions, source_file, stack_limit, locals_limit) ::= <<
 .source <source_file>
+.class  public MyClass
+.super  java/lang/Object
+.method public static main([Ljava/lang/String;)V
+.limit stack <stack_limit>
+.limit locals <locals_limit>
 <instructions>
-HALT
 									; end of program
 >>
 
 compound(instructions) ::= <<
 									; start compound
-<instructions; separator="\n">
+    <instructions; separator="\n">
 									; end compound
 >>
 
+popStack() ::= <<
+    pop
+>>
 
 //Calculations
 Expr(e1,op)::=<<
-<e1>								; e1 for operation <op>
-CALL <op>							; single operation <op>
+    <e1>							; e1 for operation <op>
+    CALL <op>						; single operation <op>
 >>
 
-biExpr(e1,e2,op)::=<<
-<e1>								; e1 for operation <op>
-<e2>								; e2 for operation <op>
-CALL <op>									; binary operation <op>
+biExpr(e1,e2,instr)::=<<
+    <e1>							; e1 for operation <instr>
+    <e2>							; e2 for operation <instr>
+    <instr>
+>>
+
+biExprJump(e1, e2, instr)::=<<
+    <e1>
+    <e2>
+    <instr> L1
+    iconst_0
+L1:
+    iconst_1
 >>
 
 //Declare
 declareConst(id,val,type,addr)::=<<
 									; declare var <id>: <type> = <val> @ <addr>[SB]
-ldc <val>                           ; declare var
+    ldc <val>                       ; declare var
 >>
 
 declareVar(id,type,addr)::=<<
 									; declare var <id>: <type> @ <addr>[SB]
-PUSH 1
+    PUSH 1
 >>
 
 //Load
@@ -53,30 +69,42 @@ loadNum(val, num)::=<<
 
 loadVal(id,addr)::=<<
 									; loadVal <id> from <addr>[SB]
-iload <addr>                        ; load integer from <addr>
+    iload <addr>                    ; load integer from <addr>
 >>
 
 //Assign
 assign(id, type, addr, e1, isint)::=<<
-    ; todo: match on node type and do assignNum, assignRef etc
-    <e1>								; e1 right hand for assignment
-    istore <addr>                       ; assign e1 to <id>: <type> @ <addr>[SB]
-    <endif>
+    <e1>                            ; e1 right hand for assignment
+    dup
+    istore <addr>                   ; assign e1 to <id>: <type> @ <addr>[SB]
+>>
+
+read(id, addr, dup_top) ::= <<
+    read here                       ; reading <id>
+<if (dup_top)>
+    dup
+<endif>
+    istore <addr>
 >>
 
 //conditionals
 if(ec1, ec2, ec3)::=<<
-<ec1>								; e1 condition
-ifcmp L1                            ; e1 is false
-<ec2>								; e2 if true expression
-goto L2
+    <ec1>							; e1 condition
+    iconst_0
+    ifeq L1                         ; e1 is false
+    <ec2>							; e2 if true expression
+    goto L2
 L1:
-<ec3>								; e3 if false expression
+    <ec3>							; e3 if false expression
 L2:
 >>
 
 while(ec1,ec2)::=<<
-<ec1>								; e1 while condition
-<ec2>								; e2 expression to evaluate
-hier hoort een while
+L1:
+    <ec1>							; e1 while condition
+    iconst_0
+    ifeq L2
+    <ec2>							; e2 expression to evaluate (body)
+    goto L1
+L2:
 >>
