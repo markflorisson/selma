@@ -88,7 +88,7 @@ tokens {
 // Parser rules
 
 program
-	: BEGIN compoundexpression END EOF
+	: compoundexpression EOF
 		-> ^(BEGIN compoundexpression END)
 	;
 

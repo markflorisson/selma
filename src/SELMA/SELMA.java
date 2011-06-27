@@ -4,6 +4,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStream;
+import java.util.*;
 
 import org.antlr.runtime.*;             // ANTLR runtime library
 import org.antlr.runtime.tree.*;        // For ANTLR's Tree classes
@@ -17,7 +18,7 @@ public class SELMA {
                             opt_no_checker      = false,
                             opt_code_generator	= false;
 
-    private static String inputFilename;
+    public static String inputFilename;
     private static InputStream inputFile;
 
     public static void parseOptions(String[] args) {
@@ -91,11 +92,6 @@ public class SELMA {
                 StringTemplateGroup templates =
                         new StringTemplateGroup(groupFileR);
                 groupFileR.close();
-
-                //System.out.println(templates.getTemplateNames());
-                StringTemplate template = templates.getTemplateDefinition("program");
-                template.setAttribute("source_file", inputFilename);
-                template.setAttribute("class_name", "HelloWorld");
 
                 CommonTreeNodeStream nodes = new CommonTreeNodeStream(tree);
                 SELMACompiler codegenerator = new SELMACompiler(nodes);

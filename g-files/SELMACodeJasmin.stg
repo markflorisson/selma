@@ -2,8 +2,8 @@
 
 group SELMA;
 
-program(instructions) ::= <<
-.source source_file ; <source_file> -> no such attribute: attribute in template context [program]
+program(instructions, source_file) ::= <<
+.source <source_file>
 <instructions>
 HALT
 									; end of program
@@ -31,7 +31,7 @@ CALL <op>									; binary operation <op>
 //Declare
 declareConst(id,val,type,addr)::=<<
 									; declare var <id>: <type> = <val> @ <addr>[SB]
-LOADL <val>
+ldc <val>                           ; declare var
 >>
 
 declareVar(id,type,addr)::=<<
@@ -40,28 +40,39 @@ PUSH 1
 >>
 
 //Load
-loadNum(val)::=<<
-									; loadNum <val>
-LOADL <val>
+
+loadNum(val, num)::=<<
+    <if (iconst)>
+        iconst_<val>
+    <elseif (bipush)>
+        bipush <val>
+    <else>
+        ldc <val>
+    <endif>
 >>
 
 loadVal(id,addr)::=<<
 									; loadVal <id> from <addr>[SB]
-LOAD(1) <addr>[SB]
+iload <addr>                        ; load integer from <addr>
 >>
 
 //Assign
-assign(id,type,addr,e1)::=<<
-<e1>								; e1 right hand for assignment
-STORE(1) <addr>[SB]					; assign e1 to <id>: <type> @ <addr>[SB]
+assign(id, type, addr, e1, isint)::=<<
+    ; todo: match on node type and do assignNum, assignRef etc
+    <e1>								; e1 right hand for assignment
+    istore <addr>                       ; assign e1 to <id>: <type> @ <addr>[SB]
+    <endif>
 >>
 
 //conditionals
-if(ec1,ec2,ec3)::=<<
+if(ec1, ec2, ec3)::=<<
 <ec1>								; e1 condition
+ifcmp L1                            ; e1 is false
 <ec2>								; e2 if true expression
+goto L2
+L1:
 <ec3>								; e3 if false expression
-hier hoort een if
+L2:
 >>
 
 while(ec1,ec2)::=<<

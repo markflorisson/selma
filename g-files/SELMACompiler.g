@@ -9,6 +9,7 @@ options {
 
 @header {
   package SELMA;
+  import SELMA.SELMA;
   import SELMA.SELMATree.SR_Type;
   import SELMA.SELMATree.SR_Kind;
 }
@@ -25,7 +26,7 @@ options {
 
 program
   : ^(BEGIN {st.openScope();} compoundexpression {st.closeScope();} END)
-  -> program( instructions={$compoundexpression.st} )
+  -> program( instructions={$compoundexpression.st}, source_file={SELMA.inputFilename} )
   ;
 
 compoundexpression
@@ -124,21 +125,27 @@ expression
 
 //ASSIGN
 //  | ^(BECOMES expression expression)
-  | ^(BECOMES node=ID e1=expression)
-  	-> assign(id={$node.text},type={$node.type},addr={st.retrieve($node).addr},e1={$e1.st})
+  | ^(BECOMES node=ID e1=expression) { boolean isint = ($node.type == NUMBER  || 
+  							$node.type == BOOLEAN || 
+  							$node.type == LETTER); }
+  	-> assign(id={$node.text},
+  		  type={$node.type},
+  		  addr={st.retrieve($node).addr},
+  		  e1={$e1.st}, 
+  		  isint={isint})
 
 //closedcompound
   | LCURLY {st.openScope();} compoundexpression {st.closeScope();} RCURLY
 
 //VALUES
-  | node=NUMBER
-    -> loadNum(val={$node.text})
+  | node=NUMBER { int num = Integer.parseInt($node.text); }
+    -> loadNum(val={$node.text}, iconst={num >= -1 && num <= 5}, bipush={num >= -128 && num <= 127})
 
   | node=BOOLEAN
-    -> loadNum(val={($node.type==TRUE)?1:0})
+    -> loadNum(val={($node.type==TRUE)?1:0}, iconst={TRUE})
 
   | node=LETTER
-    -> loadNum(val={Character.getNumericValue($node.text.charAt(1))})
+    -> loadNum(val={Character.getNumericValue($node.text.charAt(1))}, iconst={FALSE}, bipush={TRUE})
 
   | node=ID
     -> loadVal(id={$node.text}, addr={st.retrieve($node).addr})
