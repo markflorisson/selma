@@ -97,7 +97,7 @@ compoundexpression
 	;
 
 cmp
-  : ((declaration SEMICOLON!)* expression SEMICOLON!)+
+  : ((declaration SEMICOLON!)* expression_statement SEMICOLON! )+
   ;
 
 //declaration
@@ -123,8 +123,7 @@ type
 // - assignment can be "invisible" due to the ? that's why it can also be only a identifier
 
 expression_statement
-	: expression SEMICOLON
-		-> ^(EXPRESSION_STATEMENT expression)
+	: expression -> ^(EXPRESSION_STATEMENT expression)
 	;
 
 

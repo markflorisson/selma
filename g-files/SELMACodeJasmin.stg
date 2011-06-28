@@ -4,107 +4,128 @@ group SELMA;
 
 program(instructions, source_file, stack_limit, locals_limit) ::= <<
 .source <source_file>
-.class  public MyClass
+.class  public Main
 .super  java/lang/Object
 .method public static main([Ljava/lang/String;)V
 .limit stack <stack_limit>
 .limit locals <locals_limit>
+.line 1
 <instructions>
-									; end of program
+pop
+return
+.end method
 >>
 
-compound(instructions) ::= <<
-									; start compound
-    <instructions; separator="\n">
-									; end compound
+compound(instructions, line, pop) ::= <<
+.line <line>
+<instructions; separator="\n">
+<if (pop)>
+    removeLastInstruction  ; line <line>
+<endif>
 >>
 
-popStack() ::= <<
+exprStat(e1, pop, line) ::= <<
+.line <line>
+<e1>
+<if (pop)>
     pop
+<endif>
 >>
 
 //Calculations
-Expr(e1,op)::=<<
-    <e1>							; e1 for operation <op>
-    CALL <op>						; single operation <op>
->>
-
-biExpr(e1,e2,instr)::=<<
-    <e1>							; e1 for operation <instr>
-    <e2>							; e2 for operation <instr>
+uExpr(e1, instr, line, op)::=<<
+.line <line>                    ; <op> <e1>
+<e1>
     <instr>
 >>
 
-biExprJump(e1, e2, instr)::=<<
-    <e1>
-    <e2>
-    <instr> L1
+biExpr(e1, e2, instr, line, op) ::= <<
+.line <line>
+<e1>
+<e2>
+    <instr>
+>>
+
+biExprJump(e1, e2, instr, label_num1, label_num2, line, op) ::= <<
+.line <line>
+<e1>
+<e2>
+    <instr> L<label_num1>        ; e1 <op> e2
     iconst_0
-L1:
+    goto L<label_num2>
+L<label_num1>:
     iconst_1
+L<label_num2>:
 >>
 
 //Declare
 declareConst(id,val,type,addr)::=<<
-									; declare var <id>: <type> = <val> @ <addr>[SB]
-    ldc <val>                       ; declare var
+
 >>
 
 declareVar(id,type,addr)::=<<
-									; declare var <id>: <type> @ <addr>[SB]
-    PUSH 1
+
 >>
 
 //Load
 
 loadNum(val, num)::=<<
-    <if (iconst)>
-        iconst_<val>
-    <elseif (bipush)>
-        bipush <val>
-    <else>
-        ldc <val>
-    <endif>
+<if (iconst)>
+    iconst_<val>
+<elseif (bipush)>
+    bipush <val>
+
+<else>
+    ldc <val>
+<endif>
 >>
 
-loadVal(id,addr)::=<<
-									; loadVal <id> from <addr>[SB]
-    iload <addr>                    ; load integer from <addr>
+loadVal(id, addr)::=<<
+    iload <addr>                ; load <id> from <addr>
 >>
 
 //Assign
 assign(id, type, addr, e1, isint)::=<<
-    <e1>                            ; e1 right hand for assignment
+<e1>                            ; e1 right hand for assignment
     dup
-    istore <addr>                   ; assign e1 to <id>: <type> @ <addr>[SB]
+    istore <addr>               ; assign e1 to <id>: <type> @ <addr>
 >>
 
 read(id, addr, dup_top) ::= <<
-    read here                       ; reading <id>
+    read here                   ; reading <id>
 <if (dup_top)>
     dup
+
 <endif>
     istore <addr>
 >>
 
 //conditionals
-if(ec1, ec2, ec3)::=<<
-    <ec1>							; e1 condition
+if(ec1, ec2, ec3, label_num1, label_num2, ec3_not_empty) ::= <<
+<ec1>							; e1 condition
     iconst_0
-    ifeq L1                         ; e1 is false
-    <ec2>							; e2 if true expression
-    goto L2
-L1:
-    <ec3>							; e3 if false expression
-L2:
+    ifeq L<label_num1>          ; e1 is false
+<ec2>                           ; e2 if true expression
+<if (ec3_not_empty)>
+    goto L<label_num2>
+<endif>
+
+L<label_num1>:
+<if (ec3_not_empty)>
+<ec3>							; e3 if false expression
+L<label_num2>:
+<else>
+pop
+<endif>
 >>
 
-while(ec1,ec2)::=<<
-L1:
-    <ec1>							; e1 while condition
+while(ec1, ec2, label_num1, label_num2)::=<<
+L<label_num1>:
+<ec1>							; e1 while condition
     iconst_0
-    ifeq L2
-    <ec2>							; e2 expression to evaluate (body)
-    goto L1
-L2:
+    ifeq L<label_num2>
+<ec2>							; e2 expression to evaluate (body)
+pop
+    goto L<label_num1>
+L<label_num2>:
 >>
