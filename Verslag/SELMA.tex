@@ -1,4 +1,4 @@
-\documentclass[10pt]{report}
+\documentclass[]{article}
 
 \title{SELMA}
 \author{ 
@@ -11,34 +11,74 @@ s000000\\
 Box Calslaan xx-30}
 
 \usepackage{listings}
-\usepackage{verbatim}
+\usepackage{lscape}
 
 \begin{document}
+
+\lstdefinestyle{ANTLR}
+	{frame=single, breaklines=true,basicstyle=\footnotesize}
+\lstdefinestyle{SELMA}
+	{frame=single, breaklines=true,basicstyle=\small}
+\lstdefinestyle{ANTLRfile}
+	{breaklines=true, basicstyle=\scriptsize, numbers=left, stepnumber=5, firstnumber=1, numberstyle=\tiny}	
+\lstdefinestyle{SELMAfile}
+	{breaklines=true, basicstyle=\scriptsize, numbers=left, stepnumber=5, firstnumber=1, numberstyle=\tiny}	
+\lstdefinestyle{JAVAfile}
+	{language=Java, breaklines=true, numbers=left, stepnumber=5, firstnumber=1, numberstyle=\tiny}	
+\lstdefinestyle{JVMfile}
+	{breaklines=true, numbers=left, stepnumber=5, firstnumber=1, numberstyle=\tiny}	
 
 \begin{titlepage}
 \maketitle 
 \end{titlepage}
-\tableofcontents
+\tableofcontents{}
 
+\newpage
 \section{Inleiding}
 Korte beschrijving van de practicumopdracht.
 
+\newpage
 \section{Beknopte beschrijving}
 van de programmeertaal (maximaal een A4-tje).
 
+\newpage
 \section{Problemen en oplossingen}
 uitleg over de wijze waarop je de problemen die je bent tegenge-
 komen bij het maken van de opdracht hebt opgelost (maximaal twee A4-tjes).
 
+\newpage
 \section{Syntax, context-beperkingen en semantiek}
-van de taal met waar nodig nadere uitleg over de
-betekenis. Geef de beschrijving bij voorkeur in dezelfde terminologie als die gebruikt is bij
-de beschrijving van Triangle in Watt \& Brown (hoofdstuk 1 en appendix B).
 
-\subsection{Lexer}
-Om de code te kunnen parsen zal deze eerst door de lexer moeten gaan. Hier definieren wij een aantal 
+%van de taal met waar nodig nadere uitleg over de
+%betekenis. Geef de beschrijving bij voorkeur in dezelfde terminologie als die gebruikt is bij
+%de beschrijving van Triangle in Watt \& Brown (hoofdstuk 1 en appendix B).
 
-\begin{lstlisting}[frame=single]
+\subsection{Lexer - terminals}
+Om de code te kunnen parsen zal deze eerst door de lexer moeten gaan. Hier definieren wij een aantal terminal symbolen. Dit is een eindige set van een aantal symbolen of woorden, de lexer zal deze herkennen. Mits ze in de juiste volgorde worden gebruikt krijg je taalconstructies die de parser vervolgens weer begrijpt. We hebben een aantal speciale terminals die zijn opgebouwd uit meerdere karakters bijvoorbeeld. Deze vormen de lexicon. En een drietal terminals zonder textuele vorm. Deze zijn enkel voor de interne boekhouding van de parser.
+\\
+\begin{lstlisting}[style=ANTLR]
+CHARV		APOSTROPHE LETTER APOSTROPHE;
+BOOLEAN		(TRUE | FALSE);
+ID		LETTER (LETTER | DIGIT)*;
+NUMBER		DIGIT+;
+	
+DIGIT		('0'..'9');
+LOWER		('a'..'z');
+UPPER		('A'..'Z');
+LETTER		(LOWER | UPPER);
+TRUE		'true';
+FALSE		'false';
+
+UMIN;
+UPLUS;
+COMPOUND;			
+\end{lstlisting}
+
+\newpage 
+
+Verder zijn er nog de 'gewone' terminals. Te verdelen in keywords, tokens en operators. Keywords geven aan dat er een bepaalde actie gedaan wordt, zoals een variabele declareren of een if statement. Tokens zijn er om de taal iets meer structuur te geven, denk aan comma's tussen de variabelen. En operators zijn bewerkingen die je kunt uitvoeren op 1 of meer expressies.
+\\
+\begin{lstlisting}[style=ANTLR]
 	Tokens			Keywords
 	
 COLON		':';	PRINT		'print';
@@ -51,9 +91,9 @@ COMMA		',';	CHAR		'character';
 EQ		'=';	BEGIN		'begin';
 APOSTROPHE	''';	END		'end.';
 			IF		'if';
-UMIN;			THEN		'then';
-UPLUS;			ELSE		'else';
-COMPOUND;		FI		'fi';
+			THEN		'then';
+			ELSE		'else';
+			FI		'fi';
 			WHILE		'while';
 	Operators	DO		'do';
 			OD		'od';
@@ -73,21 +113,338 @@ AND		'&&';
 OR		'||';
 BECOMES		':=';
 \end{lstlisting}
+\newpage
+\subsection{Basis}
+De basis van het programma geeft een aantal restricties op aan de taal.
+Allereerst is er het programma, dit bestaat uit een (zeer grote) compoundexpression waarna het programma stopt (End Of File). Deze wordt hier herschreven. Een compoundexpression is uiteindelijk opgebouwd uit een serie declaraties en statements, gescheiden door een semicolon. Hier is te zien dat het programma uit minimaal 1 expressie bestaat, dat declaraties en expressies door elkaar gebruikt mogen worden en dat het laatste statement in een programma altijd een expressie is.
+\lstinputlisting[style=ANTLR,linerange={90-101}]{../g-files/SELMA.g}
+\subsection{Declaraties en types}
+SELMA kent twee soorten declaraties, variabelen en constanten. SELMA staat toe om per declaratie meerdere identifiers te definieren. Bij de declaratie dien je het type van de te declareren waarde mee te geven. En bij een constante dien je uiteraard een waarde mee te geven.
+\subsubsection{Syntax}
+\lstinputlisting[style=ANTLR,linerange={105-118}]{../g-files/SELMA.g}
+\subsubsection{Context}
+\begin{list}{•}{•}
+\item Het gegeven type dient bij de constante overeen te komen met het type van de gegeven waarde.
+\item Identifiers mogen niet eerder gedeclareerd zijn, in de huidige of bovenliggende scope.
+\end{list}
+\subsubsection{Semantiek}
+Er zal ruimte gereserveerd worden voor de variabele en het adres wordt onthouden. Voor een constante geldt hetzelfde behalve dat dan ook direct de desbetreffende waarde op dat adres wordt gezet. Op het moment dat elders in het programma een verwijzing is naar deze gedeclareerde dan zal deze variabele of constante geladen worden.
+\subsubsection{Voorbeeld}
+\begin{lstlisting}[style=SELMA]
+var i, x: integer;
+const c: char = 'g';
+const b,t: boolean = true;
+\end{lstlisting}
+
+\subsection{Expressies - assignment}
+De expressies zijn ingedeeld in verschillende niveaus, dit om te zorgen dat ze in de juiste volgorde worden uitgevoerd. Zo willen we dat 6+3*12 niet 108 is maar 42, niet alleen om dat 42 een mooier getal is, maar voornamelijk omdat het fijn is als de taal voldoet aan de conventionele rekenregels. \\
+Het hoogste niveau is de assignment.
+\subsubsection{Syntax}
+\lstinputlisting[style=ANTLR,linerange={131-137}]{../g-files/SELMA.g}
+\subsubsection{Context}
+\begin{list}{•}{•}
+\item expr\_arithmetic moet een identifier worden, in het eind, aangezien dat het enige is waaraan je een waarde kunt toekennen
+\item deze identiefier moet dan verwijzen naar een geldige variabele
+\item het type van expression en expression\_arithmetic moet hetzelfde zijn
+\item expression is van het type van expr\_assignment
+\item expr\_assignment is van het type van expr\_arithmetic 
+\end{list}
+\subsubsection{Semantiek}
+De waarde van expression zal worden toegekend aan het linker deel van de assignment.
+Tevens gaat de waarde van de hele expressie op de stack, zo is er een asignement met meerdere identifiers mogelijk.
+\subsubsection{Voorbeeld}
+\begin{lstlisting}[style=SELMA]
+7*6;
+foo := 7*6;
+foo := bar := 7*6;
+\end{lstlisting}
+
+\subsection{Expressies - OR}
+\subsubsection{Syntax}
+De Of-operator is de laagste operator in het rijtje, vandaar dat deze bovenin de structuur zit.
+\\
+NB: expr\_al1 staat voor "expression arithmetic level 1"
+\begin{lstlisting}[style=ANTLR]
+expr_arithmetic
+	: expr_al1
+	;
+
+	expr_al1
+		: expr_al2 (OR^ expr_al2)*
+		;
+\end{lstlisting}
+\subsubsection{Context}
+\begin{list}{•}{•}
+\item Als expr\_al1 enkel uit 1 expr\_al2 bestaat dan zijn er geen restricties
+\item In de andere gevallen dienen alle expr\_al2 van het type boolean te zijn.
+\item het type van expr\_arithmetic is het type van expr\_al1
+\item als exp\_1 == expr\_al2 dan is het type van expr\_al1 het type van expr\_al2
+\item als exp\_1 != expr\_al2 dan is het type van expr\_al1 een boolean
+\end{list}
+\subsubsection{Semantiek}
+De eerste expr\_al2 zal op de stack worden gezet. Hierna wordt er telkens een expr\_al2 erbij gezet. De OR-operatie zal worden aangeroepen en het resultaat blijft op de stack zijn. Als er nog een expr\_al2 is dan zal deze ook op de stack worden gezet en wordt de OR-operatie opnieuw aangeroepen. Aldoende blijft er uiteindelijk 1 waarde op de stack staan.
+\subsubsection{Voorbeeld}
+\begin{lstlisting}[style=SELMA]
+7*6;
+true OR false;
+true OR false OR foo;
+\end{lstlisting}
+
+\subsection{Expressies - AND}
+Hier wordt de AND-expressie beschreven. Net zoals bij de OR-expressie is het mogelijk nul tot veel AND-operatoren achter elkaar te plakken. De AND-expressie is een niveau hoger dan de OR-expressie en zal dus eerder worden uitgevoerd. \\
+Het is eventueel mogelijk later in de compiler om een AND eerder af te breken aangezien als er een false in het rijtje zit het resultaat altijd false is. Wij hebben deze optimalisatie er nog niet inzitten, dit omdat sommige expressies ongeacht de eerdere expressies uitgevoerd dienen te worden, denk bijvoorbeeld aan een READ()-statement dat anders niet uitgevoerd zou worden.
+\subsubsection{Syntax}
+\begin{lstlisting}[style=ANTLR]
+	expr_al2
+		: expr_al3 (AND^ expr_al3)*
+		;
+\end{lstlisting}
+\subsubsection{Context}
+\begin{list}{•}{•}
+\item Als expr\_al2 enkel uit 1 expr\_al3 bestaat dan zijn er geen restricties
+\item In de andere gevallen dienen alle expr\_al3 van het type boolean te zijn.
+\item als exp\_2 == expr\_al3 dan is het type van expr\_al2 het type van expr\_al3
+\item als exp\_2 != expr\_al3 dan is het type van expr\_al2 een boolean
+\end{list}
+\subsubsection{Semantiek}
+Hetzelfde als bij het OR-statement. De waardes zullen op de stack geladen worden en er zal telkens een AND-operatie op 2 waardes worden uitgevoerd. De resulterende waarde is weer geschikt voor bijvoorbeeld nog een AND-operatie.
+\subsubsection{Voorbeeld}
+\begin{lstlisting}[style=SELMA]
+7*6;
+foo AND bar;
+foo AND false AND bar;
+\end{lstlisting}
+
+\subsection{Expressies - Relaties}
+Hier worden bijna alle comperatoren afgehandeld. Het is belangrijk dat er in de checker goed wordt gekeken of de types van de linker en rechterzijde compatible zijn.
+\subsubsection{Syntax}
+%		: expr_al4 ((RELS|RELSE|RELG|RELGE|RELE|RELNE)^ expr_al4)*
+\begin{lstlisting}[style=ANTLR]
+	expr_al3
+		: expr_al4 ((RELS|RELSE|RELG|
+			RELGE|RELE|RELNE)^ expr_al4)*
+		;
+\end{lstlisting}
+\subsubsection{Context}
+\begin{list}{•}{•}
+\item alle expr\_al4 dienen van hetzelfde type te zijn
+\item bij een operatie tussen twee expr\_al4 anders dan RELE \& RELNE dient expr\_al4 een integer te zijn.
+\item als exp\_3 == expr\_al4 dan is het type van expr\_al3 het type van expr\_al4
+\item als exp\_3 != expr\_al4 dan is het type van expr\_al3 een boolean
+\end{list}
+\subsubsection{Semantiek}
+Vergelijkbaar met andere binaire operatoren zoals AND en OR, er zullen waardes op de stack worden gezet en de operatie zal 1 waarde achterlaten op de stack.
+\subsubsection{Voorbeeld}
+\begin{lstlisting}[style=SELMA]
+5 > 6;
+true == false;
+5 == 42;
+\end{lstlisting}
+
+\subsection{Expressies - plus en minus}
+Hier zijn we aangeland bij de eerder genoemde 6+3*12, plus en minus zit 1 niveau lager dan de vermenigvuldigingen.
+\subsubsection{Syntax}
+\begin{lstlisting}[style=ANTLR]
+	expr_al4
+		: expr_al5 ((PLUS|MINUS)^ expr_al5)*
+		;
+\end{lstlisting}
+\subsubsection{Context}
+\begin{list}{•}{•}
+\item als er minimaal 1 operatie wordt uitgevoerd dan dient expr\_al5 een integer te zijn
+\item als exp\_4 == expr\_al5 dan is het type van expr\_al4 het type van expr\_al5
+\item als exp\_4 != expr\_al5 dan is het type van expr\_al4 een integer
+\end{list}
+\subsubsection{Semantiek}
+Wederom een binaire operatie. Let op, de unaire plus en minus komen nog. Dus 5--6 zal de tweede minus niet hier worde opgevangen.
+\subsubsection{Voorbeeld}
+\begin{lstlisting}[style=SELMA]
+foo := 5;
+foo := 5 + 37;
+10 + 50 - 18;
+\end{lstlisting}
+
+\subsection{Expressies - delen en vermenigvuldigen}
+Naast delen en vermenigvuldigen is het ook mogelijk een modulus te nemen.
+Wat wellicht is opgevallen bij het bovenstaande, is dat het mogelijk is om enkel een som in de code te zetten. Dit vinden wij prima, echter moet daarbij wel de resulterende waarde gepopped worden als die niet meer gebruikt wordt.
+\subsubsection{Syntax}
+\begin{lstlisting}[style=ANTLR]
+	expr_al5
+		: expr_al6 ((MULT|DIV|MOD)^ expr_al6)*
+		;
+\end{lstlisting}
+\subsubsection{Context}
+\begin{list}{•}{•}
+\item als er minimaal 1 operatie wordt uitgevoerd dan dient expr\_al6 een integer te zijn
+\item als exp\_5 == expr\_al6 dan is het type van expr\_al5 het type van expr\_al6
+\item als exp\_5 != expr\_al6 dan is het type van expr\_al5 een integer
+\end{list}
+\subsubsection{Semantiek}
+Hetzelfde als bij optellen. Goed om te weten is dat de geretouneerde waarde een integer is, dus er zal worden afgerond.
+\subsubsection{Voorbeeld}
+\begin{lstlisting}[style=SELMA]
+foo := 6;
+foo := 6*7;
+foo := 21*6%84;
+\end{lstlisting}
+
+
+\subsection{Expressies - unaries}
+Hier wordt gekeken of de expressie eventueel een NOT-, PLUS- of MIN-operator voor zich heeft staan.
+Om later verwarring te voorkomen zullen PLUS en MIN vervangen worden door speciale terminals, zijnde UMIN en UPLUS. UPLUS zou eventueel weg kunnen worden gelaten aangezien +x==x.
+Als er geen operator voor de expressie staat dan is expr\_al6 gewoon een expr\_al7
+\subsubsection{Syntax}
+\begin{lstlisting}[style=ANTLR]
+	expr_al6
+//		: (PLUS|MINUS|NOT)? expr_al7
+		: PLUS expr_al7
+			-> UPLUS expr_al7
+		| MINUS expr_al7
+			-> UMIN expr_al7
+		| NOT expr_al7
+		| expr_al7
+		;
+\end{lstlisting}
+\subsubsection{Context}
+\begin{list}{•}{•}
+\item expr\_al7 dient bij PLUS expr\_al7 een integer te zijn
+\item expr\_al7 dient bij MIN expr\_al7 een integer te zijn
+\item expr\_al7 dient bij NOT expr\_al7 een boolean te zijn
+\item het type van expr\_al6 het type van expr\_al7
+\end{list}
+\subsubsection{Semantiek}
+Bij UMIN zal de waarde van expr\_7 op de stack worden gezet en de operatie worden aangeroepen om het teken om te flippen. \\
+Bij UPLUS gebeurd er niks, behalve dat de waarde van expr\_7 netjes op de stack komt.\\
+Bij NOT zal de waarde van expr\_7 worden geinverteerd, dus true wordt false en visa versa.
+\subsubsection{Voorbeeld}
+\begin{lstlisting}[style=SELMA]
+one := +1;
+evil := -42;
+foo := not foobar;
+\end{lstlisting}
+
+\subsection{Expressies - toplevel}
+Op het hoogste nivau kan een expressie bestaan uit een semi-statement zoals een if-expressie of een print-expressie, of het kan een identifier of waarde zijn, of het kan een aparte (compound)expressie binnen haken zijn.
+Zoals je ziet stond in eerste de assignment hier. Maar aangezien het meest linkerdeel van een assignment een identiefier is kan op L=1 geen onderscheid worden gemaakt tussen identifier of een assignment. Vandaar dat een assignment bij expr\_al1 is gedefineerd.
+\subsubsection{Syntax}
+\begin{lstlisting}[style=ANTLR]
+	expr_al7
+		: unsignedConstant
+		| identifier
+//		| expr_assignment  //can be identifier
+		| expr_read
+		| expr_print
+		| expr_if
+		| expr_while
+		| expr_closedcompound
+		| expr_closed
+		;
+\end{lstlisting}
+\subsubsection{Context}
+\begin{list}{•}{•}
+\item expr\_al7 is van hetzelfde type als de gegeven expressie of waarde.
+\end{list}
+\subsubsection{Semantiek}
+Dit is enkel een lijst van mogelijke expressies en waardes en dus zal er in de compiler enkel deze expressie of waarde op stack hebben staan, maar wordt er geen operatie op uitgevoerd.
+\subsubsection{Voorbeeld}
+\begin{lstlisting}[style=SELMA]
+foo;
+42;
+(foobar);
+\end{lstlisting}
+
+%==================================OPMAAK======================================
+
+%\subsection{Expressies - }
+%
+%\subsubsection{Syntax}
+%\begin{lstlisting}[style=ANTLR]
+%\end{lstlisting}
+%\subsubsection{Context}
+%\begin{list}{•}{•}
+%\item
+%\end{list}
+%\subsubsection{Semantiek}
+%
+%\subsubsection{Voorbeeld}
+%\begin{lstlisting}[style=SELMA]
+%\end{lstlisting}
+
+%==================================OPMAAK======================================
+
+%
+%expression_statement
+%	: expression SEMICOLON
+%		-> ^(EXPRESSION_STATEMENT expression)
+%	;
+%
+
+%
+
+%
+%expr_read
+%	: READ^ LPAREN! identifier (COMMA! identifier)* RPAREN!
+%	;
+%
+%expr_print
+%	: PRINT^ LPAREN! expression (COMMA! expression)* RPAREN!
+%	;
+%
+%expr_if
+%	: IF^ compoundexpression THEN compoundexpression (ELSE compoundexpression)? FI!
+%	;
+%
+%expr_while
+%	: WHILE^ compoundexpression DO compoundexpression OD
+%	;
+%
+%expr_closedcompound
+%	: LCURLY compoundexpression RCURLY
+%	;
+%
+%expr_closed
+%	: LPAREN! expression RPAREN!
+%	;
+%
+%unsignedConstant
+%	: boolval
+%	| charval
+%	| intval
+%	;
+%
+%intval
+%	: NUMBER
+%	;
+%
+%boolval
+%	: BOOLEAN
+%	;
+%
+%charval
+%	: CHARV
+%	;
+%
+%identifier
+%	: ID
+%	;
 
 
 
+\newpage
 \section{Vertaalregels}
 voor de taal, d.w.z. de transformaties waaruit blijkt op welke wijze een opeen-
 volging van symbolen die voldoet aan een produktieregel wordt omgezet in een opeenvol-
 ging van TAM-instructies. Vertaalregels zijn de ‘code templates’ van hoofdstuk 7 van Watt
 \& Brown.
 
+\newpage
 \section{Beschrijving van Java programmatuur}
 Beknopte bespreking van de extra Java klassen die
 u gedefinieerd heeft voor uw compiler (b.v. symbol table management, type checking, code
 generatie, error handling, etc.). Geef ook aan welke informatie in de AST-nodes opgeslagen
 wordt.
 
+\newpage
 \section{Testplan en -resultaten}
 Bespreking van de ‘correctheids-tests’ aan de hand van de criteria
 zoals deze zijn beschreven in het §A.5 van deze appendix. Aan de hand van deze criteria moet
@@ -98,28 +455,49 @@ en run-time fouten.
 Alle uitgevoerde tests moeten op de CD-R aanwezig zijn; van een testprogramma moet de
 uitvoer in de appendix opgenomen worden (zie onder).
 
+\newpage
 \section{Conclusies}
 
 
+
+\newpage
 \section{Appendix}
 
-\subsection{ANTLR Lexer specificatie}
-Specificatie van de invoer voor de ANTLR scanner generator,
-d.w.z. de token-definities van het taaltje.
+\subsection{ANTLR Lexer \& Parser specificatie}
+%Specificatie van de invoer voor de ANTLR scanner generator,
+%d.w.z. de token-definities van het taaltje.
 
-\subsection{ANTLR Parser specificatie}
-Specificatie van de invoer voor de parser generator, d.w.z. de
-structuur van de taal en de wijze waarop de AST gegenereerd wordt
+%Specificatie van de invoer voor de parser generator, d.w.z. de
+%structuur van de taal en de wijze waarop de AST gegenereerd wordt
+\lstinputlisting[style=ANTLRfile]{../g-files/SELMA.g}
 
-\subsection{Alle ANTLR TreeParser specificaties}
-Waarschijnlijk zult u (tenminste) twee tree parsers
-gebruiken: een context checker en een code generator.
+\newpage
+\subsection{ANTLR Checker specificatie}
+%Waarschijnlijk zult u (tenminste) twee tree parsers
+%gebruiken: een context checker en een code generator.
+\lstinputlisting[style=ANTLRfile]{../g-files/SELMAChecker.g}
 
+\newpage
+\subsection{ANTLR Codegenerator specificatie}
+%Waarschijnlijk zult u (tenminste) twee tree parsers
+%gebruiken: een context checker en een code generator.
+\lstinputlisting[style=ANTLRfile]{../g-files/SELMACompiler.g}
+
+\begin{landscape}
+\newpage
+\subsection{ANTLR Codegenerator Stringtemplate specificatie}
+%Waarschijnlijk zult u (tenminste) twee tree parsers
+%gebruiken: een context checker en een code generator.
+\lstinputlisting[style=ANTLRfile]{../g-files/SELMACodeJasmin.stg}
+\end{landscape}
+
+\newpage
 \subsection{Invoer- en uitvoer van een uitgebreid testprogramma}
 Van een correct en uitgebreid test-
 programma (met daarin alle features van uw programmeertaal) moet worden bijgevoegd: de
 listing van het oorspronkelijk programma, de listing van de gegenereerde TAM-code (be-
 standsnaam met extensie .tam) en een of meer executie voorbeelden met in- en uitvoer
 waaruit de juiste werking van de gegenereerde code blijkt.
+
 
 \end{document}
