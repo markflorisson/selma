@@ -98,7 +98,31 @@ public class SELMA {
                 codegenerator.setTemplateLib(templates);
                 SELMACompiler.program_return r = codegenerator.program();
                 StringTemplate output = (StringTemplate) r.getTemplate();
-                System.out.println(output.toString());
+
+                // Remove instructions followed by 'removeLastInstruction' and remove
+                // duplicate consecutive .line <line_num> instructions
+                Stack<String> lines = new Stack<String>();
+                String lastLine = null;
+                for (String line : output.toString().split("\r?\n")) {
+                    String trimmed = line.trim();
+
+                    if (trimmed.length() == 0)
+                        ;
+                    else if (trimmed.startsWith("removeLastInstruction") && !lines.empty())
+                        lines.pop();
+                    else
+                        lines.push(line);
+
+
+                    if (lines.peek().trim().startsWith(".line") && lines.peek().equals(lastLine)) {
+                        lines.pop();
+                    }
+
+                    lastLine = lines.peek();
+                }
+
+                for (String line : lines)
+                    System.out.println(line);
             }
 
 

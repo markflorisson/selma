@@ -25,6 +25,8 @@ options {
   int curStackDepth;
   int maxStackDepth;
 
+  int labelNum = 0;
+
   private void incrStackDepth() {
   	if (++curStackDepth > maxStackDepth)
   		maxStackDepth = curStackDepth;
@@ -40,8 +42,8 @@ program
   ;
 
 compoundexpression
-  : ^(node=COMPOUND (s+=declaration  | s+=expression)+)
-  -> compound(instructions={$s})
+  : ^(node=COMPOUND (s+=declaration  | s+=expression_statement)+)
+  -> compound(instructions={$s}, line={node.getLine()}, pop={$node.SR_type != SR_Type.VOID})
   ;
 
 declaration
@@ -71,67 +73,78 @@ declaration
   -> declareConst(id={$id.text},value={Character.getNumericValue($val.text.charAt(1))},type={"CHAR"},addr={st.nextAddr()-1})
   ;
 
+
 expression_statement
-  : ^(EXPRESSION_STATEMENT e1=expression) { curStackDepth--; }
-  -> popStack()
+  : ^(node=EXPRESSION_STATEMENT e1=expression) { curStackDepth--; }
+  -> exprStat(e1={e1.st}, line={$node.getLine()}, pop={$node.SR_type != SR_Type.VOID})
   ;
 
 expression
 //double arg expression
-  : ^(MULT e1=expression e2=expression) { curStackDepth--; }
-  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"imul"})
+  : ^(node=MULT e1=expression e2=expression) { curStackDepth--; }
+  -> biExpr(e1={$e1.st}, e2={$e2.st}, instr={"imul"}, line={node.getLine()}, op={"*"})
 
-  | ^(DIV e1=expression e2=expression) { curStackDepth--; }
-  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"idiv"})
+  | ^(node=DIV e1=expression e2=expression) { curStackDepth--; }
+  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"idiv"}, line={node.getLine()}, op={"/"})
 
-  | ^(MOD e1=expression e2=expression) { curStackDepth--; }
-  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"imod"})
+  | ^(node=MOD e1=expression e2=expression) { curStackDepth--; }
+  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"imod"}, line={node.getLine()}, op={"\%"})
 
-  | ^(PLUS e1=expression e2=expression) { curStackDepth--; }
-  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"iadd"})
+  | ^(node=PLUS e1=expression e2=expression) { curStackDepth--; }
+  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"iadd"}, line={node.getLine()}, op={"+"})
 
-  | ^(MINUS e1=expression e2=expression) { curStackDepth--; }
-  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"isub"})
+  | ^(node=MINUS e1=expression e2=expression) { curStackDepth--; }
+  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"isub"}, line={node.getLine()}, op={"-"})
 
-  | ^(OR e1=expression e2=expression) { curStackDepth--; }
-  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"or"})
+  | ^(node=OR e1=expression e2=expression) { curStackDepth--; }
+  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"or"}, line={node.getLine()}, op={"or"})
 
-  | ^(AND e1=expression e2=expression) { curStackDepth--; }
-  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"and"})
+  | ^(node=AND e1=expression e2=expression) { curStackDepth--; }
+  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"and"}, line={node.getLine()}, op={"and"})
 
-  | ^(RELS e1=expression e2=expression) { curStackDepth--; }
-  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmplt"})
+  | ^(node=RELS e1=expression e2=expression) { curStackDepth--; }
+  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmplt"}, line={node.getLine()},
+  		op={"<"}, label_num1={labelNum++}, label_num2={labelNum++})
 
-  | ^(RELSE e1=expression e2=expression) { curStackDepth--; }
-  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmple"})
+  | ^(node=RELSE e1=expression e2=expression) { curStackDepth--; }
+  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmple"}, line={node.getLine()},
+  		op={"<="}, label_num1={labelNum++}, label_num2={labelNum++})
 
-  | ^(RELG e1=expression e2=expression) { curStackDepth--; }
-  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmpgt"})
+  | ^(node=RELG e1=expression e2=expression) { curStackDepth--; }
+  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmpgt"}, line={node.getLine()},
+  		op={">"}, label_num1={labelNum++}, label_num2={labelNum++})
 
-  | ^(RELGE e1=expression e2=expression) { curStackDepth--; }
-  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmpge"})
+  | ^(node=RELGE e1=expression e2=expression) { curStackDepth--; }
+  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmpge"}, line={node.getLine()},
+  		op={">="}, label_num1={labelNum++}, label_num2={labelNum++})
 
-  | ^(RELE e1=expression e2=expression) { curStackDepth--; }
-  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmpeq"})
+  | ^(node=RELE e1=expression e2=expression) { curStackDepth--; }
+  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmpeq"}, line={node.getLine()},
+  		op={"="}, label_num1={labelNum++}, label_num2={labelNum++})
 
-  | ^(RELNE e1=expression e2=expression) { curStackDepth--; }
-  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmpne"})
+  | ^(node=RELNE e1=expression e2=expression) { curStackDepth--; }
+  -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmpne"}, line={node.getLine()},
+  		op={"!="}, label_num1={labelNum++}, label_num2={labelNum++})
 
 //single arg expression
   | ^(UPLUS e1=expression)
   {$st=$e1.st;}
 
-  | ^(UMIN e1=expression)
-  -> Expr(e1={$e1.st},op={"neg"})
+  | ^(node=UMIN e1=expression)
+  -> uExpr(e1={$e1.st}, instr={"ineg"}, line={node.getLine()}, op={"-"})
 
-  | ^(NOT e1=expression)
-  -> Expr(e1={$e1.st},op={"not"})
+  | ^(node=NOT e1=expression)
+  -> biExprJump(e1={$e1.st}, e2={"iconst_0"}, instr={"if_icmpeq"}, line={node.getLine()},
+  		op={"not"}, label_num={labelNum++})
 
 //CONDITIONAL
   | ^(IF ec1=compoundexpression THEN ec2=compoundexpression (ELSE ec3=compoundexpression)?)
-  -> if(ec1={$ec1.st},ec2={$ec2.st},ec3={$ec3.st})
+  	{ boolean ec3NotEmpty = $ec3.st != null; }
+  -> if(ec1={$ec1.st},ec2={$ec2.st},ec3={$ec3.st}, label_num1={labelNum++},
+  	label_num2={ec3NotEmpty ? labelNum++ : 0}, ec3_not_empty={ec3NotEmpty})
+
   | ^(WHILE ec1=compoundexpression DO ec2=compoundexpression OD) { curStackDepth--; }
-  -> while(ec1={$ec1.st},ec2={$ec2.st})
+  -> while(ec1={$ec1.st},ec2={$ec2.st}, label_num1={labelNum++}, label_num2={labelNum++})
 
 //IO
   | ^(READ id=ID)

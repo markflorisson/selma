@@ -32,17 +32,26 @@ program
 	;
 
 compoundexpression //do not open and close scope here (IF/WHILE)
-	: ^(node=COMPOUND (declaration|expression)+)
-	 {
-	   SELMATree e1 = (SELMATree)node.getChild(node.getChildCount()-1);
-	   if (e1.SR_type==SR_Type.VOID) {
-      $node.SR_type=SR_Type.VOID;
-      $node.SR_kind=null;
-     } else {
-      $node.SR_type=e1.SR_type;
-      $node.SR_kind=e1.SR_kind;
-     }
-	 }
+	: ^(node=COMPOUND (declaration|expression_statement)+)
+	{
+	    SELMATree e1 = (SELMATree)node.getChild(node.getChildCount()-1);
+	    if (e1.SR_type==SR_Type.VOID) {
+	        $node.SR_type=SR_Type.VOID;
+	        $node.SR_kind=null;
+	    } else {
+	        $node.SR_type=e1.SR_type;
+	        $node.SR_kind=e1.SR_kind;
+	    }
+	}
+	;
+
+expression_statement
+	: ^(node=EXPRESSION_STATEMENT expression)
+	{
+	    SELMATree e1 = (SELMATree)node.getChild(node.getChildCount()-1);
+	    $node.SR_type = e1.SR_type;
+	    $node.SR_kind = e1.SR_kind;
+	}
 	;
 
 declaration
