@@ -51,11 +51,41 @@ Box Calslaan xx-30}
 
 \newpage
 \section{Inleiding}
-Korte beschrijving van de practicumopdracht.
+%Korte beschrijving van de practicumopdracht.
+Voor vertalerbouw dient als eindopdracht een eigen taal geschreven te worden. Deze taal dient een expression-language te zijn, dit is een taal die geen statements, maar enkel expressies kent. Alles wat je dus aanroept zal een waarde teruggeven.\\
+Voor deze zelfbedachte taal dient een parser en lexer geschreven te worden, een checker en een compiler. Hierbij dient een verslag met een uitgebreide beschrijving van de taal en een goede kijk op hoe alles onder de motorkap werkt. Ook moet er een bewijs worden geleverd dat de taal werkt, dit kan door een testprogramma te schrijven dat tamelijk uitgebreid is en te kijken of dit werkt naar behoren. (exhaustive testing) \\
+Hoe uitgebreid de te definieren taal wordt is aan de studenten zelf - dit is echter terug te zien in het te behalen cijfer.\\
+Voor onze taal, SELMA, hebben wij gekozen voor het volgende:
+\todo{Klopt?}
+\begin{itemize}
+\item Basic Expression Language
+\item If- \& while-statements
+\item Ondersteunen van functies
+\item Compileren naar JVM-code in plaats van TAM-code
+\end{itemize}
+
+Onze taal heet SELMA. Een naam aan een taal geven is lastig, zo waren er een aantal andere opties zoals: SMEF of Taal voor Vertalerbouw (TV).
+SELMA staat voor Simpel Expression Language. Nu moest de afkorting wat meer zeggen dus kozen we voor de meisjesnaam SELMA, alleen maar omdat een afkorting vinden voor SELDERIE wel heel veel werk is.\\
+Gelukkig heet onze taal dus geen SELDERIE, maar SELMA:\\
+Waarbij de MA voor Minor Adjustments stond, we hebben inmiddels zoveel werk eraan gehad dat "Minor" dat geen eer meer aan doet. \\
+Dus met gepaste trots presenteren wij u SELMA:\\
+Simple Expression Language Met Augurk\\
+Vanaf nu enkel nog naar te verwijzen als SELMA.\\
 
 \newpage
 \section{Beknopte beschrijving}
-van de programmeertaal (maximaal een A4-tje).
+%van de programmeertaal (maximaal een A4-tje).
+Onze taal is gemaakt naar de gegeven instructies van de practicumhandleiding en alles is of een expressie of declaration in deze taal. Bij sommige expressies is het echter niet mogelijk een resultaat te geven, hier kunnen die expressies niet anders dan een void-resultaat retouneren, wat ze effectief een statement maakt. De structuur van de taal en de keywords lijken qua layout op een hybride tussen C en Pascal. \\
+De volledige taal is LL(1) wij hebben hierdoor vooral tijdens het ontwerpen goed moeten nadenken hoe we de taal zo logisch mogelijk opbouwden zodat de parser er mee uit de voeten kon. Eventueel is er de mogelijkheid om lokaal 1 stap verder te kijken, wij hebben dit echter niet nodig gehad omdat wij voldoende keywords hebben gebruikt, zoals voor een functie een @ zetten - en we in de parser bewust rekening hebben gehouden met de LL(1) limitatie.\\
+\todo{@?}
+\\
+SELMA compileerde in eerste instantie naar TAM, op de cd is een fragment van deze code te zien. We hebben echter besloten dat het mooier was om JVM te gebruiken, niet zo zeer uit praktisch oogpunt, maar meer omdat JVM-bytecode ook door "echte" talen wordt gebruikt en omdat het een pluspunt is in de eindbeoordeling.\\
+Op het moment dat we besloten om te schakelen waren we blij dat we haddne gekozen voor het gebruik van stringTemplates bij de codegeneratie, dit heeft ons wat werk gescheeld. En technisch gezien zouden we zo een extra compiler naar TAM-code erbij kunnen doen, aangezien er geen andere reden is dan "omdat het kan" hebben we onszelf die moeite bespaard.\\
+\\
+Lees verder - of probeer eens een testprogramma te compileren in SELMA - om te leren hoe de vork nou precies in de steel zit met deze taal.\\
+\\
+\textit{- Mark \& Jeroen}
+
 
 \newpage
 \section{Problemen en oplossingen}
