@@ -4,7 +4,9 @@ een comment
 met meerdere
 regels
 */
+
 var i: integer;									//single var int decaration
+/*
 2*3;
 i := 1;
 
@@ -12,6 +14,21 @@ i := 1;
 2*3*4;
 5*i;
 5>=6;
-while true; do 5; od;
+*/
+
+i := 0;
+while i < 10; do
+    i := i + 1;
+    print(i);
+    print('a');
+    // print('\n');
+od;
+/*
 if true; then 5; else 6; fi;
 if false; then 7; fi;
+
+true;
+false;
+
+print true;
+*/

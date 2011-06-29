@@ -21,24 +21,36 @@ options {
 }
 
 @members {
-  public SymbolTable<CompilerEntry> st = new SymbolTable<CompilerEntry>();
-  int curStackDepth;
-  int maxStackDepth;
+    public SymbolTable<CompilerEntry> st = new SymbolTable<CompilerEntry>();
+    int curStackDepth;
+    int maxStackDepth;
 
-  int labelNum = 0;
+    int labelNum = 0;
 
-  private void incrStackDepth() {
-  	if (++curStackDepth > maxStackDepth)
-  		maxStackDepth = curStackDepth;
-  }
+    private void incrStackDepth() {
+    	if (++curStackDepth > maxStackDepth)
+    	    maxStackDepth = curStackDepth;
+    }
+
+    private String getTypeDenoter(SR_Type type) {
+        if (type == SR_Type.INT) {
+            return "I";
+        } else if (type == SR_Type.BOOL) {
+            return "Ljava/lang/String;";
+        } else {
+            return "C";
+        }
+    }
 }
 
 program
   : ^(node=BEGIN {st.openScope();} compoundexpression {st.closeScope();} END)
+  { SELMATree expr = (SELMATree) $node.getChild(0); }
   -> program(instructions={$compoundexpression.st},
              source_file={SELMA.inputFilename},
-             stack_limit={maxStackDepth},
-             locals_limit={$node.localsCount})
+             stack_limit={maxStackDepth + 2}, // +2 for print and other additionally loaded constants
+             locals_limit={$node.localsCount + 1}, // +1 for the String[] argv parameter
+             pop={expr.SR_type != SR_Type.VOID})
   ;
 
 compoundexpression
@@ -138,22 +150,44 @@ expression
   		op={"not"}, label_num={labelNum++})
 
 //CONDITIONAL
-  | ^(IF ec1=compoundexpression THEN ec2=compoundexpression (ELSE ec3=compoundexpression)?)
-  	{ boolean ec3NotEmpty = $ec3.st != null; }
+  | ^(node=IF ec1=compoundexpression THEN ec2=compoundexpression (ELSE ec3=compoundexpression)?)
+  	{ boolean ec3NotEmpty = $ec3.st != null; 
+  	  SELMATree expr2 = (SELMATree) node.getChild(2);
+  	  SELMATree expr3 = null;
+  	  if (ec3NotEmpty)
+  	  	expr3 = (SELMATree) node.getChild(4);
+  	}
   -> if(ec1={$ec1.st},ec2={$ec2.st},ec3={$ec3.st}, label_num1={labelNum++},
-  	label_num2={ec3NotEmpty ? labelNum++ : 0}, ec3_not_empty={ec3NotEmpty})
+  	label_num2={ec3NotEmpty ? labelNum++ : 0}, ec3_not_empty={ec3NotEmpty},
+  	is_void={!ec3NotEmpty || expr2.SR_type != expr3.SR_type || expr2.SR_type == SR_Type.VOID})
 
-  | ^(WHILE ec1=compoundexpression DO ec2=compoundexpression OD) { curStackDepth--; }
-  -> while(ec1={$ec1.st},ec2={$ec2.st}, label_num1={labelNum++}, label_num2={labelNum++})
+  | ^(node=WHILE ec1=compoundexpression DO ec2=compoundexpression OD) 
+  { curStackDepth--; SELMATree expr2 = (SELMATree) node.getChild(2); }
+  -> while(ec1={$ec1.st}, ec2={$ec2.st}, pop={expr2.SR_type != SR_Type.VOID}, label_num1={labelNum++}, label_num2={labelNum++})
 
 //IO
-  | ^(READ id=ID)
-  	-> read(id={$id.text}, addr={st.retrieve($id).addr}, dup_top={TRUE})
-
-  | ^(READ id1=ID (id2=ID)+) { curStackDepth--; }
-	-> read(id={$id1.text}, dup_top={FALSE})
-
-  | ^(PRINT expression+)
+  | ^(node=READ (ids=ID)+)
+    /*
+   	{ boolean isExpr = $node.SR_type != SR_Type.VOID;
+  	  String typeDenoter = getTypeDenoter($node.SR_type);
+  	  boolean isBool = $node.SR_type == SR_Type.BOOL;
+      if (!isExpr)
+          curStackDepth -= $node.getChildrenCount();
+  	}
+  	-> read(ids={$ids.st}, type_denoter={typeDenoter}, dup_top={isExpr},
+  	        label_num1={labelNum++}, label_num2={labelNum++},
+            line={node.getLine()})
+    */
+  | ^(node=PRINT exprs=expression+)
+  	{ boolean isExpr = $node.SR_type != SR_Type.VOID;
+  	  String typeDenoter = getTypeDenoter($node.SR_type);
+  	  boolean isBool = $node.SR_type == SR_Type.BOOL;
+      if (!isExpr)
+          curStackDepth -= $node.getChildCount();
+  	}
+  	-> print(exprs={$exprs.st}, type_denoter={typeDenoter}, dup_top={isExpr},
+  	         is_bool={isBool}, label_num1={labelNum++}, label_num2={labelNum++},
+  	         line={node.getLine()})
 
 //ASSIGN
 //  | ^(BECOMES expression expression)
@@ -174,7 +208,7 @@ expression
     -> loadNum(val={$node.text}, iconst={num >= -1 && num <= 5}, bipush={num >= -128 && num <= 127})
 
   | node=BOOLEAN { incrStackDepth(); }
-    -> loadNum(val={($node.type==TRUE)?1:0}, iconst={TRUE})
+    -> loadNum(val={($node.text.equals("true")) ? 1 : 0}, iconst={TRUE})
 
   | node=LETTER { incrStackDepth(); }
     -> loadNum(val={Character.getNumericValue($node.text.charAt(1))}, iconst={FALSE}, bipush={TRUE})

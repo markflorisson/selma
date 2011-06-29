@@ -123,10 +123,7 @@ public class SELMA {
 
                 for (String line : lines)
                     System.out.println(line);
-            }
-
-
-            if (opt_ast) {          // print the AST as string
+            } else if (opt_ast) {          // print the AST as string
                 System.out.println(tree.toStringTree());
             } else if (opt_dot) {   // print the AST as DOT specification
                 DOTTreeGenerator gen = new DOTTreeGenerator();
@@ -137,17 +134,21 @@ public class SELMA {
         } catch (SELMAException e) {
             System.err.print("ERROR: SELMAException thrown by compiler: ");
             System.err.println(e.getMessage());
+            System.exit(1);
         } catch (SymbolTableException e) {
             System.err.print("ERROR: SymbolTableException thrown by compiler: ");
             System.err.println(e.getMessage());
+            System.exit(1);
         } catch (RecognitionException e) {
             System.err.print("ERROR: recognition exception thrown by compiler: ");
             System.err.println(e.getMessage());
             e.printStackTrace();
+            System.exit(1);
         } catch (Exception e) {
             System.err.print("ERROR: uncaught exception thrown by compiler: ");
             System.err.println(e.getMessage());
             e.printStackTrace();
+            System.exit(1);
         }
     }
 }

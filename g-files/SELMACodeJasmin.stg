@@ -2,7 +2,7 @@
 
 group SELMA;
 
-program(instructions, source_file, stack_limit, locals_limit) ::= <<
+program(instructions, source_file, stack_limit, locals_limit, pop) ::= <<
 .source <source_file>
 .class  public Main
 .super  java/lang/Object
@@ -11,8 +11,11 @@ program(instructions, source_file, stack_limit, locals_limit) ::= <<
 .limit locals <locals_limit>
 .line 1
 <instructions>
-pop
-return
+<if (pop)>
+    pop
+
+<endif>
+    return
 .end method
 >>
 
@@ -69,7 +72,7 @@ declareVar(id,type,addr)::=<<
 
 //Load
 
-loadNum(val, num)::=<<
+loadNum(val, num, iconst, bipush)::=<<
 <if (iconst)>
     iconst_<val>
 <elseif (bipush)>
@@ -91,7 +94,7 @@ assign(id, type, addr, e1, isint)::=<<
     istore <addr>               ; assign e1 to <id>: <type> @ <addr>
 >>
 
-read(id, addr, dup_top) ::= <<
+read(addrs, type_denoters, dup_top, label_num1, label_num2, line) ::= <<
     read here                   ; reading <id>
 <if (dup_top)>
     dup
@@ -100,12 +103,36 @@ read(id, addr, dup_top) ::= <<
     istore <addr>
 >>
 
+print(exprs, type_denoter, dup_top, is_bool, label_num1, label_num2, line) ::= <<
+<exprs>
+.line <line>
+<if (dup_top)>
+    dup
+<endif>
+
+<if (is_bool)>
+    ifeq L<label_num1>
+    ldc "true"
+    goto L<label_num2>
+L<label_num1>:
+    ldc "false"
+L<label_num2>:
+<endif>
+
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/print(<type_denoter>)V
+>>
+
 //conditionals
-if(ec1, ec2, ec3, label_num1, label_num2, ec3_not_empty) ::= <<
+if (ec1, ec2, ec3, label_num1, label_num2, ec3_not_empty, is_void) ::= <<
 <ec1>							; e1 condition
-    iconst_0
     ifeq L<label_num1>          ; e1 is false
 <ec2>                           ; e2 if true expression
+<if (is_void)>
+    pop                         ; is_void <is_void>
+
+<endif>
 <if (ec3_not_empty)>
     goto L<label_num2>
 <endif>
@@ -113,19 +140,23 @@ if(ec1, ec2, ec3, label_num1, label_num2, ec3_not_empty) ::= <<
 L<label_num1>:
 <if (ec3_not_empty)>
 <ec3>							; e3 if false expression
+<if (is_void)>
+    pop                         ; is_void <is_void>
+
+<endif>
 L<label_num2>:
-<else>
-pop
 <endif>
 >>
 
 while(ec1, ec2, label_num1, label_num2)::=<<
 L<label_num1>:
 <ec1>							; e1 while condition
-    iconst_0
     ifeq L<label_num2>
 <ec2>							; e2 expression to evaluate (body)
-pop
+<if (pop)>
+    pop
+
+<endif>
     goto L<label_num1>
 L<label_num2>:
 >>

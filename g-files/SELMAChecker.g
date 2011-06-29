@@ -206,10 +206,10 @@ expression
     } else { // there is a else
       if (e2.SR_type==e3.SR_type) {
         $node.SR_type=e3.SR_type;
-			   if (e2.SR_kind==SR_Kind.CONST && e3.SR_kind==SR_Kind.CONST)
-			    $node.SR_kind=SR_Kind.CONST;
-			   else
-			    $node.SR_kind=SR_Kind.VAR;
+	  if (e2.SR_kind==SR_Kind.CONST && e3.SR_kind==SR_Kind.CONST)
+	    $node.SR_kind=SR_Kind.CONST;
+	  else
+	    $node.SR_kind=SR_Kind.VAR;
       } else {
         $node.SR_type=SR_Type.VOID;
         $node.SR_kind=null;
@@ -219,7 +219,7 @@ expression
 
 	| ^(node=WHILE {st.openScope();}compoundexpression
 	     DO {st.openScope();} compoundexpression {st.closeScope();}
-	    OD{st.closeScope();})
+	     OD{st.closeScope();})
    {
    SELMATree e1 = (SELMATree)node.getChild(0);
    SELMATree e2 = (SELMATree)node.getChild(2);
