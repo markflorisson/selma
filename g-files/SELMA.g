@@ -199,7 +199,6 @@ expr_while
 	;
 
 expr_funccall
-//	: FUNCTION^ identifier LPAREN! (identifier SEMICOLON!)* RPAREN!
 	: FUNCTION identifier LPAREN! (expression SEMICOLON!)* RPAREN!
 	;
 
