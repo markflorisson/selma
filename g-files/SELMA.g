@@ -52,8 +52,7 @@ tokens {
 	INT		= 'integer';
 	BOOL		= 'boolean';
 	CHAR		= 'character';
-
-	// keywords
+	//keywords
 	IF		= 'if';
 	THEN		= 'then';
 	ELSE		= 'else';
@@ -63,8 +62,9 @@ tokens {
 	DO		= 'do';
 	OD		= 'od';
 
-	PROC		= 'procedure';
-	FUNC		= 'function';
+	FUNCDEF = 'function ';
+	FUNCRETURN = 'return';
+	FUNCTION = '@';
 
 	UMIN;
 	UPLUS;
@@ -85,7 +85,7 @@ tokens {
   package SELMA;
 }
 
-// Parser rules
+// Parser rules - program at line 90 due to the report
 
 program
 	: compoundexpression EOF
@@ -109,6 +109,7 @@ declaration
 		-> ^(VAR type identifier)+
 	| CONST identifier (COMMA identifier)* COLON type EQ unsignedConstant
 		-> ^(CONST type unsignedConstant identifier)+
+	| FUNCDEF^ identifier LPAREN! (identifier (COMMA! identifier)* COLUMN! type SEMICOLUMN!)* RPAREN! funcbody;
 	;
 
 type
@@ -117,17 +118,16 @@ type
 	| CHAR
 	;
 
-//expression
-// note:
-// - arithmetic can be "invisible" due to all the *-s that's why it is nested
-// - assignment can be "invisible" due to the ? that's why it can also be only a identifier
+funcbody
+	: COLUMN! type LCURLY! compoundexpression FUNCRETURN expression SEMICOLUMN! RCURLY!
+	| LCURLY! compoundexpression RCURLY!
+	;
 
 expression_statement
 	: expression -> ^(EXPRESSION_STATEMENT expression)
 	;
-
-
-
+// note: - arithmetic can be "invisible" due to all the *-s that's why it is nested
+// - assignment can be "invisible" due to the ? that's why it can also be only a identifier
 expression
 	: expr_assignment
 	;
@@ -180,6 +180,7 @@ expr_arithmetic
 		| expr_while
 		| expr_closedcompound
 		| expr_closed
+		| expr_funccall
 		;
 
 expr_read
@@ -196,6 +197,10 @@ expr_if
 
 expr_while
 	: WHILE^ compoundexpression DO compoundexpression OD
+	;
+
+funccall
+	: FUNCTION^ identifier LPAREN! (identifier SEMICOLUMN!)* RPAREN!
 	;
 
 expr_closedcompound
@@ -229,8 +234,8 @@ identifier
 	;
 
 CHARV
-  : APOSTROPHE (LETTER|'_') APOSTROPHE
-  ;
+	: APOSTROPHE (LETTER|'_') APOSTROPHE
+	;
 
 BOOLEAN
 	: TRUE

@@ -171,9 +171,9 @@ Dit is een speciale tussenstap voor de interne boekhouding. Na elke semicolumn z
 \lstinputlisting[style=ANTLR,linerange={125-127}]{../g-files/SELMA.g}
 
 \subsection{Declaraties en types}
-SELMA kent twee soorten declaraties, variabelen en constanten. SELMA staat toe om per declaratie meerdere identifiers te definieren. Bij de declaratie dien je het type van de te declareren waarde mee te geven. En bij een constante dien je uiteraard een waarde mee te geven.
+SELMA kent twee soorten waarden-declaraties, variabelen en constanten. SELMA staat toe om per declaratie meerdere identifiers te definieren. Bij de declaratie dien je het type van de te declareren waarde mee te geven. En bij een constante dien je uiteraard een waarde mee te geven.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={105-118}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={105-119}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item Het gegeven type dient bij de constante overeen te komen met het type van de gegeven waarde.
@@ -187,6 +187,37 @@ var i, x: integer;
 const c: char = 'g';
 const b,t: boolean = true;
 \end{lstlisting}
+
+\subsection{Functiedeclaratie}
+SELMA kent ook nog een functie declaratie. Deze valt logischerwijs ook onder de declaraties. De declaratie van een functie dient altijd voor het gebruik te komen. Een functie kan als een soort procedure worden gebruikt door geen return-type op te geven. Het return-type wordt dan automatisch void. Dit hebben we express gedaan, we willen het namelijk altijd een functie noemen, aangezien procedures niet echt een plek hebben binnen een expressietaal.
+\subsubsection{Syntax}
+\lstinputlisting[style=ANTLR,linerange={112-112,121-124}]{../g-files/SELMA.g}
+\subsubsection{Context}
+\begin{itemize}
+\item De naam van de functie moet uniek zijn als functienaam, er mag wel een variabele of constante bestaan met die naam.
+\item De opgegeven identifiers moeten allemaal een andere naam hebben, ze hoeven echter niet uniek te zijn binnen het programma aangezien ze in een aparte scope staan.
+\item Het type van de expressie na het returntype dient hetzelfde te zijn als type.
+\end{itemize}
+\subsubsection{Semantiek}
+Het adres waar deze functie staat wordt opgeslagen. Daarna komt de code van de functie. Aan het einde van de functie zal eventueel een result op de stack worden gezet en wordt het adres dat aan het begin is gegeven aangeroepen om weer terug te komen op de plek waar de functie werdt aangeroepen.
+\subsubsection{Voorbeeld}
+\begin{lstlisting}[style=SELMA]
+function foo() {
+	6*7;
+}
+function foo(awesome,less:boolean;bar:integer;): integer {
+	var i: integer;
+	
+	if (awesome;) then
+		i := 42;
+	else
+		i := 2;
+	fi;
+	
+	return i;
+}
+\end{lstlisting}
+
 
 \subsection{Expressies - assignment}
 De expressies zijn ingedeeld in verschillende niveaus, dit om te zorgen dat ze in de juiste volgorde worden uitgevoerd. Zo willen we dat 6+3*12 niet 108 is maar 42, niet alleen om dat 42 een mooier getal is, maar voornamelijk omdat het fijn is als de taal voldoet aan de conventionele rekenregels. \\
@@ -344,7 +375,7 @@ foo := not foobar;
 Op het hoogste nivau kan een expressie bestaan uit een semi-statement zoals een if-expressie of een print-expressie, of het kan een identifier of waarde zijn, of het kan een aparte (compound)expressie binnen haken zijn.
 Zoals je ziet stond in eerste de assignment hier. Maar aangezien het meest linkerdeel van een assignment een identiefier is kan op L=1 geen onderscheid worden gemaakt tussen identifier of een assignment. Vandaar dat een assignment bij expr\_al1 is gedefineerd.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={173-183}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={173-184}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item expr\_al7 is van hetzelfde type als de gegeven expressie of waarde.
@@ -361,7 +392,7 @@ foo;
 \subsection{Unsigned constants}
 Uiteraard bied onze taal ook de mogelijkheid aan om constanten te gebruiken zonder deze eerst te moeten declareren. Oftewel, je kunt gewoon nummers gebruiken bijvoorbeeld.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={209-225}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={214-230,236-238}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item unsignedconstant is van het type van de gegeven waarde
@@ -381,7 +412,7 @@ true;
 \subsection{Identifier}
 Een identifier van een bestaande variabele of constante in de huidige of een hogere scope.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={227-229}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={232-234}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item De identifier dient te verwijzen naar een geldige variabele of constante
@@ -470,10 +501,31 @@ foo := foo + 1;
 od
 \end{lstlisting}
 
+\subsection{Functieaanroep}
+Een functieaanroep naar een eerder gedefineerde functie
+\subsubsection{Syntax}
+\lstinputlisting[style=ANTLR,linerange={201-203}]{../g-files/SELMA.g}
+\subsubsection{Context}
+\begin{itemize}
+\item Het aantal expressies en hun type dient overeen te komen met de declaratie van de functie
+\item De functie retouneert het eerder gespecificeerde type. Als er geen type was gedeclareerd dan is dat dus void.
+\end{itemize}
+\subsubsection{Semantiek}
+Het returnadres wordt op de stack gezet, zodat de functie weer hiernaartoe kan terugkeren.
+De expressies worden op de stack gezet in de gespecificeerde volgorde.
+De functie wordt aangeroepen.
+De functie returned en het result staat op de stack.
+\subsubsection{Voorbeeld}
+\begin{lstlisting}[style=SELMA]
+foo();
+i := foo('b','a','r');
+\end{lstlisting}
+
+
 \subsection{Closed expression}
 Een expressie tussen haakjes is soms handig, bijvoorbeeld bij sommetjes: (5+2)*6;
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={205-207}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={209-211}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item De geretouneerde waarde zal de waarde van de expressie zijn binnen de haakjes.
@@ -489,7 +541,7 @@ De expressie binnen de haakjes zal worden uitgevoerd binnen de haakjes.
 \subsection{Closed compoundexpression}
 Is een compoundexpressie binnen haakjes. Verschil met de expressie tussen haakjes is dat deze ook toestaat om declaraties te gebruiken. Een compound tussen haakjes zal een eigen scope hebben.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={201-203}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={205-207}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item retouneerd het waarde en de type van de laatste expressie in de compound, dit kan van het type void zijn.
