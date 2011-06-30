@@ -168,7 +168,7 @@ Allereerst is er het programma, dit bestaat uit een (zeer grote) compoundexpress
 
 \subsection{Expression\_statement}
 Dit is een speciale tussenstap voor de interne boekhouding. Na elke semicolumn zal de mogelijk resterende waarde van de stack worden gepopped. Dit maakt dat er niet aan het eind van ons programma een hoop troep op de stack staat. Voorwaarde is wel dat er wordt bijgehouden wanneer een expression van het type void is, dan hoeft er namelijk niet gepopped te worden.
-\lstinputlisting[style=ANTLR,linerange={125-127}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={126-128}]{../g-files/SELMA.g}
 
 \subsection{Declaraties en types}
 SELMA kent twee soorten waarden-declaraties, variabelen en constanten. SELMA staat toe om per declaratie meerdere identifiers te definieren. Bij de declaratie dien je het type van de te declareren waarde mee te geven. En bij een constante dien je uiteraard een waarde mee te geven.
@@ -412,7 +412,7 @@ true;
 \subsection{Identifier}
 Een identifier van een bestaande variabele of constante in de huidige of een hogere scope.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={232-234}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={231-234,245-247}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item De identifier dient te verwijzen naar een geldige variabele of constante
