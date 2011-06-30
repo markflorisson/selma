@@ -231,7 +231,7 @@ expression
    $node.SR_kind=null;
 
    }
-
+/*
 	| ^(node=READ (id=ID
 	   {
 	     if (st.retrieve($id).kind!=SR_Kind.VAR)
@@ -247,21 +247,21 @@ expression
        }
 	     }
 	   )
-
-	| ^(node=PRINT expression+
+*/
+	| ^(node=PRINT expression+)
 	 {
     for (int i=0; i<((SELMATree)node).getChildCount(); i++){
-      if (((SELMATree)node.getChild(i)).SR_type==SR_Type.VOID)
-         throw new SELMAException($node,"Can not be of type void");
+      if (((SELMATree)node.getChild(i)).SR_type == SR_Type.VOID)
+         throw new SELMAException($node, "Can not be of type void");
     }
-       if ($node.getChildCount()==1){
-          $node.SR_type=((SELMATree)node.getChild(0)).SR_type;
-          $node.SR_kind=SR_Kind.VAR;
+       if ($node.getChildCount() == 1){
+          $node.SR_type = ((SELMATree) node.getChild(0)).SR_type;
+          $node.SR_kind = SR_Kind.VAR;
        } else {
-         $node.SR_type=SR_Type.VOID;
-         $node.SR_kind=null;
+         $node.SR_type = SR_Type.VOID;
+         $node.SR_kind = null;
        }
-	 })
+	 }
 
 	| ^(node=BECOMES expression expression)
 	 {
@@ -295,7 +295,7 @@ expression
    $node.SR_kind=SR_Kind.CONST;
    }
 
-	| node=LETTER
+	| node=CHARV
    {
    $node.SR_type=SR_Type.CHAR;
    $node.SR_kind=SR_Kind.CONST;

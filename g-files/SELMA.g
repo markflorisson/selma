@@ -17,7 +17,7 @@ tokens {
 	COMMA		= ',';
 	EQ		= '=';
 	APOSTROPHE	= '\'';
-
+	UNDERSCORE	= '_';
 	//arethemithic
 	NOT		= '!';
 
@@ -73,7 +73,6 @@ tokens {
 	END;
 	COMPOUND;
 	EXPRESSION_STATEMENT;
-
 }
 
 
@@ -189,6 +188,7 @@ expr_read
 
 expr_print
 	: PRINT^ LPAREN! expression (COMMA! expression)* RPAREN!
+		-> ^(PRINT expression+)
 	;
 
 expr_if
@@ -234,8 +234,8 @@ identifier
 	;
 
 CHARV
-	: APOSTROPHE (LETTER|'_') APOSTROPHE
-	;
+  : APOSTROPHE (LETTER|UNDERSCORE) APOSTROPHE
+  ;
 
 BOOLEAN
 	: TRUE
@@ -289,3 +289,4 @@ fragment FALSE
 
 
 //EOF
+
