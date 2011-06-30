@@ -100,35 +100,38 @@ st.enter($funcname, new CheckerEntry(SR_Type.VOID,SR_Kind.VAR,SR_Func.YES));
 }
 					 (param=ID typ1=(INT|BOOL|CHAR)
 {
-//add all params
-switch(typ1.getType()) {
-	case INT:								
-	st.retrieve($funcname).addParam(param,SR_Type.INT);
-	break;
-	case BOOL:								
-	st.retrieve($funcname).addParam(param,SR_Type.BOOL);
-	break;
-	case CHAR:								
-	st.retrieve($funcname).addParam(param,SR_Type.CHAR);
-	break;
+    //add all params
+    switch(typ1.getType()) {
+        case INT:
+            st.retrieve($funcname).addParam(param,SR_Type.INT);
+            break;
+        case BOOL:
+            st.retrieve($funcname).addParam(param,SR_Type.BOOL);
+            break;
+        case CHAR:
+            st.retrieve($funcname).addParam(param,SR_Type.CHAR);
+            break;
 	}
 //	| ^(FUNCDEF funcname=identifier (param=identifier type
 }
 									)* 
 //ERRORERRORERROR expr1 is t type niet van te achterhalen?
-		((typ2=(INT|BOOL|CHAR) compoundexpression fr=FUNCRETURN expr1=expression 
+		((typ2=(INT|BOOL|CHAR) compoundexpression fr=FUNCRETURN expr1=expression
 {
-switch(typ2.getType()) {
-	case INT:								
-	if (((SELMATree)expr1).SR_type!=SR_Type.INT) throw new SELMAException(fr,"Return type is not the same as the defined type");
-	break;
-	case BOOL:								
-	if (((SELMATree)expression).SR_type!=SR_Type.BOOL) throw new SELMAException(fr,"Return type is not the same as the defined type");
-	break;
-	case CHAR:								
-	if (((SELMATree)expression).SR_type!=SR_Type.CHAR) throw new SELMAException(fr,"Return type is not the same as the defined type");
-	break;
-	}
+    SELMATree expr = (SELMATree) typ2.getChild(3);
+    System.err.println(expr1);
+
+    switch(typ2.getType()) {
+        case INT:
+            if (((SELMATree)expr).SR_type!=SR_Type.INT) throw new SELMAException(fr,"Return type is not the same as the defined type");
+            break;
+        case BOOL:
+            if (((SELMATree)expr).SR_type!=SR_Type.BOOL) throw new SELMAException(fr,"Return type is not the same as the defined type");
+            break;
+        case CHAR:
+            if (((SELMATree)expr).SR_type!=SR_Type.CHAR) throw new SELMAException(fr,"Return type is not the same as the defined type");
+            break;
+    }
 }
 								)|
 		(compoundexpression))
