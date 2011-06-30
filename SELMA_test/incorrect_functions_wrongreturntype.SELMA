@@ -1,0 +1,19 @@
+function foo() {
+1;
+};
+
+function foo1(a,b:integer;c:boolean;) {
+1;
+};
+
+function foo2():integer {
+1;
+return true;
+};
+
+function foo3(a,b:integer;c:boolean;):integer {
+1;
+return 5;
+};
+
+6;
