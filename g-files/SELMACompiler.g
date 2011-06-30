@@ -41,29 +41,6 @@ options {
             return "C";
         }
     }
-
-    private void printSingle(SELMATree expr, boolean isExpr, StringBuilder sb) {
-          String typeDenoter = getTypeDenoter(expr.SR_type);
-
-  	  if (isExpr)
-  	  	sb.append("    dup\n");
-
-  	  if (expr.SR_type == SR_Type.BOOL) {
-  	  	int label1 = labelNum++, label2 = labelNum++;
-  	  	sb.append(String.format(
-  	  		"    ifeq L\%s\n"     +
-  	  		"    ldc \"true\"\n"  +
-  	  		"    goto L\%s\n"     +
-  	  		"L\%s\n"              +
-  	  		"    ldc \"false\"\n" +
-  	  		"L\%s\n", label1, label2, label1, label2));
-  	  }
- 
-  	  sb.append(String.format(
-  	  	"    getstatic java/lang/System/out Ljava/io/PrintStream;\n" +
-  	  	"    swap\n" +
-  	  	"    invokevirtual java/io/PrintStream/print(\%s)V\n", getTypeDenoter(expr.SR_type)));
-    }
 }
 
 program
@@ -201,36 +178,36 @@ expression
   	        label_num1={labelNum++}, label_num2={labelNum++},
             line={node.getLine()})
     */
-  | ^(node=PRINT (exprs+=expression)+)
-  	{
+
+    | ^(node=PRINT (exprs+=expression)+)
+    {
         boolean isExpr = $node.SR_type != SR_Type.VOID;
         int childCount = ((SELMATree) node).getChildCount();
-        StringBuilder sb = new StringBuilder();
+        List<Integer> labelNums1 = new ArrayList<Integer>();
+        List<Integer> labelNums2 = new ArrayList<Integer>();
+        List<String> typeDenoters = new ArrayList<String>();
+        List<Boolean> exprIsBool = new ArrayList<Boolean>();
 
-        System.err.println($node.getChild(0));
-        System.err.println($node.getChild(1));
-        System.err.println($node.getChild(2));
-
-        sb.append(String.format(".line \%s\n", $node.getLine()));
-
-        if (isExpr) {
-            // print(e1) - this is an expression
-            printSingle((SELMATree) $node.getChild(0), true, sb);
-        } else {
-            // print(e1, e2, ...) - this is NOT an expression
-
-            // Not an expression, don't reserve space on the stack
-            // for all the results of the expressions
+        if (!isExpr)
             curStackDepth -= childCount;
 
-            for (int i = 0; i < childCount; i++) {
-                printSingle((SELMATree) $node.getChild(i), false, sb);
+        for (int i = 0; i < childCount; i++) {
+            SELMATree child = (SELMATree) $node.getChild(i);
+            boolean isBool = child.SR_type == SR_Type.BOOL;
+            if (isBool) {
+                labelNums1.add(labelNum++);
+                labelNums2.add(labelNum++);
+            } else {
+                labelNums1.add(0);
+                labelNums2.add(0);
             }
+            typeDenoters.add(getTypeDenoter(child.SR_type));
+            exprIsBool.add(isBool);
         }
-
     }
-    -> print(exprs={exprs}, code={sb.toString()})
-
+    -> print(exprs={$exprs}, type_denoters={typeDenoters}, dup_top={isExpr},
+             expr_is_bool={exprIsBool},
+             label_nums1={labelNums1}, label_nums2={labelNums2}, line={$node.getLine()})
 //ASSIGN
   | ^(BECOMES node=ID e1=expression) { boolean isint = ($node.type == NUMBER  ||
                                        $node.type == BOOLEAN ||

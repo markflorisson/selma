@@ -5,6 +5,7 @@ met meerdere
 regels
 */
 print('a', 'b', 'c');
+print(print('a'));
 /*
 var i: integer;									//single var int decaration
 

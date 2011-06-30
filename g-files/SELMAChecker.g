@@ -307,6 +307,7 @@ expression
          $node.SR_kind = null;
        }
 	 }
+     -> ^(PRINT expression)+
 
 	| ^(node=BECOMES expression expression)
 	 {

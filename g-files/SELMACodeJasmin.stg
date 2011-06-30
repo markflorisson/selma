@@ -27,6 +27,10 @@ compound(instructions, line, pop) ::= <<
 <endif>
 >>
 
+expr(expr) ::= <<
+    <expr>
+>>
+
 exprStat(e1, pop, line) ::= <<
 .line <line>
 <e1>
@@ -108,15 +112,20 @@ read(addrs, type_denoters, dup_top, label_num1, label_num2, line) ::= <<
     istore <addr>
 >>
 
-print(exprs, code) ::= <<
-<exprs>
-<code>
+print(exprs, type_denoters, dup_top, expr_is_bool, label_nums1, label_nums2, line) ::= <<
+.line <line>
+<exprs, type_denoters, expr_is_bool,
+ label_nums1, label_nums2 : { e, t, b, L1, L2 | < printSingle(expr=e,
+                                                              type_denoter=t,
+                                                              dup_top=dup_top,
+                                                              is_bool=b,
+                                                              label_num1=L1,
+                                                              label_num2=L2) > }>
 >>
 
-/*
-printSingle(expr, type_denoter, dup_top, is_bool, label_num1, label_num2, line) ::= <<
+
+printSingle(expr, type_denoter, dup_top, is_bool, label_num1, label_num2) ::= <<
 <expr>
-.line <line>
 <if (dup_top)>
     dup
 <endif>
@@ -133,7 +142,8 @@ L<label_num2>:
     getstatic java/lang/System/out Ljava/io/PrintStream;
     swap
     invokevirtual java/io/PrintStream/print(<type_denoter>)V
->>    */
+
+>>
 
 //conditionals
 if (ec1, ec2, ec3, label_num1, label_num2, ec3_not_empty, is_void) ::= <<
