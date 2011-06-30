@@ -1,0 +1,5 @@
+function foo(a:boolean;){
+6;
+};
+
+@foo(1,);

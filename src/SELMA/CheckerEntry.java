@@ -3,15 +3,22 @@ package SELMA;
 import SELMA.SELMATree.SR_Kind;
 import SELMA.SELMATree.SR_Type;
 import SELMA.SELMATree.SR_Func;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.ArrayList; 
 import org.antlr.runtime.tree.Tree;
 
 public class CheckerEntry extends IdEntry {
+    
+class Param {
+String name; SR_Type type;
+Param (String name, SR_Type type){
+this.name=name;this.type=type;
+}
+}
+
     public SR_Type type;
     public SR_Kind kind;
     public SR_Func func;
-    public Map<String,SR_Type> params;
+    public ArrayList<Param> params;
 
 
 	public CheckerEntry(SR_Type type, SR_Kind kind) {
@@ -25,11 +32,11 @@ public class CheckerEntry extends IdEntry {
     	this.type=type;
     	this.kind=kind;
 	this.func=func;
-	params=new HashMap<String,SR_Type>();
+	params=new ArrayList<Param>();
 	}
 	public void addParam(Tree id, SR_Type type) {
 	    	String name = id.getText();
-		params.put(name,type);
+		params.add(new Param(name,type));
 	}
 	public String toString() {
 		String s = "";

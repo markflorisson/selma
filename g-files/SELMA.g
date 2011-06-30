@@ -219,7 +219,7 @@ expr_while
 	;
 
 expr_funccall
-	: FUNCTION identifier LPAREN! (expression COMMA!)* RPAREN!
+	: FUNCTION^ identifier LPAREN! (expression COMMA!)* RPAREN!
 	;
 
 expr_closedcompound

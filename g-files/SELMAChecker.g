@@ -118,6 +118,10 @@ st.enter($funcname, new CheckerEntry(SR_Type.VOID,SR_Kind.VAR,SR_Func.YES));
 {
 int type 	= node.getChild(0).getType();
 SELMATree expr 	= (SELMATree)node.getChild(2);
+
+//set type
+st.retrieve($funcname).type=expr.SR_type;
+
 switch(type){
 case INT:
 	if (expr.SR_type!=SR_Type.INT) throw new SELMAException(node,"Return type is not the same as the defined type");
@@ -306,6 +310,27 @@ expression
          $node.SR_kind = null;
        }
 	 }
+
+	| ^(node=FUNCTION ID expression*)
+{
+//retrieve function (if existent)
+SELMATree func = (SELMATree)$node;
+CheckerEntry entry = st.retrieve($ID);
+$node.SR_type=entry.type;
+$node.SR_kind=entry.kind;
+
+//matchparamlists
+//same length?
+if (entry.params.size() != func.getChildCount()-1)
+	throw new SELMAException(node,"Paramcount is not as big defined in the function");
+//every entry matches?
+for (int i=1; i<func.getChildCount(); i++){
+SELMATree expr = (SELMATree)func.getChild(i);
+if (expr.SR_type != entry.params.get(i-1).type)
+	throw new SELMAException(expr,"Param is not of the right type");
+}
+}
+
 
 	| ^(node=BECOMES expression expression)
 	 {
