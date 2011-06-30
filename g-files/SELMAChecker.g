@@ -92,11 +92,10 @@ declaration
      break;
 	 }
 	 }
-	| ^(FUNCDEF funcname=ID 
+	| ^(FUNCDEF funcname=ID
 {
 //enter as void
 st.enter($funcname, new CheckerEntry(SR_Type.VOID,SR_Kind.VAR,SR_Func.YES));
-//	| ^(FUNCDEF funcname=identifier 
 }
 					 (param=ID typ1=(INT|BOOL|CHAR)
 {
@@ -112,30 +111,30 @@ st.enter($funcname, new CheckerEntry(SR_Type.VOID,SR_Kind.VAR,SR_Func.YES));
             st.retrieve($funcname).addParam(param,SR_Type.CHAR);
             break;
 	}
-//	| ^(FUNCDEF funcname=identifier (param=identifier type
 }
-									)* 
-//ERRORERRORERROR expr1 is t type niet van te achterhalen?
-		((typ2=(INT|BOOL|CHAR) compoundexpression fr=FUNCRETURN expr1=expression
+		)*
+		(
+			^(node=FUNCRETURN type compoundexpression expression
 {
-    SELMATree expr = (SELMATree) typ2.getChild(3);
-    System.err.println(expr1);
-
-    switch(typ2.getType()) {
-        case INT:
-            if (((SELMATree)expr).SR_type!=SR_Type.INT) throw new SELMAException(fr,"Return type is not the same as the defined type");
-            break;
-        case BOOL:
-            if (((SELMATree)expr).SR_type!=SR_Type.BOOL) throw new SELMAException(fr,"Return type is not the same as the defined type");
-            break;
-        case CHAR:
-            if (((SELMATree)expr).SR_type!=SR_Type.CHAR) throw new SELMAException(fr,"Return type is not the same as the defined type");
-            break;
-    }
+int type 	= node.getChild(0).getType();
+SELMATree expr 	= (SELMATree)node.getChild(2);
+switch(type){
+case INT:
+	if (expr.SR_type!=SR_Type.INT) throw new SELMAException(node,"Return type is not the same as the defined type");
+	break;
+case BOOL:
+	if (expr.SR_type!=SR_Type.BOOL) throw new SELMAException(node,"Return type is not the same as the defined type");
+	break;
+case CHAR:
+	if (expr.SR_type!=SR_Type.CHAR) throw new SELMAException(node,"Return type is not the same as the defined type");
+	break;
 }
-								)|
-		(compoundexpression))
+}			
+			)
+			|
+			(compoundexpression))
 		)
+
 	;
 
 type

@@ -85,7 +85,17 @@ tokens {
 
 
 
-// Parser rules - program at line 90 due to the report
+
+
+
+
+
+
+
+
+
+
+// Parser rules - program at line 100 due to the report
 
 program
 	: compoundexpression EOF
@@ -119,9 +129,19 @@ type
 	;
 
 funcbody
-	: COLON! type LCURLY! compoundexpression FUNCRETURN expression SEMICOLON! RCURLY!
+	: COLON type LCURLY compoundexpression FUNCRETURN expression SEMICOLON RCURLY -> ^(FUNCRETURN type compoundexpression expression)
 	| LCURLY! compoundexpression RCURLY!
 	;
+
+
+
+
+
+
+
+
+
+//expression statement at line 146
 
 expression_statement
 	: expression -> ^(EXPRESSION_STATEMENT expression)
@@ -199,7 +219,7 @@ expr_while
 	;
 
 expr_funccall
-	: FUNCTION identifier LPAREN! (expression SEMICOLON!)* RPAREN!
+	: FUNCTION identifier LPAREN! (expression COMMA!)* RPAREN!
 	;
 
 expr_closedcompound
@@ -210,6 +230,16 @@ expr_closed
 	: LPAREN! expression RPAREN!
 	;
 
+
+
+
+
+
+
+
+
+
+//unsigned at line 244
 
 unsignedConstant
 	: boolval
