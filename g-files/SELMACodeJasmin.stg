@@ -72,7 +72,7 @@ declareVar(id,type,addr)::=<<
 
 //Load
 
-loadNum(val, num, iconst, bipush)::=<<
+loadNum(val, iconst, bipush) ::= <<
 <if (iconst)>
     iconst_<val>
 <elseif (bipush)>
@@ -87,11 +87,16 @@ loadVal(id, addr)::=<<
     iload <addr>                ; load <id> from <addr>
 >>
 
+loadChar(val, char, line) ::= <<
+.line <line>
+    bipush <val>                ; ldc <char>
+>>
+
 //Assign
-assign(id, type, addr, e1, isint)::=<<
+assign(id, type, addr, e1, isint) ::= <<
 <e1>                            ; e1 right hand for assignment
     dup
-    istore <addr>               ; assign e1 to <id>: <type> @ <addr>
+    istore <addr>
 >>
 
 read(addrs, type_denoters, dup_top, label_num1, label_num2, line) ::= <<
@@ -103,8 +108,14 @@ read(addrs, type_denoters, dup_top, label_num1, label_num2, line) ::= <<
     istore <addr>
 >>
 
-print(exprs, type_denoter, dup_top, is_bool, label_num1, label_num2, line) ::= <<
+print(exprs, code) ::= <<
 <exprs>
+<code>
+>>
+
+/*
+printSingle(expr, type_denoter, dup_top, is_bool, label_num1, label_num2, line) ::= <<
+<expr>
 .line <line>
 <if (dup_top)>
     dup
@@ -122,7 +133,7 @@ L<label_num2>:
     getstatic java/lang/System/out Ljava/io/PrintStream;
     swap
     invokevirtual java/io/PrintStream/print(<type_denoter>)V
->>
+>>    */
 
 //conditionals
 if (ec1, ec2, ec3, label_num1, label_num2, ec3_not_empty, is_void) ::= <<

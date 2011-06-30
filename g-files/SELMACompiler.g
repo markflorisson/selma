@@ -41,6 +41,29 @@ options {
             return "C";
         }
     }
+
+    private void printSingle(SELMATree expr, boolean isExpr, StringBuilder sb) {
+          String typeDenoter = getTypeDenoter(expr.SR_type);
+
+  	  if (isExpr)
+  	  	sb.append("    dup\n");
+
+  	  if (expr.SR_type == SR_Type.BOOL) {
+  	  	int label1 = labelNum++, label2 = labelNum++;
+  	  	sb.append(String.format(
+  	  		"    ifeq L\%s\n"     +
+  	  		"    ldc \"true\"\n"  +
+  	  		"    goto L\%s\n"     +
+  	  		"L\%s\n"              +
+  	  		"    ldc \"false\"\n" +
+  	  		"L\%s\n", label1, label2, label1, label2));
+  	  }
+ 
+  	  sb.append(String.format(
+  	  	"    getstatic java/lang/System/out Ljava/io/PrintStream;\n" +
+  	  	"    swap\n" +
+  	  	"    invokevirtual java/io/PrintStream/print(\%s)V\n", getTypeDenoter(expr.SR_type)));
+    }
 }
 
 program
@@ -151,7 +174,7 @@ expression
 
 //CONDITIONAL
   | ^(node=IF ec1=compoundexpression THEN ec2=compoundexpression (ELSE ec3=compoundexpression)?)
-  	{ boolean ec3NotEmpty = $ec3.st != null; 
+  	{ boolean ec3NotEmpty = $ec3.st != null;
   	  SELMATree expr2 = (SELMATree) node.getChild(2);
   	  SELMATree expr3 = null;
   	  if (ec3NotEmpty)
@@ -161,7 +184,7 @@ expression
   	label_num2={ec3NotEmpty ? labelNum++ : 0}, ec3_not_empty={ec3NotEmpty},
   	is_void={!ec3NotEmpty || expr2.SR_type != expr3.SR_type || expr2.SR_type == SR_Type.VOID})
 
-  | ^(node=WHILE ec1=compoundexpression DO ec2=compoundexpression OD) 
+  | ^(node=WHILE ec1=compoundexpression DO ec2=compoundexpression OD)
   { curStackDepth--; SELMATree expr2 = (SELMATree) node.getChild(2); }
   -> while(ec1={$ec1.st}, ec2={$ec2.st}, pop={expr2.SR_type != SR_Type.VOID}, label_num1={labelNum++}, label_num2={labelNum++})
 
@@ -178,40 +201,61 @@ expression
   	        label_num1={labelNum++}, label_num2={labelNum++},
             line={node.getLine()})
     */
-  | ^(node=PRINT exprs=expression+)
-  	{ boolean isExpr = $node.SR_type != SR_Type.VOID;
-  	  String typeDenoter = getTypeDenoter($node.SR_type);
-  	  boolean isBool = $node.SR_type == SR_Type.BOOL;
-      if (!isExpr)
-          curStackDepth -= $node.getChildCount();
-  	}
-  	-> print(exprs={$exprs.st}, type_denoter={typeDenoter}, dup_top={isExpr},
-  	         is_bool={isBool}, label_num1={labelNum++}, label_num2={labelNum++},
-  	         line={node.getLine()})
+  | ^(node=PRINT (exprs+=expression)+)
+  	{
+        boolean isExpr = $node.SR_type != SR_Type.VOID;
+        int childCount = ((SELMATree) node).getChildCount();
+        StringBuilder sb = new StringBuilder();
+
+        System.err.println($node.getChild(0));
+        System.err.println($node.getChild(1));
+        System.err.println($node.getChild(2));
+
+        sb.append(String.format(".line \%s\n", $node.getLine()));
+
+        if (isExpr) {
+            // print(e1) - this is an expression
+            printSingle((SELMATree) $node.getChild(0), true, sb);
+        } else {
+            // print(e1, e2, ...) - this is NOT an expression
+
+            // Not an expression, don't reserve space on the stack
+            // for all the results of the expressions
+            curStackDepth -= childCount;
+
+            for (int i = 0; i < childCount; i++) {
+                printSingle((SELMATree) $node.getChild(i), false, sb);
+            }
+        }
+
+    }
+    -> print(exprs={exprs}, code={sb.toString()})
 
 //ASSIGN
-//  | ^(BECOMES expression expression)
   | ^(BECOMES node=ID e1=expression) { boolean isint = ($node.type == NUMBER  ||
-  							$node.type == BOOLEAN ||
-  							$node.type == LETTER); }
+                                       $node.type == BOOLEAN ||
+                                       $node.type == LETTER); }
   	-> assign(id={$node.text},
-  		  type={$node.type},
-  		  addr={st.retrieve($node).addr},
-  		  e1={$e1.st},
-  		  isint={isint})
+      		  type={$node.type},
+  	    	  addr={st.retrieve($node).addr},
+  		      e1={$e1.st},
+  		      isint={isint})
 
 //closedcompound
   | LCURLY {st.openScope();} compoundexpression {st.closeScope();} RCURLY
 
 //VALUES
-  | node=NUMBER { incrStackDepth(); int num = Integer.parseInt($node.text); }
+  | node=NUMBER { incrStackDepth();
+                  int num = Integer.parseInt($node.text); }
     -> loadNum(val={$node.text}, iconst={num >= -1 && num <= 5}, bipush={num >= -128 && num <= 127})
 
   | node=BOOLEAN { incrStackDepth(); }
-    -> loadNum(val={($node.text.equals("true")) ? 1 : 0}, iconst={TRUE})
+    -> loadNum(val={($node.text.equals("true")) ? 1 : 0}, iconst={true})
 
-  | node=LETTER { incrStackDepth(); }
-    -> loadNum(val={Character.getNumericValue($node.text.charAt(1))}, iconst={FALSE}, bipush={TRUE})
+  | node=CHARV { incrStackDepth();
+                 char c = $node.text.charAt(1); }
+    //-> loadNum(val={(int) c}, iconst={false}, bipush={true})
+    -> loadChar(val={(int) c}, char={$node.text}, line={$node.getLine()})
 
   | node=ID { incrStackDepth(); }
     -> loadVal(id={$node.text}, addr={st.retrieve($node).addr})
