@@ -17,6 +17,10 @@ run: build
 	$(JAVA) -jar jasmin.jar -g $(PROGRAM).jasmin
 	$(JAVA) -classpath . Main
 
+astNC: build
+	$(JAVA) SELMA.SELMA -no_checker -ast $(PROGRAM).SELMA 
+
+
 runonly:
 	$(JAVA) SELMA.SELMA -code_generator $(PROGRAM).SELMA > $(PROGRAM).jasmin
 	$(JAVA) -jar jasmin.jar -g $(PROGRAM).jasmin

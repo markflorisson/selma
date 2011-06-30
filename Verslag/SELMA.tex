@@ -164,16 +164,16 @@ BECOMES		':=';
 \subsection{De basis - Programma}
 De basis van het programma geeft een aantal restricties op aan de taal.
 Allereerst is er het programma, dit bestaat uit een (zeer grote) compoundexpression waarna het programma stopt (End Of File). Deze wordt hier herschreven. Een compoundexpression is uiteindelijk opgebouwd uit een serie declaraties en statements, gescheiden door een semicolon. Hier is te zien dat het programma uit minimaal 1 expressie bestaat, dat declaraties en expressies door elkaar gebruikt mogen worden en dat het laatste statement in een programma altijd een expressie is.
-\lstinputlisting[style=ANTLR,linerange={90-101}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={100-111}]{../g-files/SELMA.g}
 
 \subsection{Expression\_statement}
 Dit is een speciale tussenstap voor de interne boekhouding. Na elke semicolumn zal de mogelijk resterende waarde van de stack worden gepopped. Dit maakt dat er niet aan het eind van ons programma een hoop troep op de stack staat. Voorwaarde is wel dat er wordt bijgehouden wanneer een expression van het type void is, dan hoeft er namelijk niet gepopped te worden.
-\lstinputlisting[style=ANTLR,linerange={126-128}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={146-148}]{../g-files/SELMA.g}
 
 \subsection{Declaraties en types}
 SELMA kent twee soorten waarden-declaraties, variabelen en constanten. SELMA staat toe om per declaratie meerdere identifiers te definieren. Bij de declaratie dien je het type van de te declareren waarde mee te geven. En bij een constante dien je uiteraard een waarde mee te geven.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={105-119}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={115-129}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item Het gegeven type dient bij de constante overeen te komen met het type van de gegeven waarde.
@@ -191,7 +191,7 @@ const b,t: boolean = true;
 \subsection{Functiedeclaratie}
 SELMA kent ook nog een functie declaratie. Deze valt logischerwijs ook onder de declaraties. De declaratie van een functie dient altijd voor het gebruik te komen. Een functie kan als een soort procedure worden gebruikt door geen return-type op te geven. Het return-type wordt dan automatisch void. Dit hebben we express gedaan, we willen het namelijk altijd een functie noemen, aangezien procedures niet echt een plek hebben binnen een expressietaal.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={112-112,121-124}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={122-122,131-134}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item De naam van de functie moet uniek zijn als functienaam, er mag wel een variabele of constante bestaan met die naam.
@@ -223,7 +223,7 @@ function foo(awesome,less:boolean;bar:integer;): integer {
 De expressies zijn ingedeeld in verschillende niveaus, dit om te zorgen dat ze in de juiste volgorde worden uitgevoerd. Zo willen we dat 6+3*12 niet 108 is maar 42, niet alleen om dat 42 een mooier getal is, maar voornamelijk omdat het fijn is als de taal voldoet aan de conventionele rekenregels. \\
 Het hoogste niveau is de assignment.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={131-137}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={151-157}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item expr\_arithmetic moet een identifier worden, in het eind, aangezien dat het enige is waaraan je een waarde kunt toekennen
@@ -247,7 +247,7 @@ De Of-operator is de laagste operator in het rijtje, vandaar dat deze bovenin de
 \\
 NB: expr\_al1 staat voor "expression arithmetic level 1"
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={139-145}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={159-165}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item Als expr\_al1 enkel uit 1 expr\_al2 bestaat dan zijn er geen restricties
@@ -269,7 +269,7 @@ true OR false OR foo;
 Hier wordt de AND-expressie beschreven. Net zoals bij de OR-expressie is het mogelijk nul tot veel AND-operatoren achter elkaar te plakken. De AND-expressie is een niveau hoger dan de OR-expressie en zal dus eerder worden uitgevoerd. \\
 Het is eventueel mogelijk later in de compiler om een AND eerder af te breken aangezien als er een false in het rijtje zit het resultaat altijd false is. Wij hebben deze optimalisatie er nog niet inzitten, dit omdat sommige expressies ongeacht de eerdere expressies uitgevoerd dienen te worden, denk bijvoorbeeld aan een READ()-statement dat anders niet uitgevoerd zou worden.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={147-149}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={167-169}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item Als expr\_al2 enkel uit 1 expr\_al3 bestaat dan zijn er geen restricties
@@ -290,7 +290,7 @@ foo AND false AND bar;
 Hier worden bijna alle comperatoren afgehandeld. Het is belangrijk dat er in de checker goed wordt gekeken of de types van de linker en rechterzijde compatible zijn.
 \subsubsection{Syntax}
 %		: expr_al4 ((RELS|RELSE|RELG|RELGE|RELE|RELNE)^ expr_al4)*
-\lstinputlisting[style=ANTLR,linerange={151-153}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={171-173}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item alle expr\_al4 dienen van hetzelfde type te zijn
@@ -310,7 +310,7 @@ true == false;
 \subsection{Expressies - plus en minus}
 Hier zijn we aangeland bij de eerder genoemde 6+3*12, plus en minus zit 1 niveau lager dan de vermenigvuldigingen.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={155-157}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={175-177}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item als er minimaal 1 operatie wordt uitgevoerd dan dient expr\_al5 een integer te zijn
@@ -330,7 +330,7 @@ foo := 5 + 37;
 Naast delen en vermenigvuldigen is het ook mogelijk een modulus te nemen.
 Wat wellicht is opgevallen bij het bovenstaande, is dat het mogelijk is om enkel een som in de code te zetten. Dit vinden wij prima, echter moet daarbij wel de resulterende waarde gepopped worden als die niet meer gebruikt wordt.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={159-161}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={179-181}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item als er minimaal 1 operatie wordt uitgevoerd dan dient expr\_al6 een integer te zijn
@@ -352,7 +352,7 @@ Hier wordt gekeken of de expressie eventueel een NOT-, PLUS- of MIN-operator voo
 Om later verwarring te voorkomen zullen PLUS en MIN vervangen worden door speciale terminals, zijnde UMIN en UPLUS. UPLUS zou eventueel weg kunnen worden gelaten aangezien +x==x.
 Als er geen operator voor de expressie staat dan is expr\_al6 gewoon een expr\_al7
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={163-171}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={183-191}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item expr\_al7 dient bij PLUS expr\_al7 een integer te zijn
@@ -375,7 +375,7 @@ foo := not foobar;
 Op het hoogste nivau kan een expressie bestaan uit een semi-statement zoals een if-expressie of een print-expressie, of het kan een identifier of waarde zijn, of het kan een aparte (compound)expressie binnen haken zijn.
 Zoals je ziet stond in eerste de assignment hier. Maar aangezien het meest linkerdeel van een assignment een identiefier is kan op L=1 geen onderscheid worden gemaakt tussen identifier of een assignment. Vandaar dat een assignment bij expr\_al1 is gedefineerd.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={173-184}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={193-204}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item expr\_al7 is van hetzelfde type als de gegeven expressie of waarde.
@@ -392,7 +392,7 @@ foo;
 \subsection{Unsigned constants}
 Uiteraard bied onze taal ook de mogelijkheid aan om constanten te gebruiken zonder deze eerst te moeten declareren. Oftewel, je kunt gewoon nummers gebruiken bijvoorbeeld.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={214-230,236-238}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={244-260,266-268}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item unsignedconstant is van het type van de gegeven waarde
@@ -412,7 +412,7 @@ true;
 \subsection{Identifier}
 Een identifier van een bestaande variabele of constante in de huidige of een hogere scope.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={231-234,245-247}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={261-264,275-277}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item De identifier dient te verwijzen naar een geldige variabele of constante
@@ -428,7 +428,7 @@ Answer42;
 \subsection{Read}
 Om contact te hebben met de buitenwereld kan onze taal lezen en schrijven naar de standard-out. 
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={185-187}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={205-207}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item Identifier dient te verwijzen naar een geldige identifier
@@ -447,7 +447,7 @@ read(foo,bar);
 \subsection{Print}
 De taal heeft ook de mogelijkheid om dat wat er bijvoorbeeld berekend is naar buiten te communiceren.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={189-192}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={209-202}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item -
@@ -463,7 +463,7 @@ print('4','2');
 \subsection{If}
 Om keuzes in het programma mogelijk te maken zal er een conditioneel statement nodig zijn, het IF-statement is een dergelijk statement. Een ELSE-deel is optioneel.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={193-195}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={213-215}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item De eerste compoundexpression moet een boolean-type retouneren
@@ -481,7 +481,7 @@ if false; then i := 0; else i:=42; fi
 \subsection{While}
 De while zal net zolang een blok code uitvoeren tot een gegeven expressie waar is.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={197-199}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={217-219}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item De eerste compoundexpression moet een boolean-type retouneren
@@ -504,7 +504,7 @@ od
 \subsection{Functieaanroep}
 Een functieaanroep naar een eerder gedefineerde functie
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={201-203}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={221-223}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item Het aantal expressies en hun type dient overeen te komen met de declaratie van de functie
@@ -518,14 +518,14 @@ De functie returned en het result staat op de stack.
 \subsubsection{Voorbeeld}
 \begin{lstlisting}[style=SELMA]
 foo();
-i := foo('b','a','r');
+i := foo('b','a','r',);
 \end{lstlisting}
 
 
 \subsection{Closed expression}
 Een expressie tussen haakjes is soms handig, bijvoorbeeld bij sommetjes: (5+2)*6;
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={209-211}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={229-231}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item De geretouneerde waarde zal de waarde van de expressie zijn binnen de haakjes.
@@ -541,7 +541,7 @@ De expressie binnen de haakjes zal worden uitgevoerd binnen de haakjes.
 \subsection{Closed compoundexpression}
 Is een compoundexpressie binnen haakjes. Verschil met de expressie tussen haakjes is dat deze ook toestaat om declaraties te gebruiken. Een compound tussen haakjes zal een eigen scope hebben.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={205-207}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={225-227}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item retouneerd het waarde en de type van de laatste expressie in de compound, dit kan van het type void zijn.
