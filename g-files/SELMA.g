@@ -75,7 +75,6 @@ tokens {
 	EXPRESSION_STATEMENT;
 }
 
-
 @header {
   package SELMA;
 }
@@ -83,6 +82,8 @@ tokens {
 @lexer::header {
   package SELMA;
 }
+
+
 
 // Parser rules - program at line 90 due to the report
 
@@ -181,7 +182,6 @@ expr_arithmetic
 		| expr_closed
 		| expr_funccall
 		;
-
 expr_read
 	: READ^ LPAREN! identifier (COMMA! identifier)* RPAREN!
 	;
@@ -190,7 +190,6 @@ expr_print
 	: PRINT^ LPAREN! expression (COMMA! expression)* RPAREN!
 		-> ^(PRINT expression+)
 	;
-
 expr_if
 	: IF^ compoundexpression THEN compoundexpression (ELSE compoundexpression)? FI!
 	;
@@ -210,6 +209,7 @@ expr_closedcompound
 expr_closed
 	: LPAREN! expression RPAREN!
 	;
+
 
 unsignedConstant
 	: boolval
