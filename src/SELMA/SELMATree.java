@@ -25,9 +25,12 @@ public class SELMATree extends CommonTree {
 
 	public enum SR_Type {INT,BOOL,CHAR,VOID};
 	public enum SR_Kind {VAR, CONST};
+	public enum SR_Func {YES, NO};
 
 	public SR_Type SR_type = null;
 	public SR_Kind SR_kind = null;
+	public SR_Func SR_func = null;
+
 
 	public String toStringTree() {
 		return toStringTree(1);
@@ -98,6 +101,20 @@ public class SELMATree extends CommonTree {
 					break;
 				case CONST:
 					s+="const";
+					break;
+			}
+
+		s+=",";
+
+		if (SR_func == null)
+			s+="NULL";
+		else
+			switch (SR_func){
+				case NO:
+					s+="no_func";
+					break;
+				case YES:
+					s+="function";
 					break;
 			}
 

@@ -109,9 +109,9 @@ declaration
 		-> ^(VAR type identifier)+
 	| CONST identifier (COMMA identifier)* COLON type EQ unsignedConstant
 		-> ^(CONST type unsignedConstant identifier)+
-	| FUNCDEF^ identifier LPAREN! (identifier (COMMA! identifier)* COLUMN! type SEMICOLUMN!)* RPAREN! funcbody;
+	| FUNCDEF^ identifier LPAREN! (funcpars SEMICOLON!)* RPAREN! funcbody
 	;
-
+funcpars : identifier (COMMA identifier)* COLON type -> (identifier type)+;
 type
 	: INT
 	| BOOL
@@ -119,7 +119,7 @@ type
 	;
 
 funcbody
-	: COLUMN! type LCURLY! compoundexpression FUNCRETURN expression SEMICOLUMN! RCURLY!
+	: COLON! type LCURLY! compoundexpression FUNCRETURN expression SEMICOLON! RCURLY!
 	| LCURLY! compoundexpression RCURLY!
 	;
 
@@ -187,7 +187,7 @@ expr_read
 	;
 
 expr_print
-	: PRINT^ LPAREN! expression (COMMA! expression)* RPAREN!
+	: PRINT LPAREN expression (COMMA expression)* RPAREN
 		-> ^(PRINT expression+)
 	;
 expr_if
@@ -198,8 +198,9 @@ expr_while
 	: WHILE^ compoundexpression DO compoundexpression OD
 	;
 
-funccall
-	: FUNCTION^ identifier LPAREN! (identifier SEMICOLUMN!)* RPAREN!
+expr_funccall
+//	: FUNCTION^ identifier LPAREN! (identifier SEMICOLON!)* RPAREN!
+	: FUNCTION identifier LPAREN! (expression SEMICOLON!)* RPAREN!
 	;
 
 expr_closedcompound
