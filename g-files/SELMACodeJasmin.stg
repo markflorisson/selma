@@ -4,11 +4,24 @@ group SELMA;
 
 program(instructions, source_file, stack_limit, locals_limit, pop) ::= <<
 .source <source_file>
-.class  public Main
-.super  java/lang/Object
+.class public Main
+.super java/lang/Object
+.field public static scanner_field Ljava/util/Scanner;
+
+.method public \<init\>()V
+    aload_0
+    invokespecial java/lang/Object/\<init\>()V
+    return
+.end method
+
 .method public static main([Ljava/lang/String;)V
 .limit stack <stack_limit>
 .limit locals <locals_limit>
+    new java/util/Scanner
+    dup                                       ; dup for \<init\>
+    getstatic java/lang/System/in Ljava/io/InputStream;
+    invokespecial java/util/Scanner/\<init\>(Ljava/io/InputStream;)V
+    putstatic Main/scanner_field Ljava/util/Scanner;
 .line 1
 <instructions>
 <if (pop)>
@@ -103,13 +116,50 @@ assign(id, type, addr, e1, isint) ::= <<
     istore <addr>
 >>
 
-read(addrs, type_denoters, dup_top, label_num1, label_num2, line) ::= <<
-    read here                   ; reading <id>
+read(addrs, dup_top, is_bool, is_int, line) ::= <<
+.line <line>
+<addrs, is_bool, is_int : { a, b, i | <readSingle(addr=a,
+                                                  is_bool=b,
+                                                  is_int=i,
+                                                  dup_top=dup_top) > }>
+
+>>
+
+readSingle(addr, is_bool, is_int, dup_top) ::= <<
+
+<if (is_bool)>
+<readBool()>
+<elseif (is_int)>
+<readInt()>
+<else>
+<readChar()>
+<endif>
+
 <if (dup_top)>
     dup
 
 <endif>
     istore <addr>
+>>
+
+readChar() ::= <<
+    ; getstatic java/lang/System/in Ljava/io/InputStream;
+    ; invokevirtual java/io/InputStream/read()I
+    getstatic Main/scanner_field Ljava/util/Scanner;
+    invokevirtual java/util/Scanner/nextByte()I
+
+>>
+
+readBool() ::= <<
+    getstatic Main/scanner_field Ljava/util/Scanner;
+    invokevirtual java/util/Scanner/nextBoolean()Z
+
+>>
+
+readInt() ::= <<
+    getstatic Main/scanner_field Ljava/util/Scanner;
+    invokevirtual java/util/Scanner/nextInt()I
+
 >>
 
 print(exprs, type_denoters, dup_top, expr_is_bool, label_nums1, label_nums2, line) ::= <<

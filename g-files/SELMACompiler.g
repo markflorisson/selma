@@ -166,18 +166,25 @@ expression
   -> while(ec1={$ec1.st}, ec2={$ec2.st}, pop={expr2.SR_type != SR_Type.VOID}, label_num1={labelNum++}, label_num2={labelNum++})
 
 //IO
-  | ^(node=READ (ids=ID)+)
-    /*
+
+  | ^(node=READ ID+)
    	{ boolean isExpr = $node.SR_type != SR_Type.VOID;
-  	  String typeDenoter = getTypeDenoter($node.SR_type);
-  	  boolean isBool = $node.SR_type == SR_Type.BOOL;
+      List<Integer> addrs = new ArrayList<Integer>();
+      List<Boolean> isBool = new ArrayList<Boolean>();
+      List<Boolean> isInt = new ArrayList<Boolean>();
+
+      for (int i = 0; i < $node.getChildCount(); i++) {
+           SELMATree child = (SELMATree) $node.getChild(i);
+
+           addrs.add(st.retrieve($node.getChild(i)).addr);
+           isBool.add(child.SR_type == SR_Type.BOOL);
+           isInt.add(child.SR_type == SR_Type.INT);
+      }
       if (!isExpr)
-          curStackDepth -= $node.getChildrenCount();
+          curStackDepth -= $node.getChildCount();
   	}
-  	-> read(ids={$ids.st}, type_denoter={typeDenoter}, dup_top={isExpr},
-  	        label_num1={labelNum++}, label_num2={labelNum++},
+  	-> read(addrs={addrs}, dup_top={isExpr}, is_bool={isBool}, is_int={isInt},
             line={node.getLine()})
-    */
 
     | ^(node=PRINT (exprs+=expression)+)
     {

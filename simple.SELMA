@@ -1,9 +1,5 @@
-
-var i: integer;
-i := 2;
-function foo(a:boolean;v,f:integer;){
-    print(6);
-    print(i);
-};
-
-@foo(true,1+9,4,);
+var i : integer;
+var j : boolean;
+var x : character;
+read(i, j, x);
+print(i + 5, 'a', i, j, x);

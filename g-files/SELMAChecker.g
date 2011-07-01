@@ -133,7 +133,7 @@ case CHAR:
 	if (expr.SR_type!=SR_Type.CHAR) throw new SELMAException(node,"Return type is not the same as the defined type");
 	break;
 }
-}			
+}
 			)
 			|
 			(compoundexpression))
@@ -159,14 +159,18 @@ expression
    SELMATree e1 = (SELMATree)node.getChild(0);
    SELMATree e2 = (SELMATree)node.getChild(1);
 
-   if (e1.SR_type!=SR_Type.INT || e2.SR_type!=SR_Type.INT)
-    throw new SELMAException($node,"Wrong type must be int");
-   $node.SR_type=SR_Type.INT;
+   if (e1.SR_type != SR_Type.INT || e2.SR_type != SR_Type.INT) {
+    throw new SELMAException(
+    	$node,
+    	String.format("Wrong types must be int (found \%s and \%s)", e1.SR_type, e2.SR_type));
+   }
 
-   if (e1.SR_kind==SR_Kind.CONST && e2.SR_kind==SR_Kind.CONST)
-    $node.SR_kind=SR_Kind.CONST;
+   $node.SR_type = SR_Type.INT;
+
+   if (e1.SR_kind == SR_Kind.CONST && e2.SR_kind == SR_Kind.CONST)
+    $node.SR_kind = SR_Kind.CONST;
    else
-    $node.SR_kind=SR_Kind.VAR;
+    $node.SR_kind = SR_Kind.VAR;
    }
 
 	| ^(node=(RELS|RELSE|RELG|RELGE) expression expression)
@@ -279,23 +283,23 @@ expression
    $node.SR_kind=null;
 
    }
-/*
+
 	| ^(node=READ (id=ID
-	   {
-	     if (st.retrieve($id).kind!=SR_Kind.VAR)
-	       throw new SELMAException($id,"Must be a variable");
-	   })+
-	     {
-	       if ($node.getChildCount()==1){
-	        $node.SR_type=((SELMATree)node.getChild(0)).SR_type;
-          $node.SR_kind=SR_Kind.VAR;
-       } else {
-         $node.SR_type=SR_Type.VOID;
-         $node.SR_kind=null;
-       }
-	     }
+        {
+            if (st.retrieve($id).kind!=SR_Kind.VAR)
+                throw new SELMAException($id,"Must be a variable");
+        })+
+        {
+            if ($node.getChildCount() == 1) {
+                $node.SR_type = st.retrieve(node.getChild(0)).type;
+                $node.SR_kind = SR_Kind.VAR;
+            } else {
+                $node.SR_type = SR_Type.VOID;
+                $node.SR_kind = null;
+            }
+        }
 	   )
-*/
+
 	| ^(node=PRINT expression+)
 	 {
     for (int i=0; i<((SELMATree)node).getChildCount(); i++){
