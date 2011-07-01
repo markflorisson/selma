@@ -96,19 +96,24 @@ declaration
 {
 //enter as void
 st.enter($funcname, new CheckerEntry(SR_Type.VOID,SR_Kind.VAR,SR_Func.YES));
+//scope of function
+st.openScope();
 }
 					 (param=ID typ1=(INT|BOOL|CHAR)
 {
-    //add all params
+//add all params
     switch(typ1.getType()) {
         case INT:
             st.retrieve($funcname).addParam(param,SR_Type.INT);
+	st.enter($param,new CheckerEntry(SR_Type.INT,SR_Kind.VAR));
             break;
         case BOOL:
             st.retrieve($funcname).addParam(param,SR_Type.BOOL);
+	st.enter($param,new CheckerEntry(SR_Type.BOOL,SR_Kind.VAR));
             break;
         case CHAR:
             st.retrieve($funcname).addParam(param,SR_Type.CHAR);
+	st.enter($param,new CheckerEntry(SR_Type.CHAR,SR_Kind.VAR));
             break;
 	}
 }
@@ -137,6 +142,10 @@ case CHAR:
 			)
 			|
 			(compoundexpression))
+{
+//scope of function
+st.closeScope();
+}
 		)
 
 	;
