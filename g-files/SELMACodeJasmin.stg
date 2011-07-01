@@ -80,11 +80,12 @@ L<label_num2>:
 
 //Declare
 declareConst(id,val,type,addr)::=<<
-
+    ldc <val>
+    istore <addr>
 >>
 
 declareVar(id,type,addr)::=<<
-
+    istore <addr>
 >>
 
 //Load

@@ -2,6 +2,7 @@ JAVA=java
 JAVAC=javac
 JAVAP=javap
 GIT=git
+PYTHON=python
 PROGRAM=simple
 PWD=$(shell pwd)
 CLASSPATH="$(PWD)/jasmin.jar:$(PWD)/antlr-3.3-complete.jar:$(PWD)/src:$(PWD)"
@@ -20,6 +21,8 @@ run: build
 astNC: build
 	$(JAVA) SELMA.SELMA -no_checker -ast $(PROGRAM).SELMA 
 
+tests:
+	$(PYTHON) test.py
 
 runonly:
 	$(JAVA) SELMA.SELMA -code_generator $(PROGRAM).SELMA > $(PROGRAM).jasmin

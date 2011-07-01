@@ -1,0 +1,52 @@
+var var1: integer;
+var var2: integer;
+var vvar: boolean;
+var cvar1, cvar2: character;
+
+const iconst1: integer = 1;
+const iconst2: integer = 2;
+const bconst: boolean = true;
+print(bconst);
+const cconst: character = 'c';
+1 + 2;
+/*
+var ivar: integer;
+ivar :=
+    {
+        var ivar1, ivar2: integer;
+        read(ivar1, ivar2);
+        print(ivar1, ivar2);
+        const iconst1: integer = 1;
+        const iconst2: integer = 2;
+        ivar2 := ivar1 := +16 + 2 * -8;
+        print(ivar1 < ivar2 && iconst1 <= iconst2,
+        iconst1 * iconst2 > ivar2 - ivar1);
+        ivar1 < read(ivar2) && iconst1 <= iconst2;
+        ivar2 := print(ivar2) + 1;
+    } + 1;
+
+
+var bvar: boolean;
+bvar :=
+    {
+        var bvar: boolean;
+        read(bvar);
+        print(bvar);
+        bvar := 12 / 5 * 5 + 12 % 5 == 12 && 6 >= 6;
+        const bconst: boolean = true;
+        print(!false && bvar == bconst || true <> false);
+    } && true;
+
+var cvar: character;
+cvar :=
+    {
+        var cvar1, cvar2: character;
+        read(cvar1);
+        const cconst: character = 'c';
+        cvar2 := 'z';
+        print('a', cvar1 == cconst && (cvar2 <> 'b' || !true));
+        'b';
+    };
+
+print(ivar, bvar, cvar);
+*/

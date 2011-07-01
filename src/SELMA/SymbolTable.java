@@ -6,7 +6,7 @@ import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.Tree;
 
 public class SymbolTable<Entry extends IdEntry> {
-	public int nextAddr = 0;
+	public int nextAddr = 1;
     private int currentLevel;
     private Map<String, Stack<Entry>> entries;
 

@@ -4,7 +4,6 @@ een comment
 met meerdere
 regels
 */
-begin									//start program
 2*3;
 											//compound expression
 var i: integer;									//single var int decaration
@@ -28,4 +27,3 @@ j := i := 5*c;									//double assignment & arith
 j := i := 5;//true;
 j := j := i;
 print(i,j,c);									//triple print
-end.									//end program

@@ -107,7 +107,7 @@ compoundexpression
 	;
 
 cmp
-  : ((declaration SEMICOLON!)* expression_statement SEMICOLON! )+
+  : ((declaration SEMICOLON!)* expression_statement? SEMICOLON! )+
   ;
 
 //declaration

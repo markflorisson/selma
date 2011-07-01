@@ -61,28 +61,30 @@ compoundexpression
 declaration
   : ^(node=VAR INT id=ID)
   {st.enter($id,new CompilerEntry(SR_Type.INT,SR_Kind.VAR,st.nextAddr())); }
-  -> declareVar(id={$id.text},type={"INT"},addr={st.nextAddr()-1})
+  //-> declareVar(id={$id.text},type={"INT"},addr={st.nextAddr()-1})
 
   | ^(node=VAR BOOL id=ID)
   {st.enter($id,new CompilerEntry(SR_Type.BOOL,SR_Kind.VAR,st.nextAddr())); }
-  -> declareVar(id={$id.text},type={"BOOL"},addr={st.nextAddr()-1})
+  //-> declareVar(id={$id.text},type={"BOOL"},addr={st.nextAddr()-1})
 
   | ^(node=VAR CHAR id=ID)
   {st.enter($id,new CompilerEntry(SR_Type.CHAR,SR_Kind.VAR,st.nextAddr())); }
-  -> declareVar(id={$id.text},type={"CHAR"},addr={st.nextAddr()-1})
+  //-> declareVar(id={$id.text},type={"CHAR"},addr={st.nextAddr()-1})
 
   // store the const at a address? LOAD Or just copy LOADL?
   | ^(node=CONST INT val=NUMBER (id=ID)+)
   {st.enter($id,new CompilerEntry(SR_Type.INT,SR_Kind.CONST,st.nextAddr())); }
-  -> declareConst(id={$id.text},value={$val.text},type={"INT"},addr={st.nextAddr()-1})
+  //-> declareConst(id={$id.text},value={$val.text},type={"INT"},addr={st.nextAddr()-1})
 
-  | ^(node=CONST BOOL BOOLEAN (id=ID)+)
-  {st.enter($id,new CompilerEntry(SR_Type.BOOL,SR_Kind.CONST,st.nextAddr()-1)); }
-  -> declareConst(id={$id.text},value={($val.text.equals("true"))?"1":"0"},type={"BOOL"},addr={st.nextAddr()})
+  //| ^(node=CONST BOOL BOOLEAN (id=ID)+)
+  
+  | ^(node=CONST type=BOOL val=BOOLEAN id=ID)
+  {st.enter($id, new CompilerEntry(SR_Type.BOOL,SR_Kind.CONST,st.nextAddr()-1)); }
+  -> declareConst(id={$id.text}, val={($val.text.equals("true"))?"1":"0"}, type={"BOOL"}, addr={st.nextAddr()})
 
   | ^(node=CONST CHAR CHARV (id=ID)+)
   {st.enter($id,new CompilerEntry(SR_Type.CHAR,SR_Kind.CONST,st.nextAddr())); }
-  -> declareConst(id={$id.text},value={Character.getNumericValue($val.text.charAt(1))},type={"CHAR"},addr={st.nextAddr()-1})
+  //-> declareConst(id={$id.text},value={Character.getNumericValue($val.text.charAt(1))},type={"CHAR"},addr={st.nextAddr()-1})
   ;
 
 
