@@ -74,17 +74,15 @@ declaration
   // store the const at a address? LOAD Or just copy LOADL?
   | ^(node=CONST INT val=NUMBER (id=ID)+)
   {st.enter($id,new CompilerEntry(SR_Type.INT,SR_Kind.CONST,st.nextAddr())); }
-  //-> declareConst(id={$id.text},value={$val.text},type={"INT"},addr={st.nextAddr()-1})
-
-  //| ^(node=CONST BOOL BOOLEAN (id=ID)+)
+  -> declareConst(id={$id.text}, val={$val.text}, type={"integer"}, addr={st.nextAddr()-1})
   
   | ^(node=CONST type=BOOL val=BOOLEAN id=ID)
   {st.enter($id, new CompilerEntry(SR_Type.BOOL,SR_Kind.CONST,st.nextAddr()-1)); }
-  -> declareConst(id={$id.text}, val={($val.text.equals("true"))?"1":"0"}, type={"BOOL"}, addr={st.nextAddr()})
+  -> declareConst(id={$id.text}, val={($val.text.equals("true"))?"1":"0"}, type={"boolean"}, addr={st.nextAddr()})
 
-  | ^(node=CONST CHAR CHARV (id=ID)+)
-  {st.enter($id,new CompilerEntry(SR_Type.CHAR,SR_Kind.CONST,st.nextAddr())); }
-  //-> declareConst(id={$id.text},value={Character.getNumericValue($val.text.charAt(1))},type={"CHAR"},addr={st.nextAddr()-1})
+  | ^(node=CONST CHAR val=CHARV (id=ID)+)
+  {st.enter($id,new CompilerEntry(SR_Type.CHAR,SR_Kind.CONST,st.nextAddr())); char c = $node.text.charAt(1); }
+  -> declareConst(id={$id.text}, val={(int) c}, type={"character"}, addr={st.nextAddr()-1})
   ;
 
 

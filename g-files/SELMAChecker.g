@@ -16,11 +16,17 @@ options {
 // Alter code generation so catch-clauses get replaced with this action.
 @rulecatch {
 	catch (RecognitionException re) {
+		if (node != null)
+		    System.err.println(
+		        String.format("Error on line \%d:\%d: \%s", node.getLine(),
+		                                                    node.getCharPositionInLine(),
+		                                                    re.getMessage()));
 		throw re;
 	}
 }
 
 @members {
+	public SymbolTable<CheckerEntry> oldSt;
 	public SymbolTable<CheckerEntry> st = new SymbolTable<CheckerEntry>();
 }
 
@@ -36,12 +42,13 @@ compoundexpression //do not open and close scope here (IF/WHILE)
 	: ^(node=COMPOUND (declaration|expression_statement)+)
 	{
 	    SELMATree e1 = (SELMATree)node.getChild(node.getChildCount()-1);
+	    System.err.println(e1 + " " + e1.getLine() + " " + $node.getChildCount());
 	    if (e1.SR_type==SR_Type.VOID) {
-	        $node.SR_type=SR_Type.VOID;
-	        $node.SR_kind=null;
+	        node.SR_type=SR_Type.VOID;
+	        node.SR_kind=null;
 	    } else {
-	        $node.SR_type=e1.SR_type;
-	        $node.SR_kind=e1.SR_kind;
+	        node.SR_type=e1.SR_type;
+	        node.SR_kind=e1.SR_kind;
 	    }
 	}
 	;
@@ -50,6 +57,7 @@ expression_statement
 	: ^(node=EXPRESSION_STATEMENT expression)
 	{
 	    SELMATree e1 = (SELMATree)node.getChild(node.getChildCount()-1);
+	    // System.err.println("..." + e1 + " " + e1.getLine());
 	    $node.SR_type = e1.SR_type;
 	    $node.SR_kind = e1.SR_kind;
 	}
@@ -151,15 +159,15 @@ st.closeScope();
 	;
 
 type
-  : INT
-  | BOOL
-  | CHAR
+  : node=INT
+  | node=BOOL
+  | node=CHAR
   ;
 
 val
-  : NUMBER
-  | CHARV
-  | BOOLEAN
+  : node=NUMBER
+  | node=CHARV
+  | node=BOOLEAN
   ;
 
 expression
@@ -169,6 +177,7 @@ expression
    SELMATree e2 = (SELMATree)node.getChild(1);
 
    if (e1.SR_type != SR_Type.INT || e2.SR_type != SR_Type.INT) {
+   	System.err.println("node " + node + " e1 " + e1 + " line " + e2.getLine());
     throw new SELMAException(
     	$node,
     	String.format("Wrong types must be int (found \%s and \%s)", e1.SR_type, e2.SR_type));

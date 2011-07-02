@@ -1,29 +1,53 @@
-										//Comment Testen
-/* dit is
-een comment
-met meerdere
-regels
-*/
-2*3;
-											//compound expression
-var i: integer;									//single var int decaration
+var var1: integer;
+var var2: integer;
+var vvar: boolean;
+var cvar1, cvar2: character;
 
-5*8;
-2*3*4;
-5*i;
-5>=6;
-if true; then 5; fi;
-if false; then 8; else 3; fi;
-i := i := 5;											//single assignment
-print(i);										//single print
-var x,y: boolean;								//double var bool declaration
-var j: integer;									//single var int declaration
-j := i := j := 7;									//double int assignment
-print(i,j);										//double print
-const a: character = 'g';							//single const declaration
-//const b: integer = 'l';							//single const declaration
-const c: integer = 1;							//single const declaration
-j := i := 5*c;									//double assignment & arith
-j := i := 5;//true;
-j := j := i;
-print(i,j,c);									//triple print
+const iconst1: integer = 1;
+const iconst2: integer = 2;
+const bconst: boolean = true;
+print(bconst);
+const cconst: character = 'c';
+1 + 2;
+
+
+var ivar: integer;
+ivar :=
+    {
+        var ivar1, ivar2: integer;
+        read(ivar1, ivar2);
+        print(ivar1, ivar2);
+        const iconst1: integer = 1;
+        const iconst2: integer = 2;
+        ivar2 := ivar1 := +16 + 2 * -8;
+        print(ivar1 < ivar2 && iconst1 <= iconst2,
+        iconst1 * iconst2 > ivar2 - ivar1);
+        ivar1 < read(ivar2) && iconst1 <= iconst2;
+        ivar2 := print(ivar2) + 1;
+    } + 1;
+
+/*
+var bvar: boolean;
+bvar :=
+    {
+        var bvar: boolean;
+        read(bvar);
+        print(bvar);
+        bvar := 12 / 5 * 5 + 12 % 5 == 12 && 6 >= 6;
+        const bconst: boolean = true;
+        print(!false && bvar == bconst || true <> false);
+    } && true;
+
+var cvar: character;
+cvar :=
+    {
+        var cvar1, cvar2: character;
+        read(cvar1);
+        const cconst: character = 'c';
+        cvar2 := 'z';
+        print('a', cvar1 == cconst && (cvar2 <> 'b' || !true));
+        'b';
+    };
+
+print(ivar, bvar, cvar);
+*/

@@ -79,13 +79,13 @@ L<label_num2>:
 >>
 
 //Declare
-declareConst(id,val,type,addr)::=<<
-    ldc <val>
+declareConst(id, val, type, addr)::=<<
+    ldc <val>                    ; const <id> : <type>
     istore <addr>
 >>
 
-declareVar(id,type,addr)::=<<
-    istore <addr>
+declareVar(id, type, addr)::=<<
+
 >>
 
 //Load
