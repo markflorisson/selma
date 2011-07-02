@@ -6,22 +6,41 @@ var cvar1, cvar2: character;
 const iconst1: integer = 1;
 const iconst2: integer = 2;
 const bconst: boolean = true;
+<output>true</output>
 print(bconst);
 const cconst: character = 'c';
 1 + 2;
-/*
+
 var ivar: integer;
 ivar :=
     {
         var ivar1, ivar2: integer;
+        <input>
+            10
+            20
+        </input>
         read(ivar1, ivar2);
+
+        <output>
+            10
+            20
+        </output>
         print(ivar1, ivar2);
         const iconst1: integer = 1;
         const iconst2: integer = 2;
         ivar2 := ivar1 := +16 + 2 * -8;
+
+        <output>
+            false
+            true
+        </output>
         print(ivar1 < ivar2 && iconst1 <= iconst2,
-        iconst1 * iconst2 > ivar2 - ivar1);
+              iconst1 * iconst2 > ivar2 - ivar1);
+
+        <input>5</input>
         ivar1 < read(ivar2) && iconst1 <= iconst2;
+
+        <output>5</output>
         ivar2 := print(ivar2) + 1;
     } + 1;
 
@@ -30,10 +49,17 @@ var bvar: boolean;
 bvar :=
     {
         var bvar: boolean;
+
+        <input>1</input>
         read(bvar);
+
+        <output>true</output>
         print(bvar);
+
         bvar := 12 / 5 * 5 + 12 % 5 == 12 && 6 >= 6;
         const bconst: boolean = true;
+
+        <output>true</output>
         print(!false && bvar == bconst || true <> false);
     } && true;
 
@@ -41,12 +67,24 @@ var cvar: character;
 cvar :=
     {
         var cvar1, cvar2: character;
+
+        <input>97</input>
         read(cvar1);
         const cconst: character = 'c';
         cvar2 := 'z';
+
+        <output>
+            a
+            false
+        </output>
         print('a', cvar1 == cconst && (cvar2 <> 'b' || !true));
         'b';
     };
 
+<output>
+    7
+    true
+    b
+</output>
 print(ivar, bvar, cvar);
-*/
+

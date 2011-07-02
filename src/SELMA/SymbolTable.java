@@ -1,6 +1,7 @@
 package SELMA;
 
 import java.util.*;
+import SELMA.SELMATree.SR_Kind;
 
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.Tree;
@@ -44,7 +45,8 @@ public class SymbolTable<Entry extends IdEntry> {
     		Stack<Entry> stack = entry.getValue();
     		if ((stack != null) && (!stack.isEmpty()) && (stack.peek().level >= currentLevel)){
     			stack.pop();
-    			nextAddr--;
+    			localCount = nextAddr > localCount ? nextAddr : localCount;
+                nextAddr--;
     		}
     	}
        	currentLevel--;
@@ -74,11 +76,13 @@ public class SymbolTable<Entry extends IdEntry> {
         	entry.level = currentLevel;
         	s.push(entry);
         	entries.put(id, s);
-        	nextAddr++;
+        	if (entry instanceof CheckerEntry && ((CheckerEntry) entry).kind != SR_Kind.CONST)
+                nextAddr++;
         } else if (s.isEmpty() || s.peek().level != currentLevel){
         	entry.level=currentLevel;
         	s.push(entry);
-        	nextAddr++;
+        	if (entry instanceof CheckerEntry && ((CheckerEntry) entry).kind != SR_Kind.CONST)
+                nextAddr++;
         } else {
         	throw new SymbolTableException(tree, "Entry "+id+" already exists in current scope.");
         }
@@ -111,6 +115,8 @@ public class SymbolTable<Entry extends IdEntry> {
 
     /* Get the locals limit for this stack frame */
     public int  getLocalsCount() {
+        return nextAddr > localCount ? nextAddr : localCount;
+        /*
         int localCount = 0;
 
         for (Stack<Entry> stack : entries.values()) {
@@ -119,7 +125,7 @@ public class SymbolTable<Entry extends IdEntry> {
             }
         }
 
-        return localCount;
+        return localCount;     */
     }
 }
 

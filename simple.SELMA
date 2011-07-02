@@ -6,10 +6,9 @@ var cvar1, cvar2: character;
 const iconst1: integer = 1;
 const iconst2: integer = 2;
 const bconst: boolean = true;
-print(bconst);
 const cconst: character = 'c';
-1 + 2;
 
+print('a', 'b', 'c', 'd', 'e', 'f', 'g', 'h');
 
 var ivar: integer;
 ivar :=
@@ -21,12 +20,12 @@ ivar :=
         const iconst2: integer = 2;
         ivar2 := ivar1 := +16 + 2 * -8;
         print(ivar1 < ivar2 && iconst1 <= iconst2,
-        iconst1 * iconst2 > ivar2 - ivar1);
+              iconst1 * iconst2 > ivar2 - ivar1);
         ivar1 < read(ivar2) && iconst1 <= iconst2;
         ivar2 := print(ivar2) + 1;
     } + 1;
 
-/*
+
 var bvar: boolean;
 bvar :=
     {
@@ -50,4 +49,3 @@ cvar :=
     };
 
 print(ivar, bvar, cvar);
-*/

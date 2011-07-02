@@ -1,5 +1,16 @@
 #!/usr/bin/env python
 
+"""
+Run all selma test programs under the 'test' directory.
+
+Input written between <input> </input> tags will be written
+to the test's stdin, and the output of the program will be matched
+against text between <output> </output> tags.
+
+If a test's filename starts with compile_ it will only be compiled,
+and if it starts with error_, compiling it should give an error.
+"""
+
 import os
 import re
 import sys
@@ -16,10 +27,17 @@ class TestRunner(object):
         self.failed = 0
 
     def collect(self, path, args, input, expected, test_type):
-        p = subprocess.Popen(args, stdout=subprocess.PIPE,
+        print test_type.capitalize(), 'test %s ...' % path,
+
+        p = subprocess.Popen(args,
+                             stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE,
                              stderr=subprocess.STDOUT)
         output, err = p.communicate(input)
         exit_status = p.wait()
+
+        if output.lstrip().startswith('Generated: Main.class'):
+            _, output = output.split('\n', 1)
 
         def test_failed():
             print '%s test %r (%s) failed with exit status %d:' % (
@@ -29,26 +47,28 @@ class TestRunner(object):
                 print 'Got:'
 
             print '\n'.join('    ' + line for line in output.splitlines())
-            print '-' * 80, '\n'
 
             if expected:
                 print 'Expected:'
                 print '\n'.join('    ' + line for line in expected.splitlines())
 
+            print '-' * 80, '\n'
+
             if self.exit_on_failure:
                 sys.exit(1)
 
             self.failed += 1
-            return False
 
         test, _ = os.path.splitext(os.path.split(path)[-1])
-        if expected and output != expected:
-            return test_failed(expected)
-        elif test_type != 'error' and exit_status != 0:
-            return test_failed()
-        elif test_type == 'error' and exit_status == 0:
-            return test_failed()
+        if (expected and output != expected or
+                test_type != 'error' and exit_status != 0 or
+                test_type == 'error' and exit_status == 0):
 
+            print 'FAIL'
+            test_failed()
+            return False
+
+        print 'OK'
         return True
 
     def compile_test(self, test, input, output, test_type):
@@ -66,15 +86,27 @@ class TestRunner(object):
         f = open(path)
         data = f.read()
         f.close()
-        input_pattern = r'<input>.*?</input>'
-        output_pattern = r'<output>.*?</output>'
+        input_pattern = r'<input>(.*?)</input>'
+        output_pattern = r'<output>(.*?)</output>'
         sub_pattern = '((%s)|(%s))' % (input_pattern, output_pattern)
 
-        open('temp.selma', 'w').write(re.sub(sub_pattern, '', data, re.DOTALL))
+        def replacement(match):
+            "Preserve line numbers from the original source file"
+            return '\n' * match.group().count('\n')
 
-        input = re.search(input_pattern, data, re.DOTALL)
-        output = re.search(output_pattern, data, re.DOTALL)
-        return input and input.group(), output and output.group()
+        open('temp.selma', 'w').write(
+            re.sub(sub_pattern, replacement, data, flags=re.DOTALL))
+
+        inputs = re.findall(input_pattern, data, re.DOTALL)
+        outputs = re.findall(output_pattern, data, re.DOTALL)
+        return ('\n'.join(line.strip()
+                    for s in inputs
+                        for line in s.splitlines()
+                            if line.strip()),
+                '\n'.join(line.strip()
+                    for s in outputs
+                        for line in s.splitlines()
+                            if line.strip()))
 
     def run(self):
         total = 0

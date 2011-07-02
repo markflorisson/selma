@@ -48,48 +48,50 @@ program
   { SELMATree expr = (SELMATree) $node.getChild(0); }
   -> program(instructions={$compoundexpression.st},
              source_file={SELMA.inputFilename},
-             stack_limit={maxStackDepth + 2}, // +2 for print and other additionally loaded constants
+             stack_limit={maxStackDepth + 3}, // +2 for print and other additionally loaded constants
              locals_limit={$node.localsCount + 1}, // +1 for the String[] argv parameter
              pop={expr.SR_type != SR_Type.VOID})
   ;
 
 compoundexpression
-  : ^(node=COMPOUND (s+=declaration  | s+=expression_statement)+)
+  : ^(node=COMPOUND (s+=declaration  | s+=expression)+)
   -> compound(instructions={$s}, line={node.getLine()}, pop={$node.SR_type != SR_Type.VOID})
   ;
 
 declaration
   : ^(node=VAR INT id=ID)
-  {st.enter($id,new CompilerEntry(SR_Type.INT,SR_Kind.VAR,st.nextAddr())); }
+  {st.enter($id, new CompilerEntry(SR_Type.INT, SR_Kind.VAR, st.nextAddr())); }
   //-> declareVar(id={$id.text},type={"INT"},addr={st.nextAddr()-1})
 
   | ^(node=VAR BOOL id=ID)
-  {st.enter($id,new CompilerEntry(SR_Type.BOOL,SR_Kind.VAR,st.nextAddr())); }
+  {st.enter($id, new CompilerEntry(SR_Type.BOOL, SR_Kind.VAR, st.nextAddr())); }
   //-> declareVar(id={$id.text},type={"BOOL"},addr={st.nextAddr()-1})
 
   | ^(node=VAR CHAR id=ID)
-  {st.enter($id,new CompilerEntry(SR_Type.CHAR,SR_Kind.VAR,st.nextAddr())); }
+  {st.enter($id, new CompilerEntry(SR_Type.CHAR, SR_Kind.VAR, st.nextAddr())); }
   //-> declareVar(id={$id.text},type={"CHAR"},addr={st.nextAddr()-1})
 
   // store the const at a address? LOAD Or just copy LOADL?
   | ^(node=CONST INT val=NUMBER (id=ID)+)
-  {st.enter($id,new CompilerEntry(SR_Type.INT,SR_Kind.CONST,st.nextAddr())); }
-  -> declareConst(id={$id.text}, val={$val.text}, type={"integer"}, addr={st.nextAddr()-1})
+  {st.enter($id,new CompilerEntry(SR_Type.INT, SR_Kind.CONST, 0).setVal($val.text)); }
+  //-> declareConst(id={$id.text}, val={$val.text}, type={"integer"}, addr={st.nextAddr()-1})
   
   | ^(node=CONST type=BOOL val=BOOLEAN id=ID)
-  {st.enter($id, new CompilerEntry(SR_Type.BOOL,SR_Kind.CONST,st.nextAddr()-1)); }
-  -> declareConst(id={$id.text}, val={($val.text.equals("true"))?"1":"0"}, type={"boolean"}, addr={st.nextAddr()})
+  {st.enter($id, new CompilerEntry(SR_Type.BOOL, SR_Kind.CONST, 0).setBool($val.text)); }
+  //-> declareConst(id={$id.text}, val={($val.text.equals("true"))?"1":"0"}, type={"boolean"}, addr={st.nextAddr()})
 
   | ^(node=CONST CHAR val=CHARV (id=ID)+)
-  {st.enter($id,new CompilerEntry(SR_Type.CHAR,SR_Kind.CONST,st.nextAddr())); char c = $node.text.charAt(1); }
-  -> declareConst(id={$id.text}, val={(int) c}, type={"character"}, addr={st.nextAddr()-1})
+  { char c = $node.text.charAt(1);
+    st.enter($id, new CompilerEntry(SR_Type.CHAR, SR_Kind.CONST, 0).setChar(c)); }
+  //-> declareConst(id={$id.text}, val={(int) c}, type={"character"}, addr={st.nextAddr()-1})
   ;
 
-
+/*
 expression_statement
   : ^(node=EXPRESSION_STATEMENT e1=expression) { curStackDepth--; }
   -> exprStat(e1={e1.st}, line={$node.getLine()}, pop={$node.SR_type != SR_Type.VOID})
   ;
+*/
 
 expression
 //double arg expression
@@ -100,7 +102,7 @@ expression
   -> biExpr(e1={$e1.st},e2={$e2.st},instr={"idiv"}, line={node.getLine()}, op={"/"})
 
   | ^(node=MOD e1=expression e2=expression) { curStackDepth--; }
-  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"imod"}, line={node.getLine()}, op={"\%"})
+  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"irem"}, line={node.getLine()}, op={"\%"})
 
   | ^(node=PLUS e1=expression e2=expression) { curStackDepth--; }
   -> biExpr(e1={$e1.st},e2={$e2.st},instr={"iadd"}, line={node.getLine()}, op={"+"})
@@ -109,10 +111,10 @@ expression
   -> biExpr(e1={$e1.st},e2={$e2.st},instr={"isub"}, line={node.getLine()}, op={"-"})
 
   | ^(node=OR e1=expression e2=expression) { curStackDepth--; }
-  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"or"}, line={node.getLine()}, op={"or"})
+  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"ior"}, line={node.getLine()}, op={"or"})
 
   | ^(node=AND e1=expression e2=expression) { curStackDepth--; }
-  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"and"}, line={node.getLine()}, op={"and"})
+  -> biExpr(e1={$e1.st},e2={$e2.st},instr={"iand"}, line={node.getLine()}, op={"and"})
 
   | ^(node=RELS e1=expression e2=expression) { curStackDepth--; }
   -> biExprJump(e1={$e1.st},e2={$e2.st},instr={"if_icmplt"}, line={node.getLine()},
@@ -147,7 +149,7 @@ expression
 
   | ^(node=NOT e1=expression)
   -> biExprJump(e1={$e1.st}, e2={"iconst_0"}, instr={"if_icmpeq"}, line={node.getLine()},
-  		op={"not"}, label_num={labelNum++})
+  		op={"not"}, label_num1={labelNum++}, label_num2={labelNum++})
 
 //CONDITIONAL
   | ^(node=IF ec1=compoundexpression THEN ec2=compoundexpression (ELSE ec3=compoundexpression)?)
@@ -162,26 +164,31 @@ expression
   	is_void={!ec3NotEmpty || expr2.SR_type != expr3.SR_type || expr2.SR_type == SR_Type.VOID})
 
   | ^(node=WHILE ec1=compoundexpression DO ec2=compoundexpression OD)
-  { curStackDepth--; SELMATree expr2 = (SELMATree) node.getChild(2); }
-  -> while(ec1={$ec1.st}, ec2={$ec2.st}, pop={expr2.SR_type != SR_Type.VOID}, label_num1={labelNum++}, label_num2={labelNum++})
+  { SELMATree expr2 = (SELMATree) node.getChild(2);
+    boolean pop = expr2.SR_type != SR_Type.VOID; 
+    if (pop) 
+        curStackDepth--; 
+  }
+  -> while(ec1={$ec1.st}, ec2={$ec2.st}, pop={pop}, 
+           label_num1={labelNum++}, label_num2={labelNum++})
 
 //IO
 
   | ^(node=READ ID+)
    	{ boolean isExpr = $node.SR_type != SR_Type.VOID;
-      List<Integer> addrs = new ArrayList<Integer>();
-      List<Boolean> isBool = new ArrayList<Boolean>();
-      List<Boolean> isInt = new ArrayList<Boolean>();
+          List<Integer> addrs = new ArrayList<Integer>();
+          List<Boolean> isBool = new ArrayList<Boolean>();
+          List<Boolean> isInt = new ArrayList<Boolean>();
 
-      for (int i = 0; i < $node.getChildCount(); i++) {
-           SELMATree child = (SELMATree) $node.getChild(i);
+          for (int i = 0; i < $node.getChildCount(); i++) {
+              SELMATree child = (SELMATree) $node.getChild(i);
 
-           addrs.add(st.retrieve($node.getChild(i)).addr);
-           isBool.add(child.SR_type == SR_Type.BOOL);
-           isInt.add(child.SR_type == SR_Type.INT);
-      }
-      if (!isExpr)
-          curStackDepth -= $node.getChildCount();
+              addrs.add(st.retrieve($node.getChild(i)).addr);
+              isBool.add(child.SR_type == SR_Type.BOOL);
+              isInt.add(child.SR_type == SR_Type.INT);
+          }
+          //if (!isExpr)
+          //    curStackDepth -= $node.getChildCount();
   	}
   	-> read(addrs={addrs}, dup_top={isExpr}, is_bool={isBool}, is_int={isInt},
             line={node.getLine()})
@@ -226,8 +233,8 @@ expression
   		      isint={isint})
 
 //closedcompound
-  | LCURLY {st.openScope();} compoundexpression {st.closeScope();} RCURLY
-
+  | ^(node=LCURLY {st.openScope();} cmp=compoundexpression {st.closeScope();} RCURLY)
+	-> compound(instructions={$cmp.st}, line={$node.getLine()}, pop={false})
 //VALUES
   | node=NUMBER { incrStackDepth();
                   int num = Integer.parseInt($node.text); }
@@ -242,7 +249,11 @@ expression
     -> loadChar(val={(int) c}, char={$node.text}, line={$node.getLine()})
 
   | node=ID { incrStackDepth(); }
-    -> loadVal(id={$node.text}, addr={st.retrieve($node).addr})
+    {
+    	CompilerEntry entry = st.retrieve(node);
+    	boolean isConst = node.SR_kind == SR_Kind.CONST;
+    }
+    -> loadVal(id={$node.text}, addr={entry.addr}, val={entry.val}, is_const={isConst})
   ;
 
 

@@ -39,10 +39,9 @@ program
 	;
 
 compoundexpression //do not open and close scope here (IF/WHILE)
-	: ^(node=COMPOUND (declaration|expression_statement)+)
+	: ^(node=COMPOUND (declaration|expression)+)
 	{
 	    SELMATree e1 = (SELMATree)node.getChild(node.getChildCount()-1);
-	    System.err.println(e1 + " " + e1.getLine() + " " + $node.getChildCount());
 	    if (e1.SR_type==SR_Type.VOID) {
 	        node.SR_type=SR_Type.VOID;
 	        node.SR_kind=null;
@@ -52,7 +51,7 @@ compoundexpression //do not open and close scope here (IF/WHILE)
 	    }
 	}
 	;
-
+/*
 expression_statement
 	: ^(node=EXPRESSION_STATEMENT expression)
 	{
@@ -62,7 +61,7 @@ expression_statement
 	    $node.SR_kind = e1.SR_kind;
 	}
 	;
-
+*/
 declaration
 	: ^(node=VAR type id=ID)
    {
@@ -177,7 +176,6 @@ expression
    SELMATree e2 = (SELMATree)node.getChild(1);
 
    if (e1.SR_type != SR_Type.INT || e2.SR_type != SR_Type.INT) {
-   	System.err.println("node " + node + " e1 " + e1 + " line " + e2.getLine());
     throw new SELMAException(
     	$node,
     	String.format("Wrong types must be int (found \%s and \%s)", e1.SR_type, e2.SR_type));
@@ -247,15 +245,15 @@ expression
    $node.SR_kind=e1.SR_kind;
    }
 
-	| ^(node=(NOT) expression)
+	| ^(node=NOT expression)
    {
-   SELMATree e1 = (SELMATree)node.getChild(0);
+        SELMATree e1 = (SELMATree)node.getChild(0);
 
-   if (e1.SR_type!=SR_Type.BOOL)
-    throw new SELMAException($node,"Wrong type must be bool");
-   $node.SR_type=SR_Type.BOOL;
+        if (e1.SR_type != SR_Type.BOOL)
+            throw new SELMAException(node, "Wrong type must be bool");
 
-   $node.SR_kind=e1.SR_kind;
+        node.SR_type = SR_Type.BOOL;
+        node.SR_kind = e1.SR_kind;
    }
 
 	| ^(node=IF {st.openScope();} compoundexpression
@@ -373,7 +371,12 @@ if (expr.SR_type != entry.params.get(i-1).type)
    $node.SR_kind=SR_Kind.VAR;
 	 }
 
-	| LCURLY {st.openScope();} compoundexpression {st.closeScope();} RCURLY
+	| ^(node=LCURLY {st.openScope();} compoundexpression {st.closeScope();} RCURLY)
+	{
+	    SELMATree e1 = (SELMATree) node.getChild(0);
+	    $node.SR_type = e1.SR_type;
+	    $node.SR_kind = e1.SR_kind;
+	}
 
 	| node=NUMBER
 	 {
