@@ -1,0 +1,4 @@
+<output>ERROR: print (2:0) Can not be of type void</output>
+print(while true; do
+          print('c');
+      od);

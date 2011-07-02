@@ -1,0 +1,5 @@
+<output>ERROR: b (2:6) Entry not found: b</output>
+while b; do
+    var b : boolean;
+    print(b);
+od;

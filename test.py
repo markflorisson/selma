@@ -65,7 +65,7 @@ class TestRunner(object):
                         if line1 is None:
                             break
 
-                        if line1.strip() != line2.strip():
+                        if line2 and line1.strip() != line2.strip():
                             marker = '    >>>'
                         else:
                             marker = '       '

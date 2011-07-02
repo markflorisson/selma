@@ -1,0 +1,6 @@
+<output>ERROR: print (2:0) Can not be of type void</output>
+print(if true; then
+          4;
+      else
+          'c';
+      fi);

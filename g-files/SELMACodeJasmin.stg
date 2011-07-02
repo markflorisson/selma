@@ -201,12 +201,12 @@ L<label_num2>:
 >>
 
 //conditionals
-if (ec1, ec2, ec3, label_num1, label_num2, ec3_not_empty, is_void) ::= <<
+if (ec1, ec2, ec3, label_num1, label_num2, ec3_not_empty, pop1, pop2) ::= <<
 <ec1>							; e1 condition
     ifeq L<label_num1>          ; e1 is false
 <ec2>                           ; e2 if true expression
-<if (is_void)>
-    pop                         ; is_void <is_void>
+<if (pop1)>
+    pop
 
 <endif>
 <if (ec3_not_empty)>
@@ -216,8 +216,8 @@ if (ec1, ec2, ec3, label_num1, label_num2, ec3_not_empty, is_void) ::= <<
 L<label_num1>:
 <if (ec3_not_empty)>
 <ec3>							; e3 if false expression
-<if (is_void)>
-    pop                         ; is_void <is_void>
+<if (pop2)>
+    pop                         ; pop
 
 <endif>
 L<label_num2>:

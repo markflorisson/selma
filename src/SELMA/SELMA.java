@@ -136,9 +136,8 @@ public class SELMA {
             System.err.println(e.getMessage());
             System.exit(1);
         } catch (SymbolTableException e) {
-            System.err.print("ERROR: SymbolTableException thrown by compiler: ");
+            System.err.print("ERROR: ");
             System.err.println(e.getMessage());
-            e.printStackTrace();
             System.exit(1);
         } catch (RecognitionException e) {
             System.err.print("ERROR: recognition exception thrown by compiler: ");

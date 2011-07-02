@@ -161,7 +161,8 @@ expression
   	}
   -> if(ec1={$ec1.st},ec2={$ec2.st},ec3={$ec3.st}, label_num1={labelNum++},
   	label_num2={ec3NotEmpty ? labelNum++ : 0}, ec3_not_empty={ec3NotEmpty},
-  	is_void={!ec3NotEmpty || expr2.SR_type != expr3.SR_type || expr2.SR_type == SR_Type.VOID})
+  	pop1={$node.SR_type == SR_Type.VOID && expr2.SR_type != SR_Type.VOID},
+  	pop2={ec3NotEmpty && $node.SR_type == SR_Type.VOID && expr3.SR_type != SR_Type.VOID})
 
   | ^(node=WHILE 
       { st.openScope(); } ec1=compoundexpression { st.closeScope(); } DO 
