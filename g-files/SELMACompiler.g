@@ -54,7 +54,7 @@ program
   ;
 
 compoundexpression
-  : ^(node=COMPOUND (s+=declaration  | s+=expression)+)
+  : ^(node=COMPOUND (s+=declaration  | s+=expression_statement)+)
   -> compound(instructions={$s}, line={node.getLine()}, pop={$node.SR_type != SR_Type.VOID})
   ;
 
@@ -86,12 +86,10 @@ declaration
   //-> declareConst(id={$id.text}, val={(int) c}, type={"character"}, addr={st.nextAddr()-1})
   ;
 
-/*
 expression_statement
   : ^(node=EXPRESSION_STATEMENT e1=expression) { curStackDepth--; }
   -> exprStat(e1={e1.st}, line={$node.getLine()}, pop={$node.SR_type != SR_Type.VOID})
   ;
-*/
 
 expression
 //double arg expression
@@ -152,7 +150,9 @@ expression
   		op={"not"}, label_num1={labelNum++}, label_num2={labelNum++})
 
 //CONDITIONAL
-  | ^(node=IF ec1=compoundexpression THEN ec2=compoundexpression (ELSE ec3=compoundexpression)?)
+  | ^(node=IF { st.openScope(); } ec1=compoundexpression { st.closeScope(); } THEN 
+  	      { st.openScope(); } ec2=compoundexpression { st.closeScope(); }
+  	(ELSE { st.openScope(); } ec3=compoundexpression { st.closeScope(); })?)
   	{ boolean ec3NotEmpty = $ec3.st != null;
   	  SELMATree expr2 = (SELMATree) node.getChild(2);
   	  SELMATree expr3 = null;
@@ -163,7 +163,9 @@ expression
   	label_num2={ec3NotEmpty ? labelNum++ : 0}, ec3_not_empty={ec3NotEmpty},
   	is_void={!ec3NotEmpty || expr2.SR_type != expr3.SR_type || expr2.SR_type == SR_Type.VOID})
 
-  | ^(node=WHILE ec1=compoundexpression DO ec2=compoundexpression OD)
+  | ^(node=WHILE 
+      { st.openScope(); } ec1=compoundexpression { st.closeScope(); } DO 
+      { st.openScope(); } ec2=compoundexpression { st.closeScope(); } OD)
   { SELMATree expr2 = (SELMATree) node.getChild(2);
     boolean pop = expr2.SR_type != SR_Type.VOID; 
     if (pop) 

@@ -1,0 +1,39 @@
+<output>
+    0
+    true
+    1
+    false
+    2
+    true
+    3
+    false
+    4
+    true
+    5
+    false
+    6
+    true
+</output>
+
+var i : integer;
+var j : character;
+var b : boolean;
+
+i := 0;
+j := 'c';
+b := true;
+
+while i <= 5; do
+    var j : boolean;
+    j := (i % 2 == 0);
+
+    print(i, j);
+    i := i + 1;
+od;
+
+print(i);
+
+while b; do
+    print(b);
+    b := false;
+od;

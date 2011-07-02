@@ -1,5 +1,0 @@
-function foo(){
-6;
-};
-
-@foo(1,);

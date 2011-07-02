@@ -16,11 +16,13 @@ options {
 // Alter code generation so catch-clauses get replaced with this action.
 @rulecatch {
 	catch (RecognitionException re) {
+		/*
 		if (node != null)
 		    System.err.println(
 		        String.format("Error on line \%d:\%d: \%s", node.getLine(),
 		                                                    node.getCharPositionInLine(),
 		                                                    re.getMessage()));
+		*/
 		throw re;
 	}
 }
@@ -39,7 +41,7 @@ program
 	;
 
 compoundexpression //do not open and close scope here (IF/WHILE)
-	: ^(node=COMPOUND (declaration|expression)+)
+	: ^(node=COMPOUND (declaration|expression_statement)+)
 	{
 	    SELMATree e1 = (SELMATree)node.getChild(node.getChildCount()-1);
 	    if (e1.SR_type==SR_Type.VOID) {
@@ -51,7 +53,7 @@ compoundexpression //do not open and close scope here (IF/WHILE)
 	    }
 	}
 	;
-/*
+
 expression_statement
 	: ^(node=EXPRESSION_STATEMENT expression)
 	{
@@ -61,7 +63,7 @@ expression_statement
 	    $node.SR_kind = e1.SR_kind;
 	}
 	;
-*/
+
 declaration
 	: ^(node=VAR type id=ID)
    {
@@ -285,9 +287,9 @@ expression
     }
     }
 
-	| ^(node=WHILE {st.openScope();}compoundexpression
+	| ^(node=WHILE {st.openScope();} compoundexpression { st.closeScope(); }
 	     DO {st.openScope();} compoundexpression {st.closeScope();}
-	     OD{st.closeScope();})
+	     OD) /*{st.closeScope();}) */
    {
    SELMATree e1 = (SELMATree)node.getChild(0);
    SELMATree e2 = (SELMATree)node.getChild(2);

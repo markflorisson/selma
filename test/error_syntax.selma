@@ -1,0 +1,13 @@
+var a, b: integer;
+
+// an error in an expression:
+a + * b;
+
+// an incomplete assignment token:
+a :-b;
+
+// non-existing and misspelled keywords:
+for gebin ned repeat;
+
+// hurray, finally something good:
+a + b;

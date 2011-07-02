@@ -72,7 +72,7 @@ tokens {
 	BEGIN;
 	END;
 	COMPOUND;
-	//EXPRESSION_STATEMENT;
+	EXPRESSION_STATEMENT;
 }
 
 @header {
@@ -107,7 +107,7 @@ compoundexpression
 	;
 
 cmp
-  : ((declaration SEMICOLON!)* expression? SEMICOLON! )+
+  : ((declaration SEMICOLON!)* expression_statement? SEMICOLON! )+
   ;
 
 //declaration
@@ -142,10 +142,10 @@ funcbody
 
 
 //expression statement at line 146
-/*
+
 expression_statement
 	: expression -> ^(EXPRESSION_STATEMENT expression)
-	;*/
+	;
 // note: - arithmetic can be "invisible" due to all the *-s that's why it is nested
 // - assignment can be "invisible" due to the ? that's why it can also be only a identifier
 expression

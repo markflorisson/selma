@@ -27,7 +27,19 @@ class TestRunner(object):
         self.failed = 0
 
     def collect(self, path, args, input, expected, test_type):
-        print test_type.capitalize(), 'test %s ...' % path,
+        """
+        Run or compile a test as subprocess.
+
+        args        [str]
+            the arguments that constitute a subprocess invocation
+        input       str
+            the input to be send on stdin to the process
+        expected    str
+            output expected from the subprocess
+        test_type   str
+            what kind of test is it (compile, error or run)
+        """
+        print '%-10s %-50s ... ' % (test_type.capitalize(), path),
 
         p = subprocess.Popen(args,
                              stdin=subprocess.PIPE,
@@ -40,31 +52,53 @@ class TestRunner(object):
             _, output = output.split('\n', 1)
 
         def test_failed():
-            print '%s test %r (%s) failed with exit status %d:' % (
-                     test_type.capitalize(), test, path, exit_status)
+            "A test failed, print the output and exit status"
+            #print '%s test %r (%s) failed with exit status %d:' % (
+            #         test_type.capitalize(), test, path, exit_status)
+
 
             if expected:
-                print 'Got:'
+                def print_lines(lines1, lines2):
+                    "print the difference between lines1 and lines2"
+                    # zip() cuts short, use map(None, ...)
+                    for line1, line2 in map(None, lines1, lines2):
+                        if line1 is None:
+                            break
 
-            print '\n'.join('    ' + line for line in output.splitlines())
+                        if line1.strip() != line2.strip():
+                            marker = '    >>>'
+                        else:
+                            marker = '       '
 
-            if expected:
-                print 'Expected:'
-                print '\n'.join('    ' + line for line in expected.splitlines())
+                        print marker, line1
 
-            print '-' * 80, '\n'
+                print '  Got:'
+                print_lines(output_lines, expected_lines)
+
+                print '  Expected:'
+                print_lines(expected_lines, output_lines)
+            else:
+                print '\n'.join(' ' * 8 + line for line in output_lines)
+
+            print '-' * 80
 
             if self.exit_on_failure:
                 sys.exit(1)
 
             self.failed += 1
 
-        test, _ = os.path.splitext(os.path.split(path)[-1])
-        if (expected and output != expected or
-                test_type != 'error' and exit_status != 0 or
-                test_type == 'error' and exit_status == 0):
 
-            print 'FAIL'
+        output_lines = [line.strip() for line in output.splitlines()]
+        if expected:
+            expected_lines = [line.strip() for line in expected.splitlines()]
+        else:
+            expected_lines = None
+
+        if ((expected_lines and expected_lines != output_lines) or
+                (test_type != 'error' and exit_status != 0) or
+                (test_type == 'error' and exit_status == 0)):
+
+            print 'FAIL (exit status %d)' % exit_status
             test_failed()
             return False
 
@@ -76,13 +110,18 @@ class TestRunner(object):
         self.collect(test, args, input, output, test_type=test_type)
 
     def run_test(self, test, input, output):
-        compile_result = self.compile_test(test, input, output, test_type='compile')
+        compile_result = self.compile_test(test, input, output,
+                                           test_type='compile')
 
         if compile_result:
             args = ['java', '-classpath', '.', 'Main']
             self.collect(test, args, input, output, test_type='run')
 
     def create_temp_test(self, path):
+        """
+        Copy a test specified by path to temp.selma and retrieve and input
+        it should receive and any output that is expected.
+        """
         f = open(path)
         data = f.read()
         f.close()
@@ -109,6 +148,9 @@ class TestRunner(object):
                             if line.strip()))
 
     def run(self):
+        """
+        Find all tests in the test subdirectory and compile and/or run them.
+        """
         total = 0
         for subdir, dirs, files in os.walk('test'):
             for filename in files:
@@ -134,6 +176,10 @@ class TestRunner(object):
                                 total - self.failed, self.failed)
 
     def cleanup(self):
+        """
+        Remove any temporary files. The --exit command line argument omits
+        this step.
+        """
         os.remove('temp.selma')
         try:
             os.remove('temp.selma.jasmin')

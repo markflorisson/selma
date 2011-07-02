@@ -1,0 +1,7 @@
+<output>ERROR: @ (7:0) Paramcount is not as big defined in the function</output>
+
+function foo(){
+6;
+};
+
+@foo(1,);

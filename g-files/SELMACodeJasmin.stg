@@ -36,7 +36,7 @@ compound(instructions, line, pop) ::= <<
 .line <line>
 <instructions; separator="\n">
 <if (pop)>
-    ; removeLastInstruction  ; line <line>
+    removeLastInstruction  ; line <line>
 <endif>
 >>
 
@@ -79,7 +79,7 @@ L<label_num2>:
 >>
 
 //Declare
-declareConst(id, val, type, addr)::=<<
+declareConst(id, val, type, addr) ::= <<
     ldc <val>                    ; const <id> : <type>
     istore <addr>
 >>
@@ -118,7 +118,7 @@ loadChar(val, char, line) ::= <<
 assign(id, type, addr, e1, isint) ::= <<
 <e1>                            ; e1 right hand for assignment
     dup
-    istore <addr>
+    istore <addr>               ; store e1 in <id>
 >>
 
 read(addrs, dup_top, is_bool, is_int, line) ::= <<

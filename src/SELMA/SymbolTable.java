@@ -44,9 +44,10 @@ public class SymbolTable<Entry extends IdEntry> {
     	for (Map.Entry<String, Stack<Entry>> entry: entries.entrySet()){
     		Stack<Entry> stack = entry.getValue();
     		if ((stack != null) && (!stack.isEmpty()) && (stack.peek().level >= currentLevel)){
-    			stack.pop();
+    			Entry e = stack.pop();
     			localCount = nextAddr > localCount ? nextAddr : localCount;
-                nextAddr--;
+                if (isLocal(e))
+                    nextAddr--;
     		}
     	}
        	currentLevel--;
@@ -55,6 +56,11 @@ public class SymbolTable<Entry extends IdEntry> {
     /** Returns the current scope level. */
     public int currentLevel() {
         return currentLevel;
+    }
+
+    /** Return whether the entry takes up space on the stack */
+    private boolean isLocal(Entry entry) {
+        return entry instanceof CheckerEntry && ((CheckerEntry) entry).kind != SR_Kind.CONST;
     }
 
     /**
@@ -70,18 +76,17 @@ public class SymbolTable<Entry extends IdEntry> {
     	if (currentLevel < 0) {
         	throw new SymbolTableException(tree, "Not in a valid scope.");
         }
+
         Stack<Entry> s = entries.get(id);
-        if (s==null) {
-        	s = new Stack<Entry>();
+        if (s == null) {
+            s = new Stack<Entry>();
+            entries.put(id, s);
+        }
+
+        if (s.isEmpty() || s.peek().level != currentLevel) {
         	entry.level = currentLevel;
         	s.push(entry);
-        	entries.put(id, s);
-        	if (entry instanceof CheckerEntry && ((CheckerEntry) entry).kind != SR_Kind.CONST)
-                nextAddr++;
-        } else if (s.isEmpty() || s.peek().level != currentLevel){
-        	entry.level=currentLevel;
-        	s.push(entry);
-        	if (entry instanceof CheckerEntry && ((CheckerEntry) entry).kind != SR_Kind.CONST)
+        	if (isLocal(entry))
                 nextAddr++;
         } else {
         	throw new SymbolTableException(tree, "Entry "+id+" already exists in current scope.");
@@ -98,8 +103,9 @@ public class SymbolTable<Entry extends IdEntry> {
     public Entry retrieve(Tree tree) throws SymbolTableException{
     	String id = tree.getText();
     	Stack<Entry> s = entries.get(id);
-    	if (s==null||s.isEmpty())
-    		throw new SymbolTableException(tree, "Entry not found: "+id);
+    	if (s==null||s.isEmpty()) {
+            throw new SymbolTableException(tree, "Entry not found: "+id);
+        }
     	return s.peek();
     }
 
@@ -116,16 +122,6 @@ public class SymbolTable<Entry extends IdEntry> {
     /* Get the locals limit for this stack frame */
     public int  getLocalsCount() {
         return nextAddr > localCount ? nextAddr : localCount;
-        /*
-        int localCount = 0;
-
-        for (Stack<Entry> stack : entries.values()) {
-            if (stack.size() > 0 && stack.peek().level >= currentLevel) {
-                localCount++;
-            }
-        }
-
-        return localCount;     */
     }
 }
 

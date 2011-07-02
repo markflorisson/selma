@@ -1,0 +1,5 @@
+<output>
+Exception in thread "main" java.lang.ArithmeticException: / by zero
+    at Main.main(temp.selma:5)
+</output>
+10 / 0;

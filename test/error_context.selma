@@ -1,0 +1,31 @@
+var x, y: integer;
+const z: integer = 1;
+z := 10;
+12 := 10;
+x + y := 10;
+
+- ’a’;
++ true;
+var c: character;
+!c;
+var b: boolean;
+b + 10 * c % 2;
+’a’ < c;
+b && 10 || c;
+
+’a’ = b;
+b <> 10;
+x + y = c;
+
+c := x + y;
+b := 10;
+
+p; q;
+var q: boolean;
+
+{ 2 + 4 * 3; var w: integer; };
+
+read(x, y) + 10;
+’c’ <> write(x, y);
+10 + { var u, v: integer; read(u, v); write(u, v); };
+
