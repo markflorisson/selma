@@ -126,6 +126,7 @@ assign(id, type, addr, e1, isint) ::= <<
 <e1>                            ; e1 right hand for assignment
     dup
     istore <addr>               ; store e1 in <id>
+
 >>
 
 read(addrs, dup_top, is_bool, is_int, line) ::= <<
@@ -133,7 +134,7 @@ read(addrs, dup_top, is_bool, is_int, line) ::= <<
 <addrs, is_bool, is_int : { a, b, i | <readSingle(addr=a,
                                                   is_bool=b,
                                                   is_int=i,
-                                                  dup_top=dup_top) > }>
+                                                  dup_top=dup_top) > }; separator="\n">
 
 >>
 
@@ -154,6 +155,8 @@ readSingle(addr, is_bool, is_int, dup_top) ::= <<
     dup
 
 <endif>
+
+
     istore <addr>
 >>
 

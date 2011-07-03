@@ -3,41 +3,44 @@ package SELMA;
 import SELMA.SELMATree.SR_Kind;
 import SELMA.SELMATree.SR_Type;
 import SELMA.SELMATree.SR_Func;
-import java.util.ArrayList; 
+import java.util.ArrayList;
 import org.antlr.runtime.tree.Tree;
 
 public class CheckerEntry extends IdEntry {
-    
-class Param {
-String name; SR_Type type;
-Param (String name, SR_Type type){
-this.name=name;this.type=type;
-}
-}
+
+    class Param {
+        String name; SR_Type type;
+
+        Param (String name, SR_Type type) {
+            this.name = name;
+            this.type = type;
+        }
+    }
 
     public SR_Type type;
     public SR_Kind kind;
     public SR_Func func;
     public ArrayList<Param> params;
 
-
 	public CheckerEntry(SR_Type type, SR_Kind kind) {
 		super();
-    	this.type=type;
-    	this.kind=kind;
-	this.func=SR_Func.NO;
+    	this.type = type;
+    	this.kind = kind;
+	    this.func = SR_Func.NO;
 	}
 	public CheckerEntry(SR_Type type, SR_Kind kind, SR_Func func) {
 		super();
-    	this.type=type;
-    	this.kind=kind;
-	this.func=func;
-	params=new ArrayList<Param>();
+    	this.type = type;
+    	this.kind = kind;
+	    this.func = func;
+	    params = new ArrayList<Param>();
 	}
-	public void addParam(Tree id, SR_Type type) {
-	    	String name = id.getText();
+
+    public void addParam(Tree id, SR_Type type) {
+	    String name = id.getText();
 		params.add(new Param(name,type));
 	}
+
 	public String toString() {
 		String s = "";
 		s += " [";

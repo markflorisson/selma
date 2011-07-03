@@ -30,6 +30,23 @@ options {
 @members {
 	public SymbolTable<CheckerEntry> oldSt;
 	public SymbolTable<CheckerEntry> st = new SymbolTable<CheckerEntry>();
+
+	public void matchType(Tree expectedType, SR_Type exprType) {
+	    matchType(((SELMATree) expectedType).getSelmaType(), exprType);
+	}
+
+	public void matchType(Tree expectedType, Tree exprType) {
+	    matchType(((SELMATree) expectedType).getSelmaType(),
+	              ((SELMATree) exprType).getSelmaType());
+	}
+
+	public void matchType(SR_Type expectedType, SR_Type exprType) {
+	    if (expectedType != exprType)
+		throw new SELMAException(String.format(
+			"Expected type \%s, got type \%s",
+			expectedType,
+			exprType));
+	}
 }
 
 program
@@ -67,97 +84,54 @@ expression_statement
 declaration
 	: ^(node=VAR type id=ID)
    {
-   int type = node.getChild(0).getType();
-
-   switch (type){
-     case INT:
-     st.enter($id,new CheckerEntry(SR_Type.INT,SR_Kind.VAR));
-     break;
-     case BOOL:
-     st.enter($id,new CheckerEntry(SR_Type.BOOL,SR_Kind.VAR));
-     break;
-     case CHAR:
-     st.enter($id,new CheckerEntry(SR_Type.CHAR,SR_Kind.VAR));
-     break;
-   }
+       st.enter($id, new CheckerEntry(((SELMATree) node.getChild(0)).getSelmaType(),
+                                      SR_Kind.VAR));
    }
 	| ^(node=CONST type val id=ID)
-	 {
-   int type = node.getChild(0).getType();
-   int val  = node.getChild(1).getType();
+    {
+	     int type = node.getChild(0).getType();
+         int val  = node.getChild(1).getType();
 
-	 switch (type){
-     case INT:
-     if (val!=NUMBER) throw new SELMAException(id,"Expecting int-value");
-     st.enter($id,new CheckerEntry(SR_Type.INT,SR_Kind.CONST));
-     break;
-     case BOOL:
-     if (val!=BOOLEAN) throw new SELMAException(id,"Expecting bool-value");
-     st.enter($id,new CheckerEntry(SR_Type.BOOL,SR_Kind.CONST));
-     break;
-     case CHAR:
-     if (val!=CHARV) throw new SELMAException(id,"Expecting char-value");
-     st.enter($id,new CheckerEntry(SR_Type.CHAR,SR_Kind.CONST));
-     break;
-	 }
-	 }
+         switch (type) {
+           case INT:
+             if (val!=NUMBER) throw new SELMAException(id,"Expecting int-value");
+             st.enter($id,new CheckerEntry(SR_Type.INT,SR_Kind.CONST));
+             break;
+           case BOOL:
+             if (val!=BOOLEAN) throw new SELMAException(id,"Expecting bool-value");
+             st.enter($id,new CheckerEntry(SR_Type.BOOL,SR_Kind.CONST));
+             break;
+           case CHAR:
+             if (val!=CHARV) throw new SELMAException(id,"Expecting char-value");
+             st.enter($id,new CheckerEntry(SR_Type.CHAR,SR_Kind.CONST));
+             break;
+         }
+    }
 	| ^(FUNCDEF funcname=ID
-{
-//enter as void
-st.enter($funcname, new CheckerEntry(SR_Type.VOID,SR_Kind.VAR,SR_Func.YES));
-//scope of function
-st.openScope();
-}
-					 (param=ID typ1=(INT|BOOL|CHAR)
-{
-//add all params
-    switch(typ1.getType()) {
-        case INT:
-            st.retrieve($funcname).addParam(param,SR_Type.INT);
-	st.enter($param,new CheckerEntry(SR_Type.INT,SR_Kind.VAR));
-            break;
-        case BOOL:
-            st.retrieve($funcname).addParam(param,SR_Type.BOOL);
-	st.enter($param,new CheckerEntry(SR_Type.BOOL,SR_Kind.VAR));
-            break;
-        case CHAR:
-            st.retrieve($funcname).addParam(param,SR_Type.CHAR);
-	st.enter($param,new CheckerEntry(SR_Type.CHAR,SR_Kind.VAR));
-            break;
-	}
-}
+   {
+       //enter as void
+       st.enter($funcname, new CheckerEntry(SR_Type.VOID, SR_Kind.VAR, SR_Func.YES));
+       st.openScope();
+   }
+       (param=ID typ1=(INT|BOOL|CHAR)
+   {
+	st.addParamToFunc($funcname, param, $typ1);
+   }
 		)*
 		(
 			^(node=FUNCRETURN type compoundexpression expression
-{
-int type 	= node.getChild(0).getType();
-SELMATree expr 	= (SELMATree)node.getChild(2);
-
-//set type
-st.retrieve($funcname).type=expr.SR_type;
-
-switch(type){
-case INT:
-	if (expr.SR_type!=SR_Type.INT) throw new SELMAException(node,"Return type is not the same as the defined type");
-	break;
-case BOOL:
-	if (expr.SR_type!=SR_Type.BOOL) throw new SELMAException(node,"Return type is not the same as the defined type");
-	break;
-case CHAR:
-	if (expr.SR_type!=SR_Type.CHAR) throw new SELMAException(node,"Return type is not the same as the defined type");
-	break;
-}
-}
-			)
-			|
-			(compoundexpression))
-{
-//scope of function
-st.closeScope();
-}
-		)
-
-	;
+   {
+	SELMATree type = (SELMATree) node.getChild(0);
+	SELMATree expr = (SELMATree) node.getChild(2);
+	st.retrieve($funcname).type = expr.SR_type;
+	
+	matchType(type, expr.SR_type);
+   })
+ 	| (compoundexpression))
+   {
+	//scope of function
+	st.closeScope();
+   });
 
 type
   : node=INT

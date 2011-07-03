@@ -1,8 +1,9 @@
 package SELMA;
+import java.lang.RuntimeException;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.*;
 
-class SELMAException extends RecognitionException {
+class SELMAException extends RuntimeException { //RecognitionException {
     private String msg;
     public static final long serialVersionUID = 241645436L; // for Serializable
 

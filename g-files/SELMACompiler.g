@@ -12,6 +12,7 @@ options {
   import SELMA.SELMA;
   import SELMA.SELMATree.SR_Type;
   import SELMA.SELMATree.SR_Kind;
+  import SELMA.SELMATree.SR_Func;
 }
 
 @rulecatch {
@@ -22,14 +23,41 @@ options {
 
 @members {
     public SymbolTable<CompilerEntry> st = new SymbolTable<CompilerEntry>();
+    
     int curStackDepth;
     int maxStackDepth;
-
     int labelNum = 0;
 
+    class StackDepthLabelCounter {
+        public int curStackDepth;
+        public int maxStackDepth;
+        public int labelNum = 0;
+    }
+
+    Stack<StackDepthLabelCounter> stack = new Stack<StackDepthLabelCounter>();
+
     private void incrStackDepth() {
-    	if (++curStackDepth > maxStackDepth)
+    	if (curStackDepth > maxStackDepth)
     	    maxStackDepth = curStackDepth;
+    }
+
+    private void enterFuncScope() {
+        StackDepthLabelCounter o = new StackDepthLabelCounter();
+        o.curStackDepth = curStackDepth;
+        o.maxStackDepth = maxStackDepth;
+        o.labelNum = labelNum;
+        stack.push(o); 
+        
+        st.openScope();
+        curStackDepth = maxStackDepth = labelNum = 0;
+    }
+    
+    private void leaveFuncScope() {
+        StackDepthLabelCounter o = stack.pop();
+        st.closeScope();
+        curStackDepth = o.curStackDepth;
+        maxStackDepth = o.maxStackDepth;
+        labelNum = o.labelNum; 
     }
 
     private String getTypeDenoter(SR_Type type) {
@@ -75,7 +103,7 @@ declaration
   | ^(node=CONST INT val=NUMBER (id=ID)+)
   {st.enter($id,new CompilerEntry(SR_Type.INT, SR_Kind.CONST, 0).setVal($val.text)); }
   //-> declareConst(id={$id.text}, val={$val.text}, type={"integer"}, addr={st.nextAddr()-1})
-  
+
   | ^(node=CONST type=BOOL val=BOOLEAN id=ID)
   {st.enter($id, new CompilerEntry(SR_Type.BOOL, SR_Kind.CONST, 0).setBool($val.text)); }
   //-> declareConst(id={$id.text}, val={($val.text.equals("true"))?"1":"0"}, type={"boolean"}, addr={st.nextAddr()})
@@ -84,6 +112,23 @@ declaration
   { char c = $node.text.charAt(1);
     st.enter($id, new CompilerEntry(SR_Type.CHAR, SR_Kind.CONST, 0).setChar(c)); }
   //-> declareConst(id={$id.text}, val={(int) c}, type={"character"}, addr={st.nextAddr()-1})
+
+  | ^(node=FUNCDEF funcname=ID
+  {
+	st.enter($funcname, new CompilerEntry(SR_Type.VOID, SR_Kind.VAR, 0, SR_Func.YES));
+	enterFuncScope();
+  } (param=ID typ1=(INT|BOOL|CHAR)
+  {
+  	st.addParamToFunc($funcname, param, $typ1);
+  })*
+  (^(node=FUNCRETURN typ1=(INT|BOOL|CHAR) compoundexpression expression
+  {
+
+  })
+ 	| (compoundexpression))
+  {
+	leaveFuncScope();
+  })
   ;
 
 expression_statement

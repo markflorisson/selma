@@ -1,5 +1,6 @@
 package SELMA;
 import java.util.Arrays;
+import SELMA.SELMAException;
 
 import org.antlr.runtime.tree.*;
 import org.antlr.runtime.Token;
@@ -31,6 +32,24 @@ public class SELMATree extends CommonTree {
 	public SR_Kind SR_kind = null;
 	public SR_Func SR_func = null;
 
+    /* Given a type as AST Tree node, return the SR_Type */
+    public SR_Type getSelmaType() throws SELMAException {
+        switch (token.getType()) {
+          case SELMAChecker.INT:
+            return SR_Type.INT;
+          case SELMAChecker.BOOL:
+            return SR_Type.BOOL;
+          case SELMAChecker.CHAR:
+            return SR_Type.CHAR;
+          default:
+            try {
+                throw new SELMAException("Invalid type: " + token.getType());
+            } catch (SELMAException e) {
+                e.printStackTrace();
+                throw e;
+            }
+        }
+    }
 
 	public String toStringTree() {
 		return toStringTree(1);

@@ -1,19 +1,19 @@
 function foo() {
-1;
+    1;
 };
 
-function foo1(a,b:integer;c:boolean;) {
-1;
+function foo1(a, b : integer; c : boolean;) {
+    1;
 };
 
-function foo2():integer {
-1;
-return 6;
+function foo2() : integer {
+    1;
+    return 6;
 };
 
-function foo3(a,b:integer;c:boolean;):integer {
-1;
-return 5;
+function foo3(a, b : integer; c : boolean;) : integer {
+    1;
+    return 5;
 };
 
 6;

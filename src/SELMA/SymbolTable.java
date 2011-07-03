@@ -1,7 +1,11 @@
 package SELMA;
 
 import java.util.*;
+import SELMA.SELMATree.SR_Type;
 import SELMA.SELMATree.SR_Kind;
+import SELMA.SELMATree.SR_Func;
+
+import SELMA.SELMAChecker;
 
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.Tree;
@@ -100,13 +104,20 @@ public class SymbolTable<Entry extends IdEntry> {
      * @return  Entry of this id on the highest level
      *          null if this SymbolTable does not contain id
      */
-    public Entry retrieve(Tree tree) throws SymbolTableException{
+    public Entry retrieve(Tree tree) throws SymbolTableException {
     	String id = tree.getText();
     	Stack<Entry> s = entries.get(id);
     	if (s==null||s.isEmpty()) {
-            throw new SymbolTableException(tree, "Entry not found: "+id);
+            throw new SymbolTableException(tree, "Entry not found: " + id);
         }
     	return s.peek();
+    }
+
+    public void addParamToFunc(Tree func, Tree param, Tree type) {
+        SR_Type selmaType = ((SELMATree) type).getSelmaType();
+        CheckerEntry function = (CheckerEntry) retrieve(func);
+        function.addParam(param, selmaType);
+        enter(param, (Entry) new CheckerEntry(selmaType, SR_Kind.VAR));
     }
 
     public String toString(){
@@ -126,7 +137,7 @@ public class SymbolTable<Entry extends IdEntry> {
 }
 
 /** Exception class to signal problems with the SymbolTable */
-class SymbolTableException extends RecognitionException {
+class SymbolTableException extends RuntimeException { //RecognitionException {
     public static final long serialVersionUID = 24362462L; // for Serializable
     private String msg;
     public SymbolTableException(Tree tree, String msg) {
