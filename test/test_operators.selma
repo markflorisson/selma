@@ -1,0 +1,44 @@
+var v : integer;
+const c : character = 'c';
+
+v := 6;
+
+<output>true</output>
+print(5 < v);
+
+<output>false</output>
+print(5 > v);
+
+<output>false</output>
+print(true && false);
+
+<output>true</output>
+print(false || true);
+
+<output>true</output>
+print(5 <= v);
+
+<output>false</output>
+print(5 >= v);
+
+<output>
+    2
+    true
+</output>
+print(print(10 % 4) == 2) && !('a' <> c);
+
+// arithmetic
+<output>
+    5
+    -1
+    5
+    0
+    6
+</output>
+print(
+    10 - 5,
+    -5 + 4,
+    -2 * -2 + 1,
+    +1 - 2 * 3 / 5,
+    22 % 5 * 3
+);

@@ -105,17 +105,9 @@ class TestRunner(object):
         print 'OK'
         return True
 
-    def compile_test(self, test, input, output, test_type):
+    def compile_and_run(self, test, input, output, test_type):
         args = ['/bin/sh', 'selma', 'temp.selma']
-        self.collect(test, args, input, output, test_type=test_type)
-
-    def run_test(self, test, input, output):
-        compile_result = self.compile_test(test, input, output,
-                                           test_type='compile')
-
-        if compile_result:
-            args = ['java', '-classpath', '.', 'Main']
-            self.collect(test, args, input, output, test_type='run')
+        return self.collect(test, args, input, output, test_type=test_type)
 
     def create_temp_test(self, path):
         """
@@ -138,14 +130,15 @@ class TestRunner(object):
 
         inputs = re.findall(input_pattern, data, re.DOTALL)
         outputs = re.findall(output_pattern, data, re.DOTALL)
-        return ('\n'.join(line.strip()
-                    for s in inputs
+
+        def striplines(string):
+            return '\n'.join(
+                line.strip()
+                    for s in string
                         for line in s.splitlines()
-                            if line.strip()),
-                '\n'.join(line.strip()
-                    for s in outputs
-                        for line in s.splitlines()
-                            if line.strip()))
+                            if line.strip())
+
+        return striplines(inputs), striplines(outputs)
 
     def run(self):
         """
@@ -163,11 +156,15 @@ class TestRunner(object):
                 input, output = self.create_temp_test(path)
 
                 if suffix.lower() == '.selma':
-                    if filename.startswith(('compile_', 'error_')):
-                        self.compile_test(path, input, output,
-                                          test_type=filename.partition('_')[0])
+                    if filename.startswith('compile_'):
+                        test_type = 'compile'
+                    elif filename.startswith('error_'):
+                        test_type = 'error'
                     else:
-                        self.run_test(path, input, output)
+                        test_type = 'run'
+
+                    self.compile_and_run(path, input, output,
+                                         test_type=test_type)
 
                 total += 1
                 self.cleanup()

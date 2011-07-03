@@ -1,0 +1,8 @@
+<output>
+h
+e
+l
+l
+o
+</output>
+print('h', 'a', 'l', 'l', 'o');

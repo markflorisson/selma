@@ -146,8 +146,8 @@ expression
   -> uExpr(e1={$e1.st}, instr={"ineg"}, line={node.getLine()}, op={"-"})
 
   | ^(node=NOT e1=expression)
-  -> biExprJump(e1={$e1.st}, e2={"iconst_0"}, instr={"if_icmpeq"}, line={node.getLine()},
-  		op={"not"}, label_num1={labelNum++}, label_num2={labelNum++})
+  -> not(e1={$e1.st}, line={node.getLine()},
+  	 label_num1={labelNum++}, label_num2={labelNum++})
 
 //CONDITIONAL
   | ^(node=IF { st.openScope(); } ec1=compoundexpression { st.closeScope(); } THEN 

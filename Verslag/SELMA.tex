@@ -7,14 +7,17 @@ s0132778\\
 Matenweg 75-201\\
 \\
 Florisson, M\\
-s000000\\
-Box Calslaan xx-30}
+s0165972\\
+Box Calslaan 60-30}
 
 \usepackage{listings}
 \usepackage{lscape}
 \usepackage{color}
 \usepackage[pdftex,bookmarks=true]{hyperref}
 \usepackage{hyperref}
+\usepackage{verbatim}
+% \usepackage[T1]{fontenc}
+
 \hypersetup{
     colorlinks,
     citecolor=black,
@@ -47,6 +50,8 @@ Box Calslaan xx-30}
 \begin{titlepage}
 \maketitle 
 \end{titlepage}
+\setcounter{secnumdepth}{5}
+\setcounter{tocdepth}{5}
 \tableofcontents{}
 
 \newpage
@@ -588,10 +593,324 @@ foo+2;
 
 \newpage
 \section{Vertaalregels}
-voor de taal, d.w.z. de transformaties waaruit blijkt op welke wijze een opeen-
-volging van symbolen die voldoet aan een produktieregel wordt omgezet in een opeenvol-
-ging van TAM-instructies. Vertaalregels zijn de ‘code templates’ van hoofdstuk 7 van Watt
-\& Brown.
+Deze sectie specificeerd hoe selma programmas naar Jasmin worden vertaald. Jasmin is een assembler die gegeven Jasmin assembly JVM bytecode genereerd in de vorm van een \texttt{.class} file.
+
+De vertaling wordt gedaan door middel van een compiler (g-files/SELMACompiler.g) in ANTLR die executeerd na de checker en producties uit de Jasmin string template aanroept (SELMACodeJasmin.stg).
+
+We gebruiken de volgende code functies:
+
+\begin{itemize}
+	\item run       : Program     -> Instruction*
+	\item execute   | ExpressionStatement -> Instruction*
+ 	\item evaluate  : Expression  -> Instruction*
+ 	\item fetch		  : Identifier  -> Instruction*
+ 	\item assign    : Identifier   -> Instruction*
+ 	\item elaborate : VarDeclaration -> Instruction*
+\end{itemize}
+
+\begin{tabular}{| l | c | l |}
+	Phare   & Code Function & Effect \\ 
+	\hline \hline
+  Program & run P       & Run P en begin en eindig met een lege stack. Doe ook de \\
+  &&                      nodige declaraties om classen en methoden te genereren. \\
+  &&											 Return hierna.\\ 
+  \hline
+  ExprStat & execute E  & Executeer statement S. Als S een expressie is dat \\
+  && 										 een waarde op de stack genereerd, pop. Dit veranderd de \\
+  &&											 stack niet. \\ 
+  \hline
+  Expression & evaluate E & Evalueer expressie E en laat de nieuwe waarde op de stack staan.\\
+  &&												 Een expressie kan 1 of 2 oude waarden van de stack halen (e.g. AND). \\ 
+  \hline
+  ID				   & fetch I    & Laad de waarde van I en zet het op de stack. \\
+  \hline
+  ID					 & assign I   & Pop de top van de stack en sla het op in I. \\
+  \hline
+\end{tabular}
+
+In onze vertaalregels zullen we variabelen omringen met \textless en \textgreater.
+
+\subsection{Run}
+\subsubsection{Program}
+\begin{verbatim}
+run[P, source_file, stack_limit, locals_limit, pop] = 
+	  .source <source_file>
+	  .class public Main
+	  .super java/lang/Object
+	  .field public static scanner_field Ljava/Util/Scanner;
+	  
+	  .method public static main([Ljava/lang/String;)V
+	  .limit stack <stack_limit>
+	  .limit locals <locals_limit>
+    new java/util/Scanner
+    dup
+    getstatic java/lang/System/in Ljava/io/InputStream;
+    invokespecial java/util/Scanner/<init>(Ljava/io/InputStream;)V
+    putstatic Main/scanner_field Ljava/util/Scanner;
+
+    evaluate[P]
+    if <pop>:
+        pop
+
+    return
+.end method
+\end{verbatim}
+
+De \texttt{source\_file}, \texttt{stack\_limit} en \texttt{locals\_limit} geven respectievelijk aan wat de originele source file was (voor runtime excepties), de grootte van de stack en het aantal locale variabelen dat het programma gebruikt. \texttt{pop} geeft aan of P een expressie was en nog een waarde op de stack heeft achtergelaten. Dit zou ook opgelost kunnen worden door de regel
+
+\begin{verbatim}
+    program -> expression_statement
+    expression_statement -> expression
+    expression -> ... | compoundexpression
+    compoundexpression -> (declaration | expression_statement)* 
+\end{verbatim}
+
+in plaats van
+
+\begin{verbatim}
+    program -> compoundexpression
+\end{verbatim}
+
+Helaas resulteerd dit in Left Recursion waar we geen tijd meer voor hadden dit op te lossen. Een simpele \texttt{pop = expression.type != type.VOID} lost dit echter gauw genoeg op.\\
+\\
+Als er labels in code regels voorkomen als L1, L2, etc, zullen deze in werkelijkheid uniek genummerd zijn.
+
+\subsection{Execute}
+\subsubsection{ExpressionStatement}
+
+\begin{verbatim}
+execute[S, pop] =
+    evaluate[S]
+    if pop:
+        pop
+\end{verbatim}
+
+\texttt{S} is hierbij een expressie en pop is wederom true iff \texttt{expression.type != type.VOID}.
+
+\subsubsection{while}
+\begin{verbatim}
+execute[while E; do S; od] =
+    L1:
+        evaluate[E]
+        ifeq	 L2	
+        execute[S]
+        goto L1
+    L2:
+\end{verbatim}
+
+De \texttt{ifeq} instructie kijkt of de waarde op de top van de stack gelijk is aan 0 (boolean waarden zijn integer waarden 0 of 1), en als dat het geval is jumpt de interpreter naar de label L2 (naar de eerstvolgende instructie na de while loop). Als dit niet het geval is gaat hij verder met de eerste instructie van \texttt{S} en hierna volgt een jump naar het begin om te kijken of een volgende iteratie nodig is.
+
+\subsection{Evaluate}
+\subsubsection{Compound Expression}
+Omdat een compound expression ook weer een expressie is, maar bestaat uit expressie statements, moet de codegenerator de mogelijk gegenereerde pop van de laatste expressie statement verwijderen. De regel is als volgt:
+
+\begin{verbatim}
+compoundexpression = COMPOUND (declaration | expression_statement)*
+
+evaluate[E, last_expr_is_void] =
+    evaluate[E]
+    if not <last_expr_is_void>:
+    	    remove_last_instruction
+\end{verbatim}
+
+Hier geeft de variabele \texttt{last\_expr\_is\_void} aan of de laatste expressie (als er tenminste 1 expressie is) van type VOID is. Als dit niet het geval is, is er een pop gegenereerd door \texttt{expression\_statement} die verwijderd moet worden. Dit gebeurt door een dummy instructie \texttt{remove\_last\_instruction} te genereren die de laaste instructie verwijderd. Dit gebeurd voordat het resultaat naar een Jasmin aseembly file geschreven wordt.
+
+\subsubsection{if then else expression}
+
+\begin{verbatim}
+evaluate[if E1 then E2 (else E3)?] =
+        evaluate[E1]
+        ifeq L1
+        evaluate[E2]
+        goto L2
+    L1:
+        evaluate[E3]
+    L2:
+\end{verbatim}
+
+\subsubsection{Identifier}
+\label{Identifier}
+
+\begin{verbatim}
+evaluate[ID, kind] =
+    if kind == CONST:
+        ldc getvalue(<ID>)
+    else:
+        iload address_of(<ID>)
+\end{verbatim}
+
+Als de variabele een constante is wordt de waarde bijgehouden in de symbol table. De functie \texttt{getvalue} haalt hier de waarde van de constante op.
+\texttt{address\_of} is hier een functie die gegeven een identifier zijn address als locale variabele ophaalt.
+
+\subsubsection{Integer Literal}
+\begin{verbatim}
+evaluate[literal, iconst, bipush, ldc] =
+    if iconst:	
+        iconst_<literal>
+    elif bipush:
+        bipush <literal>
+    else:	
+        ldc <literal>
+\end{verbatim}
+
+Als de integer literal in de juiste range van iconst of bipush zit, worden deze geprefereerd over ldc voor compactere bytecode.
+
+\subsubsection{Character Literal}
+\begin{verbatim}
+evaluate[literal] =
+    bipush <literal>
+\end{verbatim}
+
+\subsubsection{Boolean Literals}
+\begin{verbatim}
+evaluate[true] =
+    iconst_1
+\end{verbatim}
+
+en
+
+\begin{verbatim}
+evaluate[false] =
+    iconst_0
+\end{verbatim}
+
+\subsubsection{Arithmetic, AND en OR}
+\begin{verbatim}
+evaluate[E1, op, E2, instruction] =
+    evaluate[E1]
+    evaluate[E2]
+    <instruction>		; E1 <op> E2
+\end{verbatim}
+
+Hierbij is op een binaire arithmetic operator zoals \texttt{+}, \texttt{-}, etc, of AND/OR. \texttt{instruction} is de bijbehorende JVM Jasmin instructie. De operators mappen als volgt naar hun instructies:
+
+\begin{itemize}
+	\item \texttt{+} : \texttt{iadd}
+	\item \texttt{-} : \texttt{isub}
+	\item \texttt{*} : \texttt{imul}
+	\item \texttt{/} : \texttt{idiv}
+	\item \texttt{\%} : \texttt{irem}
+	
+	\item \texttt{\&\&} : \texttt{iand}
+	\item || : \texttt{ior}
+\end{itemize}
+
+\subsubsection{Relational operators}
+
+\begin{verbatim}
+evaluate[E1 op E2, instruction] =
+    evaluate[E1]
+    evaluate[E2]
+    <instruction> L1	  ; E1 <op> E2
+    iconst_0
+    goto L2
+L1:
+    iconst_1
+L2:
+\end{verbatim}
+
+Voor elke relational relational operator zoals \texttt{\textless=}, \texttt{==} etc wordt deze code gegenereerd met bijbehorende instructie. De opererator naar instructie mapping is als volgt:
+
+\begin{verbatim}
+	<  : ifcmp_lt
+	<= : ifcmp_le
+	== : ifcmp_eq
+	!= : ifcmp_ne
+	>= : ifcmp_ge
+	>  : ifcmp_gt
+\end{verbatim}
+
+\subsubsection{Unary Plus and Minus}
+\begin{verbatim}
+evaluate[-E] =
+    evaluate[E]
+    ineg	
+\end{verbatim}
+
+Voor unary \texttt{+} hoeft er niets te gebeuren.
+
+\subsubsection{NOT}
+\begin{verbatim}
+evaluate[!E] =
+    evaluate[E]
+    ifeq L1
+    iconst_0
+    goto L2
+L1:
+    iconst_1
+L2:
+\end{verbatim}
+
+\subsubsection{Assignment}
+\begin{verbatim}
+evaluate[ID := E, address] =
+    evaluate[E]
+    dup
+    istore <address>
+\end{verbatim}
+
+\texttt{address} is het address van de locale variabele. De \texttt{dup} is nodig om de waarde eerst te dupliceren aangezien assignment een expressie is.
+
+\subsubsection{Print}
+\begin{verbatim}
+evaluate[print(E+), type_denoters, bools, dup_top] =
+    for expr, type_denoter, is_bool in E, type_denoters, bools:
+        evaluate[expr]
+
+        if <dup_top>:
+            dup		
+		
+        if <is_bool>:
+                ifeq L1
+                ldc "true"
+                goto L2
+            L1:
+                ldc "false"
+            L2:
+		
+        getstatic java/lang/System/out Ljava/io/PrintStream;
+        swap
+        invokevirtual java/io/PrintStream/println(<type_denoter>)V
+\end{verbatim}
+
+Hier krijgt de vertaalregel voor elke expressie mee of het type \texttt{boolean} is (\texttt{bools}), en welke overloaded versie van \texttt{System.out.println} moet worden aangeroepen (\texttt{type\_denoters}). In het geval van een boolean moet de waarde \texttt{"true"} of \texttt{"false"} worden geladen in plaats van de integer waarde. De boolean dup\_top geeft aan of de print een statement of expressie is. Als het een expressie is (in het geval van een enkele print), moet de waarde worden gedupliceerd op de stack voordat de println de waarde popt.
+
+\subsubsection{Read}
+\begin{verbatim}
+evaluate[read(ID+), bools, ints, dup_top] =
+    for id, is_bool, is_int in ID, bools, ints:
+		    getstatic Main/scanner_field Ljava/util/Scanner;
+		
+        if <is_bool>:
+            invokevirtual java/util/Scanner/nextBoolean()Z
+        elif <is_int>:
+            invokevirtual java/util/Scanner/nextInt()I
+        else:
+            invokevirtual java/util/Scanner/nextByte()I		
+				
+        if <dup_top>:
+            dup		
+		
+        istore address_of(<id>)
+\end{verbatim}
+
+Hier krijgt de vertaalregel voor elke expressie mee of het type \texttt{boolean} of int is (\texttt{bools}, texttt{ints}) en of de read een expressie is (\texttt{dup\_top}). \texttt{address\_of} is hier een functie die gegeven een identifier zijn address als locale variabele ophaalt. Afhankelijk van het type (boolean, integer of character) wordt een aanroep gedaan naar de methoden nextBoolean(), nextInt() of nextByte() van Scanner.
+
+\subsection{Elaborate}
+De elaborate code functie genereerd geen code, maar maakt entries aan in de compiler's symbol table.
+
+\begin{verbatim}
+elaborate[VarDeclaration type ID] =
+    increase amount of local variables by one
+    enter <ID> of <type> in symbol table
+
+elaborate[ConstDeclaration type ID value] =
+    increase amount of local variables by one
+    enter <ID> of <type> in symbol table
+    set value on symbol table entry of <ID>
+\end{verbatim}
+
+Constanten nemen geen ruimte in op de stack of als locale variabelen maar worden in de symbol table bijgehouden. Variabelen zijn locale variabelen in de JVM. Dit betekent dat variabelen in de global scope niet beschikbaar zijn voor functies, aangezien dat andere methoden zijn en geen closures over de main functie. Hiervoor zouden het statische of non-statische fields moeten zijn. Zie ook de subsectie over Identifiers \ref{Identifier}.
 
 \newpage
 \section{Beschrijving van Java programmatuur}
@@ -660,14 +979,85 @@ De compilerEntry is weer een uitbreiding op de CheckerEntry. Voor de compiler is
 
 \newpage
 \section{Testplan en -resultaten}
-Bespreking van de ‘correctheids-tests’ aan de hand van de criteria
-zoals deze zijn beschreven in het §A.5 van deze appendix. Aan de hand van deze criteria moet
-een verzameling test-programma’s in het taal geschreven worden die de juiste werking van de
-vertaler en interpreter controleren. Tot deze test-set behoren behalve correcte programma’s
-die de verschillende taalconstructies testen, ook programma’s met syntactische, semantische
-en run-time fouten.
-Alle uitgevoerde tests moeten op de CD-R aanwezig zijn; van een testprogramma moet de
-uitvoer in de appendix opgenomen worden (zie onder).
+Voor het testen hebben we testprogramma's geschreven in onze taal. Ook zit er een testrunner bij die automatisch alle tests in de 'test' subdirectory vind en compileerd en optioneel executeerd.
+Tests kunnen van de volgende typen zijn:
+\begin{itemize}
+	\item Compile - Compileer de test
+	\item Error	    - Compileer en (als successvol), executeer
+	\item Run		    - Compileer en executeer
+\end{itemize}
+
+Bij deze tests kunnen in het programma tags gezet worden, namelijk <input>text</input> voor input voor het programma op stdin, en <output>text</output> voor output van het programma (of de compiler, in het geval van een compile of error test). Error tests beginnen met de prefix 'error\_' in de bestandsnaam, en compile tests met 'compile\_'. Zo kan getest worden voor juiste syntax en semantiek, juiste error reporting bij onjuiste syntax en semantiek, en correctie vertaalregels door middel van correcte executie, en runtime error checking voor juiste programmas met runtime fouten. Om de tests te runnen is Python 2.5+ < 3.0 nodig. De tests kunnen als volgt worden geexecuteerd:
+
+\begin{lstlisting}
+\$ python test.py
+\end{lstlisting}
+
+of
+
+\begin{lstlisting}
+\$ make tests
+\end{lstlisting}
+
+
+Als een run test geen output heeft gespecificeerd is de exit status van het programma bepalend of de test faalt of niet. Bij een error test geldt het tegenovergestelde: zonder gespecificeerde output moet de exit status nonzero zijn.
+
+De tests in de test directory testen alle constructen uit de taal, zoals arithmetic, alle operators, typen, constanten, scope rules, etcetera. Hieronder is output gegeven van de test runner. Als een test faalt zal de output worden weergegeven:
+
+\begin{lstlisting}[style=SELMA]
+[0] [11:11] ~/selma git(master!) ➤ python test.py
+Run        test/correct.selma                                 ...  OK
+Error      test/error_context.selma                           ...  OK
+Error      test/error_if.selma                                ...  OK
+Error      test/error_runtime_uninitialized.selma             ...  OK
+Error      test/error_runtime_zerodivision.selma              ...  OK
+Error      test/error_syntax.selma                            ...  OK
+Error      test/error_while.selma                             ...  OK
+Error      test/error_while_void.selma                        ...  OK
+Run        test/sample.selma                                  ...  FAIL (exit status 0)
+  Got:
+        h
+    >>> a
+        l
+        l
+        o
+  Expected:
+        h
+    >>> e
+        l
+        l
+        o
+--------------------------------------------------------------------------------
+Run        test/test_if.selma                                 ...  OK
+Run        test/test_operators.selma                          ...  OK
+Run        test/test_while.selma                              ...  OK
+Run        test/test_functions/correct_functions.SELMA        ...  FAIL (exit status 1)
+        ERROR: recognition exception thrown by compiler: null
+        org.antlr.runtime.EarlyExitException
+        at SELMA.SELMACompiler.compoundexpression(SELMACompiler.java:271)
+        at SELMA.SELMACompiler.program(SELMACompiler.java:170)
+        at SELMA.SELMA.main(SELMA.java:99)
+--------------------------------------------------------------------------------
+Error      test/test_functions/error_doublefunction.selma     ...  OK
+Error      test/test_functions/error_wrongparamcount.selma    ...  OK
+Error      test/test_functions/error_wrongparamtype.selma     ...  OK
+Error      test/test_functions/error_wrongreturntype.selma    ...  OK
+Ran 17 test(s), SUCCESS=15, FAILURE=2
+\end{lstlisting}
+
+Hier zien we dat \texttt{test/sample.selma} niet de correcte output heeft, maar wel executeerde zonder fouten (exit status 0), terwijl \texttt{test/test\_functions/correct\_functions.SELMA} een compilatie fout had met een exit status 1. De eerste colom geeft het type test aan, in dit geval 'Error' of 'Run'. Ter demonstratie is \texttt{test/sample.selma} bijgevoegd:
+
+
+\begin{lstlisting}[style=SELMA]
+<output>
+    h
+    e
+    l
+    l
+    o
+</output>
+print('h', 'a', 'l', 'l', 'o');
+\end{lstlisting}
 
 \newpage
 \section{Conclusies}

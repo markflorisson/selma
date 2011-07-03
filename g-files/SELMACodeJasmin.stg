@@ -22,12 +22,8 @@ program(instructions, source_file, stack_limit, locals_limit, pop) ::= <<
     getstatic java/lang/System/in Ljava/io/InputStream;
     invokespecial java/util/Scanner/\<init\>(Ljava/io/InputStream;)V
     putstatic Main/scanner_field Ljava/util/Scanner;
-.line 1
-<instructions>
-<if (pop)>
-    pop
 
-<endif>
+<instructions>
     return
 .end method
 >>
@@ -53,10 +49,21 @@ exprStat(e1, pop, line) ::= <<
 >>
 
 //Calculations
-uExpr(e1, instr, line, op)::=<<
+uExpr(e1, instr, line, op) ::= <<
 .line <line>                    ; <op> <e1>
 <e1>
     <instr>
+>>
+
+not(e1, label_num1, label_num2, line) ::= <<
+.line <line>
+    <e1>
+	ifeq L<label_num1>
+	iconst_0
+	goto L<label_num2>
+L<label_num1>:
+	iconst_1
+L<label_num2>:
 >>
 
 biExpr(e1, e2, instr, line, op) ::= <<
@@ -131,13 +138,16 @@ read(addrs, dup_top, is_bool, is_int, line) ::= <<
 >>
 
 readSingle(addr, is_bool, is_int, dup_top) ::= <<
-
+    getstatic Main/scanner_field Ljava/util/Scanner;
 <if (is_bool)>
-<readBool()>
+    invokevirtual java/util/Scanner/nextBoolean()Z
+
 <elseif (is_int)>
-<readInt()>
+    invokevirtual java/util/Scanner/nextInt()I
+
 <else>
-<readChar()>
+    invokevirtual java/util/Scanner/nextByte()I
+
 <endif>
 
 <if (dup_top)>
@@ -145,26 +155,6 @@ readSingle(addr, is_bool, is_int, dup_top) ::= <<
 
 <endif>
     istore <addr>
->>
-
-readChar() ::= <<
-    ; getstatic java/lang/System/in Ljava/io/InputStream;
-    ; invokevirtual java/io/InputStream/read()I
-    getstatic Main/scanner_field Ljava/util/Scanner;
-    invokevirtual java/util/Scanner/nextByte()I
-
->>
-
-readBool() ::= <<
-    getstatic Main/scanner_field Ljava/util/Scanner;
-    invokevirtual java/util/Scanner/nextBoolean()Z
-
->>
-
-readInt() ::= <<
-    getstatic Main/scanner_field Ljava/util/Scanner;
-    invokevirtual java/util/Scanner/nextInt()I
-
 >>
 
 print(exprs, type_denoters, dup_top, expr_is_bool, label_nums1, label_nums2, line) ::= <<
