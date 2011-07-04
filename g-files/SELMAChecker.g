@@ -28,7 +28,6 @@ options {
 }
 
 @members {
-	public SymbolTable<CheckerEntry> oldSt;
 	public SymbolTable<CheckerEntry> st = new SymbolTable<CheckerEntry>();
 
 	public void matchType(Tree expectedType, SR_Type exprType) {
@@ -318,12 +317,14 @@ $node.SR_kind=entry.kind;
 
 //matchparamlists
 //same length?
-if (entry.params.size() != func.getChildCount()-1)
-	throw new SELMAException(node,"Paramcount is not as big defined in the function");
+int argc = func.getChildCount()-1;
+if (entry.params.size() != argc)
+	throw new SELMAException(node, String.format(
+		"\%s takes \%d arguments (\%d given)", $ID.text, entry.params.size(), argc));
 //every entry matches?
 for (int i=1; i<func.getChildCount(); i++){
-SELMATree expr = (SELMATree)func.getChild(i);
-if (expr.SR_type != entry.params.get(i-1).type)
+    SELMATree expr = (SELMATree)func.getChild(i);
+    if (expr.SR_type != entry.params.get(i-1).type)
 	throw new SELMAException(expr,"Param is not of the right type");
 }
 }

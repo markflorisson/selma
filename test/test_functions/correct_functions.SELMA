@@ -1,3 +1,5 @@
+const c : character = 'c';
+
 function foo() {
     1;
 };
@@ -13,7 +15,8 @@ function foo2() : integer {
 
 function foo3(a, b : integer; c : boolean;) : integer {
     1;
-    return 5;
+    return a * b + 5;
 };
 
-6;
+<output>7</output>
+print(@foo3(1, 2, true,));

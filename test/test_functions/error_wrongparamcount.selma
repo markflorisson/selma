@@ -1,7 +1,7 @@
-<output>ERROR: @ (7:0) Paramcount is not as big defined in the function</output>
+<output>ERROR: @ (7:0) foo takes 0 arguments (1 given)</output>
 
 function foo(){
-6;
+    6;
 };
 
 @foo(1,);

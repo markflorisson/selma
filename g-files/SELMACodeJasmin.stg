@@ -24,6 +24,12 @@ program(instructions, source_file, stack_limit, locals_limit, pop) ::= <<
     putstatic Main/scanner_field Ljava/util/Scanner;
 
 <instructions>
+
+<if (pop)>
+    pop
+
+<endif>
+
     return
 .end method
 >>
@@ -230,10 +236,10 @@ L<label_num1>:
 L<label_num2>:
 >>
 
-function(funcname, param_types, body, return_expression, return_type,
+function(funcname, signature, body, return_expression,
          pop, locals_limit, stack_limit, line) ::= <<
 \<method\>
-.method public <funcname>(<param_types; separator="">)<return_type>
+.method public static <funcname><signature>
 .limit stack <stack_limit>
 .limit locals <locals_limit>
 .line <line>
@@ -255,3 +261,7 @@ function(funcname, param_types, body, return_expression, return_type,
 \</method\>
 >>
 
+funccall(id, signature, exprs) ::= <<
+<exprs; separator="\n">
+    invokestatic Main/<id><signature>
+>>

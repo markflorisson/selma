@@ -13,6 +13,8 @@ options {
   import SELMA.SELMATree.SR_Type;
   import SELMA.SELMATree.SR_Kind;
   import SELMA.SELMATree.SR_Func;
+  
+  import java.lang.StringBuilder;
 }
 
 @rulecatch {
@@ -54,7 +56,8 @@ options {
         stack.push(o); 
         
         st.openScope();
-        curStackDepth = maxStackDepth = labelNum = st.nextAddr = st.localCount = 0;
+        curStackDepth = maxStackDepth = labelNum = st.localCount = 0;
+        st.nextAddr = 1;
     }
     
     private void leaveFuncScope() {
@@ -94,7 +97,7 @@ program
   { SELMATree expr = (SELMATree) $node.getChild(0); }
   -> program(instructions={$compoundexpression.st},
              source_file={SELMA.inputFilename},
-             stack_limit={maxStackDepth + 3}, // +3 for print and other additionally loaded constants
+             stack_limit={maxStackDepth + 3}, // +3 for print
              locals_limit={$node.localsCount + 1}, // +1 for the String[] argv parameter
              pop={expr.SR_type != SR_Type.VOID})
   ;
@@ -133,14 +136,18 @@ declaration
 
   | ^(node=FUNCDEF funcname=ID
   {
-	st.enter($funcname, new CompilerEntry(SR_Type.VOID, SR_Kind.VAR, 0, SR_Func.YES));
+	CompilerEntry funcentry = new CompilerEntry(
+	                SR_Type.VOID, SR_Kind.VAR, 0, SR_Func.YES);
+	st.enter($funcname, funcentry);
 	enterFuncScope();
 	int paramCount = 0;
-	List<String> paramTypeDenoters = new ArrayList<String>();
+	StringBuilder signatureBuilder = new StringBuilder("(");
+	//List<String> paramTypeDenoters = new ArrayList<String>();
   } (param=ID typ1=(INT|BOOL|CHAR)
   {
   	SELMATree type1 = (SELMATree) $node.getChild(++paramCount * 2);
-  	paramTypeDenoters.add(getTypeDenoter(type1.getSelmaType()));
+  	signatureBuilder.append(getTypeDenoter(type1.getSelmaType()));
+  	//paramTypeDenoters.add(getTypeDenoter(type1.getSelmaType()));
   	st.addParamToFunc($funcname, param, type1);
   })*
   ( ^(return_node=FUNCRETURN (INT|BOOL|CHAR) (body+=compoundexpression) retexpr=expression)
@@ -150,25 +157,27 @@ declaration
   	SELMATree funcbody;
   	int stackLimit = maxStackDepth + 3;
   	int localsLimit = st.getLocalsCount();
-  	String returnTypeDenoter;
+  	
+  	signatureBuilder.append(")");
   	
   	if ($return_node == null) {
   	    funcbody = (SELMATree) $node.getChild(paramCount * 2 + 1);
-  	    returnTypeDenoter = "V";
+  	    signatureBuilder.append("V");
   	} else {
   	    funcbody = (SELMATree) $return_node.getChild(1);
   	    SELMATree returnType = (SELMATree) $return_node.getChild(0);
-  	    returnTypeDenoter = getTypeDenoter(returnType.getSelmaType());
+  	    signatureBuilder.append(getTypeDenoter(returnType.getSelmaType()));
 	}
 	leaveFuncScope();
+	
+	String signature = signatureBuilder.toString();
+	funcentry.signature = signature;
   })
   -> function(funcname={$funcname.text}, 
               body={$body},
-              param_types={paramTypeDenoters},
-              return_expression={$retexpr.st},
-              return_type={returnTypeDenoter}, 
-              //pop={funcbody.SR_type != SR_Type.VOID && $node.SR_type == SR_Type.VOID},
-              is_void={returnTypeDenoter.equals("V")},
+              signature={signature},
+              return_expression={$retexpr.st}, 
+              is_void={signature.endsWith("V")},
               stack_limit={stackLimit},
               locals_limit={localsLimit + 1},
               line={$node.getLine()})
@@ -313,6 +322,9 @@ expression
     -> print(exprs={$exprs}, type_denoters={typeDenoters}, dup_top={isExpr},
              expr_is_bool={exprIsBool},
              label_nums1={labelNums1}, label_nums2={labelNums2}, line={$node.getLine()})
+  
+  | ^(node=FUNCTION id=ID (exprs+=expression)*)
+  	-> funccall(id={$id.text}, signature={st.retrieve($id).signature}, exprs={$exprs})
 //ASSIGN
   | ^(BECOMES node=ID e1=expression) { boolean isint = ($node.type == NUMBER  ||
                                        $node.type == BOOLEAN ||
@@ -339,8 +351,9 @@ expression
     //-> loadNum(val={(int) c}, iconst={false}, bipush={true})
     -> loadChar(val={(int) c}, char={$node.text}, line={$node.getLine()})
 
-  | node=ID { incrStackDepth(); }
+  | node=ID
     {
+    	incrStackDepth();
     	CompilerEntry entry = st.retrieve(node);
     	boolean isConst = node.SR_kind == SR_Kind.CONST;
     }

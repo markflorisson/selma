@@ -117,15 +117,16 @@ public class SymbolTable<Entry extends IdEntry> {
         SR_Type selmaType = ((SELMATree) type).getSelmaType();
         CheckerEntry function = (CheckerEntry) retrieve(func);
         function.addParam(param, selmaType);
-        enter(param, (Entry) new CheckerEntry(selmaType, SR_Kind.VAR));
+        enter(param, (Entry) new CompilerEntry(selmaType, SR_Kind.VAR, nextAddr));
     }
 
     public String toString(){
     	String s = "";
     	for (Map.Entry<String, Stack<Entry>> entry: entries.entrySet()){
     		Stack<Entry> stack = entry.getValue();
-    		s+=entry.getKey();
-   			s+=stack.toString();
+    		s += String.format("Id=%-10s : %s=%s\n", entry.getKey(), stack, stack.peek().getClass());
+            //s+=entry.getKey();
+   			//s+=stack.toString();
     	}
     	return s;
     }
