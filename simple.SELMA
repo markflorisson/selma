@@ -17,17 +17,14 @@ function foo2() : integer {
 function foo3(a, b : integer; c : boolean;) : integer {
     var v : integer;
 
-    v := 2;
-
-    print(b, v);
-
+    v := 3;
+    print(a, b, c, v);
     return a * b + 5;
 };
 
 
 @foo();
 @foo1(1, 2, false,);
-
+print(c);
 print(@foo2());
-
 print(@foo3(1, 2, true,));

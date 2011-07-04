@@ -1,5 +1,5 @@
 <output>
-    Exception in thread "main" java.lang.VerifyError: (class: Main, method: main signature: ([Ljava/lang/String;)V) Accessing value from uninitialized register 1
+    Exception in thread "main" java.lang.VerifyError: (class: Main, method: func signature: ()V) Accessing value from uninitialized register 0
 </output>
 
 function func() {

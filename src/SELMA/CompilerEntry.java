@@ -29,8 +29,9 @@ public class CompilerEntry extends CheckerEntry {
         return this;
     }
 
-    public CompilerEntry setChar(char c) {
-        val = (int) c;
+    public CompilerEntry setChar(int c) {
+        val = c;
+        // System.err.println("Setting " + c + " on " + addr + " = " + val);
         return this;
     }
 }

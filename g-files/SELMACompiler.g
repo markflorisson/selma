@@ -57,7 +57,7 @@ options {
         
         st.openScope();
         curStackDepth = maxStackDepth = labelNum = st.localCount = 0;
-        st.nextAddr = 1;
+        st.nextAddr = 0;
     }
     
     private void leaveFuncScope() {
@@ -122,8 +122,9 @@ declaration
   //-> declareConst(id={$id.text}, val={($val.text.equals("true"))?"1":"0"}, type={"boolean"}, addr={st.nextAddr()})
 
   | ^(node=CONST CHAR val=CHARV (id=ID)+)
-  { char c = $node.text.charAt(1);
-    st.enter($id, new CompilerEntry(SR_Type.CHAR, SR_Kind.CONST, 0).setChar(c)); }
+  { char c = $val.text.charAt(1);
+    st.enter($id, new CompilerEntry(SR_Type.CHAR, SR_Kind.CONST, 0).setChar(c)); 
+  }
   //-> declareConst(id={$id.text}, val={(int) c}, type={"character"}, addr={st.nextAddr()-1})
 
   | ^(node=FUNCDEF funcname=ID

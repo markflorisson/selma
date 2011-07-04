@@ -1,10 +1,11 @@
 <output>
+    c
     25
     c
     6
     1
     2
-    false
+    true
     3
     7
 </output>
@@ -36,6 +37,6 @@ function foo3(a, b : integer; c : boolean;) : integer {
 
 @foo();
 @foo1(1, 2, false,);
-
+print(c);
 print(@foo2());
 print(@foo3(1, 2, true,));
