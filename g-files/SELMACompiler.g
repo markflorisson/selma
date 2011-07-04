@@ -71,34 +71,26 @@ options {
     }
 
     private String getTypeDenoter(SR_Type type) {
-        return getTypeDenoter(type, false);
+        return st.getTypeDenoter(type, false);
     }
-
+    
     private String getTypeDenoter(SR_Type type, boolean printing) {
-        if (type == SR_Type.INT) {
-            return "I";
-        } else if (type == SR_Type.BOOL) {
-            if (printing)
-                return "Ljava/lang/String;";
-            else
-                return "I";
-        } else if (type == SR_Type.VOID) {
-            return "V";
-        } else if (type == SR_Type.CHAR) {
-            return "C";
-        } else {
-            throw new RuntimeException(":( Invalid type: " + type);
-        }
+        return st.getTypeDenoter(type, printing);
     }
 }
 
 program
-  : ^(node=BEGIN {st.openScope();} compoundexpression {st.closeScope();} END)
-  { SELMATree expr = (SELMATree) $node.getChild(0); }
+  : ^(node=BEGIN {st.openScope();} compoundexpression END)
+  { SELMATree expr = (SELMATree) $node.getChild(0); 
+    int localsCount = st.getLocalsCount();
+    List<String> globalVariableFields = st.getAllLocalVariablesWithTypes();
+    st.closeScope();
+  }
   -> program(instructions={$compoundexpression.st},
              source_file={SELMA.inputFilename},
              stack_limit={maxStackDepth + 3}, // +3 for print
-             locals_limit={$node.localsCount + 1}, // +1 for the String[] argv parameter
+             locals_limit={localsCount + 1}, // +1 for the String[] argv parameter
+             fields={globalVariableFields},
              pop={expr.SR_type != SR_Type.VOID})
   ;
 
@@ -178,6 +170,7 @@ declaration
               signature={signature},
               return_expression={$retexpr.st}, 
               is_void={signature.endsWith("V")},
+              pop={funcbody.SR_type != SR_Type.VOID},
               stack_limit={stackLimit},
               locals_limit={localsLimit + 1},
               line={$node.getLine()})
@@ -275,23 +268,37 @@ expression
 //IO
 
   | ^(node=READ ID+)
+      /*
+      {
+      	  CompilerEntry entry = st.retrieve($id);
+      }))
+      -> readSingle(id={$id.text}, addr={entry.addr},
+                    is_bool={entry.type == SR_Type.BOOL},
+                    is_int={entry.type == SR_Type.INT},
+                    dup_top={$node.SR_type != SR_Type.VOID},
+                    is_global={entry.level == 0},
+                    type_denoter={getTypeDenoter(entry.type)})
+      */
    	{ boolean isExpr = $node.SR_type != SR_Type.VOID;
           List<Integer> addrs = new ArrayList<Integer>();
           List<Boolean> isBool = new ArrayList<Boolean>();
           List<Boolean> isInt = new ArrayList<Boolean>();
-
+	  List<Boolean> globals = new ArrayList<Boolean>();
+	  List<String> ids = new ArrayList<String>();
+	  
           for (int i = 0; i < $node.getChildCount(); i++) {
               SELMATree child = (SELMATree) $node.getChild(i);
-
-              addrs.add(st.retrieve($node.getChild(i)).addr);
+	      CompilerEntry entry = st.retrieve(child);
+              addrs.add(entry.addr);
               isBool.add(child.SR_type == SR_Type.BOOL);
               isInt.add(child.SR_type == SR_Type.INT);
+              globals.add(entry.level == 0);
+              ids.add(child.getText());
           }
-          //if (!isExpr)
-          //    curStackDepth -= $node.getChildCount();
   	}
-  	-> read(addrs={addrs}, dup_top={isExpr}, is_bool={isBool}, is_int={isInt},
-            line={node.getLine()})
+  	-> read(ids={ids}, addrs={addrs}, dup_top={isExpr}, 
+  	        is_bool={isBool}, is_int={isInt},
+                globals={globals}, line={node.getLine()})
 
     | ^(node=PRINT (exprs+=expression)+)
     {
@@ -326,14 +333,23 @@ expression
   | ^(node=FUNCTION id=ID (exprs+=expression)*)
   	-> funccall(id={$id.text}, signature={st.retrieve($id).signature}, exprs={$exprs})
 //ASSIGN
-  | ^(BECOMES node=ID e1=expression) { boolean isint = ($node.type == NUMBER  ||
-                                       $node.type == BOOLEAN ||
-                                       $node.type == LETTER); }
+  | ^(BECOMES node=ID e1=expression) 
+  {  
+      CompilerEntry entry = st.retrieve(node);
+      boolean isConst = node.SR_kind == SR_Kind.CONST;
+      boolean isGlobal = false;
+      String typeDenoter = getTypeDenoter(entry.type);
+    	
+      if (entry.level == 0) {
+          isGlobal = true;
+      }
+  }
   	-> assign(id={$node.text},
       		  type={$node.type},
   	    	  addr={st.retrieve($node).addr},
-  		      e1={$e1.st},
-  		      isint={isint})
+  		  e1={$e1.st},
+  		  is_global={isGlobal},
+  		  type_denoter={typeDenoter})
 
 //closedcompound
   | ^(node=LCURLY {st.openScope();} cmp=compoundexpression {st.closeScope();} RCURLY)
@@ -356,8 +372,15 @@ expression
     	incrStackDepth();
     	CompilerEntry entry = st.retrieve(node);
     	boolean isConst = node.SR_kind == SR_Kind.CONST;
+    	boolean isGlobal = false;
+    	String typeDenoter = getTypeDenoter(entry.type);
+    	
+    	if (entry.level == 0) {
+    	    isGlobal = true;
+    	}
     }
-    -> loadVal(id={$node.text}, addr={entry.addr}, val={entry.val}, is_const={isConst})
+    -> loadVal(id={$node.text}, addr={entry.addr}, val={entry.val}, is_const={isConst},
+               is_global={isGlobal}, type_denoter={typeDenoter})
   ;
 
 

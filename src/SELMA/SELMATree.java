@@ -7,11 +7,6 @@ import org.antlr.runtime.Token;
 
 public class SELMATree extends CommonTree {
 
-    // This attribute is set on procedures and on the root node by the checker
-    // It indicates the maximum amount of local variables in use at a time in
-    // that stack frame.
-    public int localsCount;
-
 	public SELMATree(){
 		super();
 	}

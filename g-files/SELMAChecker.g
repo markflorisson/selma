@@ -52,7 +52,7 @@ program
     : ^(node=BEGIN
         {st.openScope();}
         compoundexpression
-        {$node.localsCount = st.getLocalsCount(); st.closeScope();}
+        {st.closeScope();}
         END)
 	;
 

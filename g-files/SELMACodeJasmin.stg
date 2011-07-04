@@ -2,11 +2,13 @@
 
 group SELMA;
 
-program(instructions, source_file, stack_limit, locals_limit, pop) ::= <<
+program(instructions, fields, source_file, stack_limit, locals_limit, pop) ::= <<
 .source <source_file>
 .class public Main
 .super java/lang/Object
 .field public static scanner_field Ljava/util/Scanner;
+
+<fields : { f | .field public static <f> }; separator="\n">
 
 .method public \<init\>()V
     aload_0
@@ -114,11 +116,16 @@ loadNum(val, iconst, bipush) ::= <<
 <endif>
 >>
 
-loadVal(id, addr, val, is_const) ::= <<
+loadVal(id, addr, val, is_const, is_global, type_denoter) ::= <<
 <if (is_const)>
     ldc <val>                   ; load constant <id>
+
+<elseif (is_global)>
+    getstatic Main/<id> <type_denoter> ; load global <id>
+
 <else>
     iload <addr>                ; load <id> from <addr>
+
 <endif>
 >>
 
@@ -128,23 +135,30 @@ loadChar(val, char, line) ::= <<
 >>
 
 //Assign
-assign(id, type, addr, e1, isint) ::= <<
+assign(id, type, addr, e1, is_global, type_denoter) ::= <<
 <e1>                            ; e1 right hand for assignment
     dup
+<if (is_global)>
+    putstatic Main/<id> <type_denoter>
+
+<else>
     istore <addr>               ; store e1 in <id>
 
+<endif>
+
 >>
 
-read(addrs, dup_top, is_bool, is_int, line) ::= <<
+read(ids, addrs, dup_top, is_bool, is_int, globals, line) ::= <<
 .line <line>
-<addrs, is_bool, is_int : { a, b, i | <readSingle(addr=a,
-                                                  is_bool=b,
-                                                  is_int=i,
-                                                  dup_top=dup_top) > }; separator="\n">
+<ids, addrs, is_bool, is_int, globals :
+    { id, a, b, i, g | <readSingle(id=id, addr=a,
+                                   is_bool=b, is_int=i,
+                                   dup_top=dup_top, is_global=g
+                                   ) > }; separator="\n">
 
 >>
 
-readSingle(addr, is_bool, is_int, dup_top) ::= <<
+readSingle(id, addr, is_bool, is_int, dup_top, is_global) ::= <<
     getstatic Main/scanner_field Ljava/util/Scanner;
 <if (is_bool)>
     invokevirtual java/util/Scanner/nextBoolean()Z
@@ -162,8 +176,18 @@ readSingle(addr, is_bool, is_int, dup_top) ::= <<
 
 <endif>
 
-
+<if (is_global)>
+    <if (is_bool)>
+        putstatic Main/<id> I
+    <elseif (is_int)>
+        putstatic Main/<id> I
+    <else>
+        putstatic Main/<id> C
+    <endif>
+<else>
     istore <addr>
+
+<endif>
 >>
 
 print(exprs, type_denoters, dup_top, expr_is_bool, label_nums1, label_nums2, line) ::= <<
@@ -246,8 +270,10 @@ function(funcname, signature, body, return_expression,
 
 <body; separator="\n\n">
 
-
+<if (pop)>
     pop
+
+<endif>
 <return_expression>
 <if (is_void)>
     return

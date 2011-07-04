@@ -1,7 +1,19 @@
+<output>
+    25
+    c
+    6
+    1
+    2
+    false
+    3
+    7
+</output>
+
 const c : character = 'c';
+var v : integer;
 
 function foo() {
-    1;
+    v := 25;
 };
 
 function foo1(a, b : integer; c : boolean;) {
@@ -9,14 +21,21 @@ function foo1(a, b : integer; c : boolean;) {
 };
 
 function foo2() : integer {
-    1;
+    print(v, c);
     return 6;
 };
 
 function foo3(a, b : integer; c : boolean;) : integer {
-    1;
+    var v : integer;
+
+    v := 3;
+    print(a, b, c, v);
     return a * b + 5;
 };
 
-<output>7</output>
+
+@foo();
+@foo1(1, 2, false,);
+
+print(@foo2());
 print(@foo3(1, 2, true,));

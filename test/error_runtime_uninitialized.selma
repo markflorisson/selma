@@ -2,10 +2,16 @@
     Exception in thread "main" java.lang.VerifyError: (class: Main, method: main signature: ([Ljava/lang/String;)V) Accessing value from uninitialized register 1
 </output>
 
+function func() {
+    var i : integer;
+
+    if 5 == 6; then
+        i := 9;
+    fi;
+
+    print(i);
+};
+
 var i : integer;
-
-if 5 == 6; then
-    i := 9;
-fi;
-
 print(i);
+@func();

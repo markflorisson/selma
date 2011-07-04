@@ -135,6 +135,51 @@ public class SymbolTable<Entry extends IdEntry> {
     public int  getLocalsCount() {
         return nextAddr > localCount ? nextAddr : localCount;
     }
+
+    /**
+     * Return the JVM type denoter of the Symbol Table SR_Type
+     * @param type the type to get the denoter for
+     * @param printing whether the denoter is used to format
+     *                 values using the print() statement
+     * @return The type denoter (String)
+     */
+    public String getTypeDenoter(SR_Type type, boolean printing) {
+        if (type == SR_Type.INT) {
+            return "I";
+        } else if (type == SR_Type.BOOL) {
+            if (printing)
+                return "Ljava/lang/String;";
+            else
+                return "I";
+        } else if (type == SR_Type.VOID) {
+            return "V";
+        } else if (type == SR_Type.CHAR) {
+            return "C";
+        } else {
+            throw new RuntimeException(":( Invalid type: " + type);
+        }
+    }
+
+    /**
+     * Get a list of strings for each local variable along with its type denoter.
+     * This is used for global variables that are to become fields
+     * @return
+     */
+    public List<String> getAllLocalVariablesWithTypes() {
+        List<String> localVars = new ArrayList<String>();
+
+        for (Map.Entry<String, Stack<Entry>> entry: entries.entrySet()){
+    		Stack<Entry> stack = entry.getValue();
+    		if (stack != null && !stack.isEmpty()) {
+                CheckerEntry e = (CheckerEntry) stack.peek();
+                if (e.kind != SR_Kind.CONST && e.func != SR_Func.YES) {
+                    localVars.add(entry.getKey() + " " + getTypeDenoter(e.type, false));
+                }
+            }
+        }
+
+        return localVars;
+    }
 }
 
 /** Exception class to signal problems with the SymbolTable */
