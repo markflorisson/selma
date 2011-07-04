@@ -229,3 +229,29 @@ L<label_num1>:
     goto L<label_num1>
 L<label_num2>:
 >>
+
+function(funcname, param_types, body, return_expression, return_type,
+         pop, locals_limit, stack_limit, line) ::= <<
+\<method\>
+.method public <funcname>(<param_types; separator="">)<return_type>
+.limit stack <stack_limit>
+.limit locals <locals_limit>
+.line <line>
+
+<body; separator="\n\n">
+
+
+    pop
+<return_expression>
+<if (is_void)>
+    return
+
+<else>
+    ireturn
+
+<endif>
+
+.end method
+\</method\>
+>>
+

@@ -102,27 +102,39 @@ public class SELMA {
                 // Remove instructions followed by 'removeLastInstruction' and remove
                 // duplicate consecutive .line <line_num> instructions
                 Stack<String> lines = new Stack<String>();
-                String lastLine = null;
+                Stack<Stack<String>> functions = new Stack<Stack<String>>();
+                List<Stack<String>> collectedFunctions = new ArrayList<Stack<String>>();
+
                 for (String line : output.toString().split("\r?\n")) {
                     String trimmed = line.trim();
 
-                    if (trimmed.length() == 0)
-                        ;
+                    if (trimmed.length() == 0 ||
+                        (!lines.isEmpty() &&
+                         lines.peek().trim().startsWith(".line") &&
+                         lines.peek().equals(line)))
+                        // Empty line or duplicate .line directive
+                        continue;
                     else if (trimmed.startsWith("removeLastInstruction") && !lines.empty())
                         lines.pop();
-                    else
+                    else if (line.trim().equals("<method>")) {
+                        functions.push(lines);
+                        lines = new Stack<String>();
+                    } else if (line.trim().equals("</method>")) {
+                        collectedFunctions.add(lines);
+                        lines = functions.pop();
+                    } else
                         lines.push(line);
-
-
-                    if (lines.peek().trim().startsWith(".line") && lines.peek().equals(lastLine)) {
-                        lines.pop();
-                    }
-
-                    lastLine = lines.peek();
                 }
 
+                // Print the module-global code
                 for (String line : lines)
                     System.out.println(line);
+
+                // Print the code for all functions
+                for (Stack<String> functionCode : collectedFunctions)
+                    for (String line : functionCode)
+                        System.out.println(line);
+
             } else if (opt_ast) {          // print the AST as string
                 System.out.println(tree.toStringTree());
             } else if (opt_dot) {   // print the AST as DOT specification

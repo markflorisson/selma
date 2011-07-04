@@ -713,7 +713,7 @@ evaluate[E, last_expr_is_void] =
     	    remove_last_instruction
 \end{verbatim}
 
-Hier geeft de variabele \texttt{last\_expr\_is\_void} aan of de laatste expressie (als er tenminste 1 expressie is) van type VOID is. Als dit niet het geval is, is er een pop gegenereerd door \texttt{expression\_statement} die verwijderd moet worden. Dit gebeurt door een dummy instructie \texttt{remove\_last\_instruction} te genereren die de laaste instructie verwijderd. Dit gebeurd voordat het resultaat naar een Jasmin aseembly file geschreven wordt.
+Hier geeft de variabele \texttt{last\_expr\_is\_void} aan of de laatste expressie (als er tenminste 1 expressie is) van type VOID is. Als dit niet het geval is, is er een pop gegenereerd door \texttt{expression\_statement} die verwijderd moet worden. Dit gebeurt door een dummy instructie \texttt{remove\_last\_instruction} te genereren die de laaste instructie verwijderd. Dit gebeurd voordat mhet resultaat naar een Jasmin aseembly file geschreven wordt.
 
 \subsubsection{if then else expression}
 

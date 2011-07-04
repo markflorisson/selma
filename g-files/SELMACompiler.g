@@ -31,7 +31,9 @@ options {
     class StackDepthLabelCounter {
         public int curStackDepth;
         public int maxStackDepth;
-        public int labelNum = 0;
+        public int labelNum;
+        public int nextAddr;
+        public int localCount;
     }
 
     Stack<StackDepthLabelCounter> stack = new Stack<StackDepthLabelCounter>();
@@ -46,10 +48,13 @@ options {
         o.curStackDepth = curStackDepth;
         o.maxStackDepth = maxStackDepth;
         o.labelNum = labelNum;
+        o.nextAddr = st.nextAddr;
+        o.localCount = st.localCount;
+
         stack.push(o); 
         
         st.openScope();
-        curStackDepth = maxStackDepth = labelNum = 0;
+        curStackDepth = maxStackDepth = labelNum = st.nextAddr = st.localCount = 0;
     }
     
     private void leaveFuncScope() {
@@ -57,16 +62,29 @@ options {
         st.closeScope();
         curStackDepth = o.curStackDepth;
         maxStackDepth = o.maxStackDepth;
-        labelNum = o.labelNum; 
+        labelNum = o.labelNum;
+        st.nextAddr = o.nextAddr;
+        st.localCount = o.localCount; 
     }
 
     private String getTypeDenoter(SR_Type type) {
+        return getTypeDenoter(type, false);
+    }
+
+    private String getTypeDenoter(SR_Type type, boolean printing) {
         if (type == SR_Type.INT) {
             return "I";
         } else if (type == SR_Type.BOOL) {
-            return "Ljava/lang/String;";
-        } else {
+            if (printing)
+                return "Ljava/lang/String;";
+            else
+                return "I";
+        } else if (type == SR_Type.VOID) {
+            return "V";
+        } else if (type == SR_Type.CHAR) {
             return "C";
+        } else {
+            throw new RuntimeException(":( Invalid type: " + type);
         }
     }
 }
@@ -76,7 +94,7 @@ program
   { SELMATree expr = (SELMATree) $node.getChild(0); }
   -> program(instructions={$compoundexpression.st},
              source_file={SELMA.inputFilename},
-             stack_limit={maxStackDepth + 3}, // +2 for print and other additionally loaded constants
+             stack_limit={maxStackDepth + 3}, // +3 for print and other additionally loaded constants
              locals_limit={$node.localsCount + 1}, // +1 for the String[] argv parameter
              pop={expr.SR_type != SR_Type.VOID})
   ;
@@ -117,18 +135,43 @@ declaration
   {
 	st.enter($funcname, new CompilerEntry(SR_Type.VOID, SR_Kind.VAR, 0, SR_Func.YES));
 	enterFuncScope();
+	int paramCount = 0;
+	List<String> paramTypeDenoters = new ArrayList<String>();
   } (param=ID typ1=(INT|BOOL|CHAR)
   {
-  	st.addParamToFunc($funcname, param, $typ1);
+  	SELMATree type1 = (SELMATree) $node.getChild(++paramCount * 2);
+  	paramTypeDenoters.add(getTypeDenoter(type1.getSelmaType()));
+  	st.addParamToFunc($funcname, param, type1);
   })*
-  (^(node=FUNCRETURN typ1=(INT|BOOL|CHAR) compoundexpression expression
+  ( ^(return_node=FUNCRETURN (INT|BOOL|CHAR) (body+=compoundexpression) retexpr=expression)
+  | (body+=compoundexpression)
+  )
   {
-
-  })
- 	| (compoundexpression))
-  {
+  	SELMATree funcbody;
+  	int stackLimit = maxStackDepth + 3;
+  	int localsLimit = st.getLocalsCount();
+  	String returnTypeDenoter;
+  	
+  	if ($return_node == null) {
+  	    funcbody = (SELMATree) $node.getChild(paramCount * 2 + 1);
+  	    returnTypeDenoter = "V";
+  	} else {
+  	    funcbody = (SELMATree) $return_node.getChild(1);
+  	    SELMATree returnType = (SELMATree) $return_node.getChild(0);
+  	    returnTypeDenoter = getTypeDenoter(returnType.getSelmaType());
+	}
 	leaveFuncScope();
   })
+  -> function(funcname={$funcname.text}, 
+              body={$body},
+              param_types={paramTypeDenoters},
+              return_expression={$retexpr.st},
+              return_type={returnTypeDenoter}, 
+              //pop={funcbody.SR_type != SR_Type.VOID && $node.SR_type == SR_Type.VOID},
+              is_void={returnTypeDenoter.equals("V")},
+              stack_limit={stackLimit},
+              locals_limit={localsLimit + 1},
+              line={$node.getLine()})
   ;
 
 expression_statement
@@ -263,7 +306,7 @@ expression
                 labelNums1.add(0);
                 labelNums2.add(0);
             }
-            typeDenoters.add(getTypeDenoter(child.SR_type));
+            typeDenoters.add(getTypeDenoter(child.SR_type, true));
             exprIsBool.add(isBool);
         }
     }
