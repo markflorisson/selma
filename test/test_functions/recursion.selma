@@ -9,7 +9,7 @@ function fac(n : integer;) : integer {
     return result;
 };
 
-<output>3628800</output>
+//<output>3628800</output>
 print(@fac(10,));
 
 var result : integer;
@@ -24,5 +24,5 @@ function fac2(n : integer;) {
 result := 1;
 @fac2(10,);
 
-<output>3628800</output>
+//<output>3628800</output>
 print(result);

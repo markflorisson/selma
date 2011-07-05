@@ -3,38 +3,38 @@ const c : character = 'c';
 
 v := 6;
 
-<output>true</output>
+//<output>true</output>
 print(5 < v);
 
-<output>false</output>
+//<output>false</output>
 print(5 > v);
 
-<output>false</output>
+//<output>false</output>
 print(true && false);
 
-<output>true</output>
+//<output>true</output>
 print(false || true);
 
-<output>true</output>
+//<output>true</output>
 print(5 <= v);
 
-<output>false</output>
+//<output>false</output>
 print(5 >= v);
 
-<output>
+/*<output>
     2
     true
-</output>
+</output>*/
 print(print(10 % 4) == 2) && !('a' <> c);
 
 // arithmetic
-<output>
+/*<output>
     5
     -1
     5
     0
     6
-</output>
+</output>*/
 print(
     10 - 5,
     -5 + 4,
