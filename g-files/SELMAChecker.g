@@ -111,6 +111,8 @@ declaration
 	| ^(FUNCDEF funcname=ID
    {
        //enter as void
+       if (st.funclevel != 0)
+           throw new SELMAException($funcname, "Cannot nest functions");
        st.enter($funcname, new CheckerEntry(SR_Type.VOID, SR_Kind.VAR, SR_Func.YES));
        st.enterFuncScope();
    }
