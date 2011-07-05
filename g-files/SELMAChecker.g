@@ -29,7 +29,9 @@ options {
 
 @members {
 	public SymbolTable<CheckerEntry> st = new SymbolTable<CheckerEntry>();
-
+	// Keep track of whether we are assigning to an identifier
+	int assigning = 0;
+	
 	public void matchType(Tree expectedType, SR_Type exprType) {
 	    matchType(((SELMATree) expectedType).getSelmaType(), exprType);
 	}
@@ -88,7 +90,7 @@ declaration
    }
 	| ^(node=CONST type val id=ID)
     {
-	     int type = node.getChild(0).getType();
+	 int type = node.getChild(0).getType();
          int val  = node.getChild(1).getType();
 
          switch (type) {
@@ -110,7 +112,7 @@ declaration
    {
        //enter as void
        st.enter($funcname, new CheckerEntry(SR_Type.VOID, SR_Kind.VAR, SR_Func.YES));
-       st.openScope();
+       st.enterFuncScope();
    }
        (param=ID typ1=(INT|BOOL|CHAR)
    {
@@ -129,7 +131,7 @@ declaration
  	| (compoundexpression))
    {
 	//scope of function
-	st.closeScope();
+	st.leaveFuncScope();
    });
 
 type
@@ -277,7 +279,9 @@ expression
 
 	| ^(node=READ (id=ID
         {
-            if (st.retrieve($id).kind!=SR_Kind.VAR)
+            CheckerEntry entry = st.retrieve($id);
+            entry.initialized = true;
+            if (entry.kind!=SR_Kind.VAR)
                 throw new SELMAException($id,"Must be a variable");
         })+
         {
@@ -330,7 +334,7 @@ for (int i=1; i<func.getChildCount(); i++){
 }
 
 
-	| ^(node=BECOMES expression expression)
+	| ^(node=BECOMES {assigning++;} expression {assigning--;} expression)
 	 {
    SELMATree e1 = (SELMATree)node.getChild(0);
    SELMATree e2 = (SELMATree)node.getChild(1);
@@ -338,7 +342,8 @@ for (int i=1; i<func.getChildCount(); i++){
     throw new SELMAException(e1,"Must be a identifier");
 
    CheckerEntry ident = st.retrieve(e1);
-
+   ident.initialized = true;
+   
    if (ident.kind!=SR_Kind.VAR)
     throw new SELMAException(e1,"Must be a variable");
    if (ident.type!=e2.SR_type)
@@ -376,6 +381,9 @@ for (int i=1; i<func.getChildCount(); i++){
 	| node=ID
 	 {
 	 CheckerEntry entry = st.retrieve($node);
+	 if (assigning == 0 && !entry.isInitialized(st))
+	     throw new SELMAException($node, 
+	            "Variable " + $node.text + " is not initialized yet.");
 	 $node.SR_type=entry.type;
 	 $node.SR_kind=entry.kind;
 	 }

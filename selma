@@ -1,0 +1,13 @@
+#!/bin/sh
+
+CLASSPATH="$PWD/jasmin.jar:$PWD/antlr-3.3-complete.jar:$PWD/src"
+export CLASSPATH
+
+filename=${1%.*}
+dirname=$(dirname $filename)
+
+java SELMA.SELMA -code_generator "$1" > "$filename.jasmin" && \
+java -jar jasmin.jar -d $dirname "$filename.jasmin" && \
+java -classpath $dirname Main
+
+exit $?

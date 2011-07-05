@@ -12,6 +12,8 @@ import org.antlr.runtime.tree.Tree;
 
 public class SymbolTable<Entry extends IdEntry> {
 	public int nextAddr = 1;
+    public int funclevel = 0;
+
     private int currentLevel;
     private Map<String, Stack<Entry>> entries;
 
@@ -117,7 +119,9 @@ public class SymbolTable<Entry extends IdEntry> {
         SR_Type selmaType = ((SELMATree) type).getSelmaType();
         CheckerEntry function = (CheckerEntry) retrieve(func);
         function.addParam(param, selmaType);
-        enter(param, (Entry) new CompilerEntry(selmaType, SR_Kind.VAR, nextAddr));
+        CompilerEntry paramentry = new CompilerEntry(selmaType, SR_Kind.VAR, nextAddr);
+        paramentry.initialized = true;
+        enter(param, (Entry) paramentry);
     }
 
     public String toString(){
@@ -179,6 +183,16 @@ public class SymbolTable<Entry extends IdEntry> {
         }
 
         return localVars;
+    }
+
+    public void enterFuncScope() {
+        openScope();
+        funclevel++;
+    }
+
+    public void leaveFuncScope() {
+        closeScope();
+        funclevel--;
     }
 }
 

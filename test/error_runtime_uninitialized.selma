@@ -12,6 +12,4 @@ function func() {
     print(i);
 };
 
-var i : integer;
-print(i);
 @func();

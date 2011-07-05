@@ -22,6 +22,8 @@ public class CheckerEntry extends IdEntry {
     public SR_Func func;
     public ArrayList<Param> params;
 
+    public boolean initialized;
+
 	public CheckerEntry(SR_Type type, SR_Kind kind) {
 		super();
     	this.type = type;
@@ -36,10 +38,23 @@ public class CheckerEntry extends IdEntry {
 	    params = new ArrayList<Param>();
 	}
 
+    /**
+     * Add a parameter with id id and type type to this function entry.
+     */
     public void addParam(Tree id, SR_Type type) {
 	    String name = id.getText();
 		params.add(new Param(name,type));
 	}
+
+    /**
+     * See whether the variable is initialized
+     */
+    public boolean isInitialized(SymbolTable st) {
+        if (kind == SR_Kind.VAR)
+            return initialized || (st.funclevel > 0 && level == 0);
+
+        return true;
+    }
 
 	public String toString() {
 		String s = "";

@@ -1,0 +1,3 @@
+<output>ERROR: i (3:6) Variable i is not initialized yet.</output>
+var i : integer;
+print(i);
