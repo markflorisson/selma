@@ -1017,16 +1017,15 @@ Tests kunnen van de volgende typen zijn:
 
 Bij deze tests kunnen in het programma tags gezet worden, namelijk <input>text</input> voor input voor het programma op stdin, en <output>text</output> voor output van het programma (of de compiler, in het geval van een compile of error test). Error tests beginnen met de prefix 'error\_' in de bestandsnaam, en compile tests met 'compile\_'. Zo kan getest worden voor juiste syntax en semantiek, juiste error reporting bij onjuiste syntax en semantiek, en correctie vertaalregels door middel van correcte executie, en runtime error checking voor juiste programmas met runtime fouten. Om de tests te runnen is Python 2.5+ < 3.0 nodig. De tests kunnen als volgt worden geexecuteerd:
 
-\begin{lstlisting}
-\$ python test.py
-\end{lstlisting}
+\begin{verbatim}
+$ python test.py
+\end{verbatim}
 
 of
 
-\begin{lstlisting}
-\$ make tests
-\end{lstlisting}
-
+\begin{verbatim}
+$ make tests
+\end{verbatim}
 
 Als een run test geen output heeft gespecificeerd is de exit status van het programma bepalend of de test faalt of niet. Bij een error test geldt het tegenovergestelde: zonder gespecificeerde output moet de exit status nonzero zijn.
 
