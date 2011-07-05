@@ -1,7 +1,12 @@
 SELMA
 =====
 
+
 SELMA is a compiler for the simple programming language SELMA. It compiles SELMA code to Jasmin, which can be compiled to JVM bytecode.
+Before doing anything, compile the compiler::
+
+    $ make
+
 To run tests::
 
     $ python test.py

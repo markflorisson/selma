@@ -6,8 +6,12 @@ import SELMA.SELMATree.SR_Func;
 import java.util.ArrayList;
 import org.antlr.runtime.tree.Tree;
 
+/**
+ * Symbol table entry for the Checker phase.
+ */
 public class CheckerEntry extends IdEntry {
 
+    /** Houd de naam en type van een parameter voor een functie bij */
     class Param {
         String name; SR_Type type;
 
@@ -17,9 +21,13 @@ public class CheckerEntry extends IdEntry {
         }
     }
 
+    /** Het type van de entry */
     public SR_Type type;
+    /** Wat voor soort entry het is (e.g. constante, variabele) */
     public SR_Kind kind;
+    /** Of deze entry voor een functie is */
     public SR_Func func;
+    /** Parameters voor een functie */
     public ArrayList<Param> params;
 
     public boolean initialized;

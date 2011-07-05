@@ -10,6 +10,9 @@ import SELMA.SELMAChecker;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.Tree;
 
+/**
+ * Implementatie van een symbol table voor de compiler.
+ */
 public class SymbolTable<Entry extends IdEntry> {
 	public int nextAddr = 1;
     public int funclevel = 0;
@@ -22,6 +25,10 @@ public class SymbolTable<Entry extends IdEntry> {
 
     int localCount;
 
+    /**
+     *
+     * @return Address voor een locale variabele
+     */
     public int nextAddr(){
     	return nextAddr;
     }
@@ -174,11 +181,17 @@ public class SymbolTable<Entry extends IdEntry> {
         }
     }
 
+    /**
+     * Enter een functie scope. Houdt bij of we in een functie zitten of niet, zodat we weten of variabelen globaal zijn of niet.
+     */
     public void enterFuncScope() {
         openScope();
         funclevel++;
     }
 
+     /**
+     * Verlaat een functie scope. Houdt bij of we in een functie zitten of niet, zodat we weten of variabelen globaal zijn of niet.
+     */
     public void leaveFuncScope() {
         closeScope();
         funclevel--;

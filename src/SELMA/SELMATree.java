@@ -5,6 +5,9 @@ import SELMA.SELMAException;
 import org.antlr.runtime.tree.*;
 import org.antlr.runtime.Token;
 
+/**
+ * Custom tree. Heeft constanten die het type aangeven, de kind en of het een functie is.
+ */
 public class SELMATree extends CommonTree {
 
 	public SELMATree(){

@@ -11,7 +11,9 @@ import org.antlr.runtime.tree.*;        // For ANTLR's Tree classes
 import org.antlr.stringtemplate.*;      // For the DOTTreeGenerator
 
 
-
+/**
+ * Classe die de lexer, parser, checker en code generator opzet en executeerd. Kan ook een ast printen.
+ */
 public class SELMA {
     private static boolean  opt_ast             = false,
                             opt_dot             = false,
@@ -21,6 +23,9 @@ public class SELMA {
     public static String inputFilename;
     private static InputStream inputFile;
 
+    /**
+     * Parse de command line opties
+     */
     public static void parseOptions(String[] args) {
         int i;
 
