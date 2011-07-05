@@ -150,15 +150,17 @@ assign(id, type, addr, e1, is_global, type_denoter) ::= <<
 
 read(ids, addrs, dup_top, is_bool, is_int, globals, line) ::= <<
 .line <line>
-<ids, addrs, is_bool, is_int, globals :
-    { id, a, b, i, g | <readSingle(id=id, addr=a,
-                                   is_bool=b, is_int=i,
-                                   dup_top=dup_top, is_global=g
+<ids, is_bool, is_int, globals, addrs :
+    { id, b, is_int, g, a | <readSingle(id=id,
+                                   is_bool=b, is_int=is_int,
+                                   is_global=g, addr=addrs,
+                                   dup_top=dup_top
                                    ) > }; separator="\n">
 
 >>
 
 readSingle(id, addr, is_bool, is_int, dup_top, is_global) ::= <<
+    ; read <id> <addr> <is_bool> <is_int>
     getstatic Main/scanner_field Ljava/util/Scanner;
 <if (is_bool)>
     invokevirtual java/util/Scanner/nextBoolean()Z
@@ -167,7 +169,7 @@ readSingle(id, addr, is_bool, is_int, dup_top, is_global) ::= <<
     invokevirtual java/util/Scanner/nextInt()I
 
 <else>
-    invokevirtual java/util/Scanner/nextByte()I
+    invokevirtual java/util/Scanner/nextByte()B
 
 <endif>
 

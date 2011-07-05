@@ -283,26 +283,31 @@ expression
                     is_global={entry.level == 0},
                     type_denoter={getTypeDenoter(entry.type)})
       */
-   	{ boolean isExpr = $node.SR_type != SR_Type.VOID;
-          List<Integer> addrs = new ArrayList<Integer>();
-          List<Boolean> isBool = new ArrayList<Boolean>();
-          List<Boolean> isInt = new ArrayList<Boolean>();
-	  List<Boolean> globals = new ArrayList<Boolean>();
-	  List<String> ids = new ArrayList<String>();
-	  
-          for (int i = 0; i < $node.getChildCount(); i++) {
-              SELMATree child = (SELMATree) $node.getChild(i);
-	      CompilerEntry entry = st.retrieve(child);
-              addrs.add(entry.addr);
-              isBool.add(child.SR_type == SR_Type.BOOL);
-              isInt.add(child.SR_type == SR_Type.INT);
-              globals.add(entry.isGlobal);
-              ids.add(entry.getIdentifier(child.getText()));
-          }
+   	{   boolean isExpr = $node.SR_type != SR_Type.VOID;
+        List<Integer> addrs = new ArrayList<Integer>();
+        List<Boolean> isBool = new ArrayList<Boolean>();
+        List<Boolean> isInt = new ArrayList<Boolean>();
+        List<Boolean> globals = new ArrayList<Boolean>();
+        List<String> ids = new ArrayList<String>();
+
+        for (int i = 0; i < $node.getChildCount(); i++) {
+            SELMATree child = (SELMATree) $node.getChild(i);
+            CompilerEntry entry = st.retrieve(child);
+            /*
+            System.err.println(String.format("\%s -> \%s = \%s (\%s) is_int=\%s",
+                child.getText(), entry.getIdentifier(child.getText()),
+                entry, getTypeDenoter(entry.type), entry.type == SR_Type.INT));
+            */
+            addrs.add(entry.addr);
+            isBool.add(entry.type == SR_Type.BOOL);
+            isInt.add(entry.type == SR_Type.INT);
+            globals.add(entry.isGlobal);
+            ids.add(entry.getIdentifier(child.getText()));
+        }
   	}
-  	-> read(ids={ids}, addrs={addrs}, dup_top={isExpr}, 
+  	-> read(ids={ids}, addrs={addrs}, dup_top={isExpr},
   	        is_bool={isBool}, is_int={isInt},
-                globals={globals}, line={node.getLine()})
+            globals={globals}, line={node.getLine()})
 
     | ^(node=PRINT (exprs+=expression)+)
     {
@@ -341,11 +346,13 @@ expression
   {  
       CompilerEntry entry = st.retrieve(node);
       String ident = entry.getIdentifier($node.text);
-      boolean isConst = node.SR_kind == SR_Kind.CONST;
+      boolean isConst = entry.kind == SR_Kind.CONST;
+      
       String typeDenoter = getTypeDenoter(entry.type);
+      // System.err.println("assign " + ident + " " + entry + " " + typeDenoter);
   }
   	-> assign(id={ident},
-      		  type={$node.type},
+      		  type={entry.type},
   	    	  addr={st.retrieve($node).addr},
   		  e1={$e1.st},
   		  is_global={entry.isGlobal},
@@ -372,8 +379,9 @@ expression
     	incrStackDepth();
     	CompilerEntry entry = st.retrieve(node);
     	String ident = entry.getIdentifier($node.text);
-    	boolean isConst = node.SR_kind == SR_Kind.CONST;
+    	boolean isConst = entry.kind == SR_Kind.CONST;
     	String typeDenoter = getTypeDenoter(entry.type);
+    	// System.err.println("ID " + ident + " " + entry);
     }
     -> loadVal(id={ident}, addr={entry.addr}, val={entry.val}, is_const={isConst},
                is_global={entry.isGlobal}, type_denoter={typeDenoter})

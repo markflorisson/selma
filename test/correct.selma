@@ -50,7 +50,7 @@ bvar :=
     {
         var bvar: boolean;
 
-        <input>1</input>
+        <input>true</input>
         read(bvar);
 
         <output>true</output>

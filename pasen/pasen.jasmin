@@ -2,19 +2,19 @@
 .class public Main
 .super java/lang/Object
 .field public static scanner_field Ljava/util/Scanner;
-.field public static X I 
-.field public static E I 
-.field public static C I 
-.field public static jaar I 
-.field public static EE I 
-.field public static tosmall I 
-.field public static P I 
-.field public static month I 
-.field public static Y I 
-.field public static G I 
-.field public static N I 
-.field public static Z I 
-.field public static day I 
+.field public static N_1 I 
+.field public static C_1 I 
+.field public static tosmall_1 I 
+.field public static EE_1 I 
+.field public static month_1 I 
+.field public static day_1 I 
+.field public static Y_1 I 
+.field public static P_1 I 
+.field public static jaar_1 I 
+.field public static E_1 I 
+.field public static Z_1 I 
+.field public static G_1 I 
+.field public static X_1 I 
 .method public <init>()V
     aload_0
     invokespecial java/lang/Object/<init>()V
@@ -255,58 +255,59 @@
     swap
     invokevirtual java/io/PrintStream/println(C)V
 .line 25
+    ; read jaar_1 2 false true
     getstatic Main/scanner_field Ljava/util/Scanner;
     invokevirtual java/util/Scanner/nextInt()I
     dup
-        putstatic Main/jaar I 
+        putstatic Main/jaar_1 I 
     pop
 .line 29
-    getstatic Main/jaar I ; load global jaar
+    getstatic Main/jaar_1 I ; load global jaar_1
     invokestatic Main/checkjaar(I)I
     ifeq L19          ; e1 is false
 .line 32
 .line 33
-    getstatic Main/jaar I ; load global jaar
-    ldc 19                   ; load constant negentien
+    getstatic Main/jaar_1 I ; load global jaar_1
+    ldc 19                   ; load constant negentien_1
     idiv                            ; e1 right hand for assignment
     dup
-    putstatic Main/G I
+    putstatic Main/G_1 I
     pop
 .line 34
-    getstatic Main/G I ; load global G
+    getstatic Main/G_1 I ; load global G_1
     iconst_1
     iadd                            ; e1 right hand for assignment
     dup
-    putstatic Main/G I
+    putstatic Main/G_1 I
     pop
 .line 39
-    getstatic Main/jaar I ; load global jaar
+    getstatic Main/jaar_1 I ; load global jaar_1
                             ; e1 right hand for assignment
     dup
-    putstatic Main/C I
+    putstatic Main/C_1 I
     pop
 .line 40
-    getstatic Main/C I ; load global C
+    getstatic Main/C_1 I ; load global C_1
     bipush 100
     idiv
     iconst_1
     iadd                            ; e1 right hand for assignment
     dup
-    putstatic Main/C I
+    putstatic Main/C_1 I
     pop
 .line 64
-    ldc 1                   ; load constant stap
+    ldc 1                   ; load constant stap_1
     iconst_1
     iadd
-    ldc 1                   ; load constant stap
-    getstatic Main/C I ; load global C
+    ldc 1                   ; load constant stap_1
+    getstatic Main/C_1 I ; load global C_1
     invokestatic Main/nest(II)I
     invokestatic Main/nest(II)I                            ; e1 right hand for assignment
     dup
-    putstatic Main/X I
+    putstatic Main/X_1 I
     pop
 .line 69
-    getstatic Main/jaar I ; load global jaar
+    getstatic Main/jaar_1 I ; load global jaar_1
     ldc 1900
     if_icmpge L0        ; e1 >= e2
     iconst_0
@@ -319,47 +320,47 @@ L1:
     iconst_1
                             ; e1 right hand for assignment
     dup
-    putstatic Main/Y I
+    putstatic Main/Y_1 I
     goto L3
 L2:
 .line 72
     bipush 8
-    getstatic Main/C I ; load global C
+    getstatic Main/C_1 I ; load global C_1
     imul
     bipush 25
     idiv
     iconst_5
     isub                            ; e1 right hand for assignment
     dup
-    putstatic Main/Y I
+    putstatic Main/Y_1 I
 L3:
     pop
 .line 89
     invokestatic Main/nested()I                            ; e1 right hand for assignment
     dup
-    putstatic Main/Z I
+    putstatic Main/Z_1 I
     pop
 .line 94
-    ldc 11                   ; load constant elf
+    ldc 11                   ; load constant elf_1
 .line 94
-    getstatic Main/G I ; load global G
+    getstatic Main/G_1 I ; load global G_1
     bipush 20
     iadd
-    getstatic Main/Y I ; load global Y
+    getstatic Main/Y_1 I ; load global Y_1
     iadd
     imul
-    getstatic Main/X I ; load global X
+    getstatic Main/X_1 I ; load global X_1
     isub
     bipush 30
     idiv                            ; e1 right hand for assignment
     dup
-    putstatic Main/EE I
+    putstatic Main/EE_1 I
                             ; e1 right hand for assignment
     dup
-    putstatic Main/E I
+    putstatic Main/E_1 I
     pop
 .line 96
-    getstatic Main/EE I ; load global EE
+    getstatic Main/EE_1 I ; load global EE_1
     bipush 24
     if_icmpeq L4        ; e1 = e2
     iconst_0
@@ -368,7 +369,7 @@ L4:
     iconst_1
 L5:
 .line 96
-    getstatic Main/E I ; load global E
+    getstatic Main/E_1 I ; load global E_1
     bipush 25
     if_icmpeq L6        ; e1 = e2
     iconst_0
@@ -377,7 +378,7 @@ L6:
     iconst_1
 L7:
 .line 96
-    getstatic Main/G I ; load global G
+    getstatic Main/G_1 I ; load global G_1
     bipush 11
     if_icmpgt L8        ; e1 > e2
     iconst_0
@@ -387,26 +388,26 @@ L8:
 L9:
     iand
     ior
-    ldc 0                   ; load constant mnope
+    ldc 0                   ; load constant mnope_1
     ior
     ifeq L10          ; e1 is false
 .line 97
     iconst_1
-    getstatic Main/E I ; load global E
+    getstatic Main/E_1 I ; load global E_1
     iadd                            ; e1 right hand for assignment
     dup
-    putstatic Main/E I
+    putstatic Main/E_1 I
     pop
 L10:
 .line 104
-    ldc 44                   ; load constant minus2
-    getstatic Main/E I ; load global E
+    ldc 44                   ; load constant minus2_1
+    getstatic Main/E_1 I ; load global E_1
     isub                            ; e1 right hand for assignment
     dup
-    putstatic Main/N I
+    putstatic Main/N_1 I
     pop
 .line 106
-    getstatic Main/N I ; load global N
+    getstatic Main/N_1 I ; load global N_1
     bipush 21
     if_icmplt L11        ; e1 < e2
     iconst_0
@@ -415,12 +416,12 @@ L11:
     iconst_1
 L12:                            ; e1 right hand for assignment
     dup
-    putstatic Main/tosmall I
+    putstatic Main/tosmall_1 I
     pop
 .line 107
-    getstatic Main/N I ; load global N
+    getstatic Main/N_1 I ; load global N_1
 .line 108
-    getstatic Main/tosmall I ; load global tosmall
+    getstatic Main/tosmall_1 I ; load global tosmall_1
     ifeq L13          ; e1 is false
 .line 109
     bipush 30
@@ -431,24 +432,24 @@ L13:
 L14:
     iadd                            ; e1 right hand for assignment
     dup
-    putstatic Main/N I
+    putstatic Main/N_1 I
     pop
 .line 117
-    getstatic Main/N I ; load global N
+    getstatic Main/N_1 I ; load global N_1
     bipush 7
     iadd
 .line 117
-    getstatic Main/Z I ; load global Z
-    getstatic Main/N I ; load global N
+    getstatic Main/Z_1 I ; load global Z_1
+    getstatic Main/N_1 I ; load global N_1
     iadd
     bipush 7
     irem
     isub                            ; e1 right hand for assignment
     dup
-    putstatic Main/P I
+    putstatic Main/P_1 I
     pop
 .line 122
-    getstatic Main/P I ; load global P
+    getstatic Main/P_1 I ; load global P_1
     bipush 31
     if_icmpgt L15        ; e1 > e2
     iconst_0
@@ -461,27 +462,27 @@ L16:
     iconst_4
                             ; e1 right hand for assignment
     dup
-    putstatic Main/month I
+    putstatic Main/month_1 I
     pop
 .line 124
-    getstatic Main/P I ; load global P
+    getstatic Main/P_1 I ; load global P_1
     bipush 31
     irem                            ; e1 right hand for assignment
     dup
-    putstatic Main/day I
+    putstatic Main/day_1 I
     goto L18
 L17:
 .line 126
     iconst_3
                             ; e1 right hand for assignment
     dup
-    putstatic Main/month I
+    putstatic Main/month_1 I
     pop
 .line 127
-    getstatic Main/P I ; load global P
+    getstatic Main/P_1 I ; load global P_1
                             ; e1 right hand for assignment
     dup
-    putstatic Main/day I
+    putstatic Main/day_1 I
 L18:
     pop
 .line 141
@@ -496,7 +497,7 @@ L19:
 .line 9
 .line 10
 .line 11
-    iload 0                ; load jaar from 0
+    iload 0                ; load jaar_1 from 0
     iconst_0
     if_icmplt L0        ; e1 < e2
     iconst_0
@@ -624,8 +625,8 @@ L1:
     goto L6
 L5:
 .line 14
-    iload 0                ; load jaar from 0
-    ldc 2099                   ; load constant maxyear
+    iload 0                ; load jaar_1 from 0
+    ldc 2099                   ; load constant maxyear_1
     if_icmpgt L2        ; e1 > e2
     iconst_0
     goto L3
@@ -693,7 +694,7 @@ L4:
 							; e3 if false expression
 L6:
 .line 18
-    iload 0                ; load jaar from 0
+    iload 0                ; load jaar_1 from 0
     iconst_0
     if_icmpge L7        ; e1 >= e2
     iconst_0
@@ -702,8 +703,8 @@ L7:
     iconst_1
 L8:
 .line 18
-    iload 0                ; load jaar from 0
-    ldc 2099                   ; load constant maxyear
+    iload 0                ; load jaar_1 from 0
+    ldc 2099                   ; load constant maxyear_1
     if_icmple L9        ; e1 <= e2
     iconst_0
     goto L10
@@ -712,9 +713,9 @@ L9:
 L10:
     iand                            ; e1 right hand for assignment
     dup
-    istore 1               ; store e1 in ok
+    istore 1               ; store e1 in ok_1
     pop
-    iload 1                ; load ok from 1
+    iload 1                ; load ok_1 from 1
     ireturn
 .end method
 .method public static nest(II)I
@@ -723,7 +724,7 @@ L10:
 .line 47
 .line 48
 .line 49
-    iload 0                ; load stap from 0
+    iload 0                ; load stap_1 from 0
     iconst_1
     if_icmpeq L0        ; e1 = e2
     iconst_0
@@ -734,15 +735,15 @@ L1:
     ifeq L9          ; e1 is false
 .line 50
     iconst_3
-    iload 1                ; load w from 1
+    iload 1                ; load w_1 from 1
     imul                            ; e1 right hand for assignment
     dup
-    istore 2               ; store e1 in returnvalue
+    istore 2               ; store e1 in returnvalue_1
     pop
     goto L10
 L9:
 .line 52
-    iload 0                ; load stap from 0
+    iload 0                ; load stap_1 from 0
     iconst_2
     if_icmpeq L2        ; e1 = e2
     iconst_0
@@ -752,23 +753,23 @@ L2:
 L3:
     ifeq L8          ; e1 is false
 .line 53
-    iload 1                ; load w from 1
+    iload 1                ; load w_1 from 1
     iconst_4
     idiv                            ; e1 right hand for assignment
     dup
-    istore 2               ; store e1 in returnvalue
+    istore 2               ; store e1 in returnvalue_1
     pop
 .line 55
     iconst_1
                             ; e1 right hand for assignment
     dup
-    istore 3               ; store e1 in loop
+    istore 3               ; store e1 in loop_1
     pop
 .line 56
 L6:
 .line 56
-    iload 3                ; load loop from 3
-    ldc 12                   ; load constant twaalf
+    iload 3                ; load loop_1 from 3
+    ldc 12                   ; load constant twaalf_1
     if_icmple L4        ; e1 <= e2
     iconst_0
     goto L5
@@ -777,18 +778,18 @@ L4:
 L5:
     ifeq L7
 .line 57
-    iload 2                ; load returnvalue from 2
+    iload 2                ; load returnvalue_1 from 2
     iconst_1
     isub                            ; e1 right hand for assignment
     dup
-    istore 2               ; store e1 in returnvalue
+    istore 2               ; store e1 in returnvalue_1
     pop
 .line 58
-    iload 3                ; load loop from 3
+    iload 3                ; load loop_1 from 3
     iconst_1
     iadd                            ; e1 right hand for assignment
     dup
-    istore 3               ; store e1 in loop
+    istore 3               ; store e1 in loop_1
     pop
     goto L6
 L7:
@@ -796,7 +797,7 @@ L7:
 L8:
 							; e3 if false expression
 L10:
-    iload 2                ; load returnvalue from 2
+    iload 2                ; load returnvalue_1 from 2
     ireturn
 .end method
 .method public static copy(I)I
@@ -806,7 +807,7 @@ L10:
 .line 76
     bipush 42
     pop
-    iload 0                ; load jaar from 0
+    iload 0                ; load jaar_1 from 0
     ireturn
 .end method
 .method public static nested()I
@@ -815,27 +816,27 @@ L10:
 .line 82
 .line 83
 .line 84
-    getstatic Main/jaar I ; load global jaar
+    getstatic Main/jaar_1 I ; load global jaar_1
     iconst_5
     imul
     iconst_4
     idiv
-    getstatic Main/X I ; load global X
+    getstatic Main/X_1 I ; load global X_1
     isub
 .line 84                    ; -     bipush 10
     bipush 10
     ineg
     iadd                            ; e1 right hand for assignment
     dup
-    istore 0               ; store e1 in Z
+    istore 0               ; store e1 in Z_1
     pop
 .line 85
-    iload 0                ; load Z from 0
+    iload 0                ; load Z_1 from 0
     invokestatic Main/copy(I)I                            ; e1 right hand for assignment
     dup
-    istore 0               ; store e1 in Z
+    istore 0               ; store e1 in Z_1
     pop
-    iload 0                ; load Z from 0
+    iload 0                ; load Z_1 from 0
     ireturn
 .end method
 .method public static printdatum()V
@@ -843,7 +844,7 @@ L10:
 .limit locals 2
 .line 130
 .line 131
-    getstatic Main/day I ; load global day
+    getstatic Main/day_1 I ; load global day_1
     dup
     getstatic java/lang/System/out Ljava/io/PrintStream;
     swap
@@ -857,10 +858,10 @@ L10:
     invokevirtual java/io/PrintStream/println(C)V
                              ; e1 right hand for assignment
     dup
-    istore 0               ; store e1 in under
+    istore 0               ; store e1 in under_1
     pop
 .line 134
-    getstatic Main/month I ; load global month
+    getstatic Main/month_1 I ; load global month_1
     iconst_3
     if_icmpeq L0        ; e1 = e2
     iconst_0
@@ -925,11 +926,11 @@ L2:
 							; e3 if false expression
 L3:
 .line 139
-    iload 0                ; load under from 0
+    iload 0                ; load under_1 from 0
     getstatic java/lang/System/out Ljava/io/PrintStream;
     swap
     invokevirtual java/io/PrintStream/println(C)V
-     getstatic Main/jaar I ; load global jaar
+     getstatic Main/jaar_1 I ; load global jaar_1
     getstatic java/lang/System/out Ljava/io/PrintStream;
     swap
     invokevirtual java/io/PrintStream/println(I)V
