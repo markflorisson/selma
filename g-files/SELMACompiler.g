@@ -55,14 +55,14 @@ options {
 
         stack.push(o); 
         
-        st.openScope();
+        st.enterFuncScope();
         curStackDepth = maxStackDepth = labelNum = st.localCount = 0;
         st.nextAddr = 0;
     }
     
     private void leaveFuncScope() {
         StackDepthLabelCounter o = stack.pop();
-        st.closeScope();
+        st.leaveFuncScope();
         curStackDepth = o.curStackDepth;
         maxStackDepth = o.maxStackDepth;
         labelNum = o.labelNum;
@@ -83,14 +83,13 @@ program
   : ^(node=BEGIN {st.openScope();} compoundexpression END)
   { SELMATree expr = (SELMATree) $node.getChild(0); 
     int localsCount = st.getLocalsCount();
-    List<String> globalVariableFields = st.getAllLocalVariablesWithTypes();
     st.closeScope();
   }
   -> program(instructions={$compoundexpression.st},
              source_file={SELMA.inputFilename},
              stack_limit={maxStackDepth + 3}, // +3 for print
              locals_limit={localsCount + 1}, // +1 for the String[] argv parameter
-             fields={globalVariableFields},
+             fields={st.globals},
              pop={expr.SR_type != SR_Type.VOID})
   ;
 
@@ -135,7 +134,7 @@ declaration
 	enterFuncScope();
 	int paramCount = 0;
 	StringBuilder signatureBuilder = new StringBuilder("(");
-	//List<String> paramTypeDenoters = new ArrayList<String>();
+	boolean hasReturnType = false;
   } (param=ID typ1=(INT|BOOL|CHAR)
   {
   	SELMATree type1 = (SELMATree) $node.getChild(++paramCount * 2);
@@ -143,34 +142,38 @@ declaration
   	//paramTypeDenoters.add(getTypeDenoter(type1.getSelmaType()));
   	st.addParamToFunc($funcname, param, type1);
   })*
-  ( ^(return_node=FUNCRETURN (INT|BOOL|CHAR) (body+=compoundexpression) retexpr=expression)
-  | (body+=compoundexpression)
-  )
+  ( ^(return_node=FUNCRETURN (INT|BOOL|CHAR) 
   {
-  	SELMATree funcbody;
-  	int stackLimit = maxStackDepth + 3;
-  	int localsLimit = st.getLocalsCount();
+  	SELMATree returnTypeNode = (SELMATree) $return_node.getChild(0);
   	
   	signatureBuilder.append(")");
-  	
-  	if ($return_node == null) {
-  	    funcbody = (SELMATree) $node.getChild(paramCount * 2 + 1);
-  	    signatureBuilder.append("V");
-  	} else {
-  	    funcbody = (SELMATree) $return_node.getChild(1);
-  	    SELMATree returnType = (SELMATree) $return_node.getChild(0);
-  	    signatureBuilder.append(getTypeDenoter(returnType.getSelmaType()));
-	}
-	leaveFuncScope();
+  	signatureBuilder.append(getTypeDenoter(returnTypeNode.getSelmaType()));
+	funcentry.signature = signatureBuilder.toString();
 	
-	String signature = signatureBuilder.toString();
-	funcentry.signature = signature;
-  })
+	hasReturnType = true;
+  }
+  
+  (body+=compoundexpression) retexpr=expression)
+  | ({funcentry.signature = signatureBuilder.toString() + ")V";} body+=compoundexpression)
+  )
+  {
+        SELMATree funcbody;
+  	int stackLimit = maxStackDepth + 3;
+  	int localsLimit = st.getLocalsCount();
+  	  	
+  	if ($return_node == null)
+  	    funcbody = (SELMATree) $node.getChild(paramCount * 2 + 1);  
+  	else
+  	    funcbody = (SELMATree) $return_node.getChild(1);
+  	    
+	leaveFuncScope();
+  }
+  )
   -> function(funcname={$funcname.text}, 
               body={$body},
-              signature={signature},
+              signature={funcentry.signature},
               return_expression={$retexpr.st}, 
-              is_void={signature.endsWith("V")},
+              is_void={funcentry.signature.endsWith("V")},
               pop={funcbody.SR_type != SR_Type.VOID},
               stack_limit={stackLimit},
               locals_limit={localsLimit + 1},
@@ -293,8 +296,8 @@ expression
               addrs.add(entry.addr);
               isBool.add(child.SR_type == SR_Type.BOOL);
               isInt.add(child.SR_type == SR_Type.INT);
-              globals.add(entry.level == 0);
-              ids.add(child.getText());
+              globals.add(entry.isGlobal);
+              ids.add(entry.getIdentifier(child.getText()));
           }
   	}
   	-> read(ids={ids}, addrs={addrs}, dup_top={isExpr}, 
@@ -337,19 +340,15 @@ expression
   | ^(BECOMES node=ID e1=expression) 
   {  
       CompilerEntry entry = st.retrieve(node);
+      String ident = entry.getIdentifier($node.text);
       boolean isConst = node.SR_kind == SR_Kind.CONST;
-      boolean isGlobal = false;
       String typeDenoter = getTypeDenoter(entry.type);
-    	
-      if (entry.level == 0) {
-          isGlobal = true;
-      }
   }
-  	-> assign(id={$node.text},
+  	-> assign(id={ident},
       		  type={$node.type},
   	    	  addr={st.retrieve($node).addr},
   		  e1={$e1.st},
-  		  is_global={isGlobal},
+  		  is_global={entry.isGlobal},
   		  type_denoter={typeDenoter})
 
 //closedcompound
@@ -372,16 +371,12 @@ expression
     {
     	incrStackDepth();
     	CompilerEntry entry = st.retrieve(node);
+    	String ident = entry.getIdentifier($node.text);
     	boolean isConst = node.SR_kind == SR_Kind.CONST;
-    	boolean isGlobal = false;
     	String typeDenoter = getTypeDenoter(entry.type);
-    	
-    	if (entry.level == 0) {
-    	    isGlobal = true;
-    	}
     }
-    -> loadVal(id={$node.text}, addr={entry.addr}, val={entry.val}, is_const={isConst},
-               is_global={isGlobal}, type_denoter={typeDenoter})
+    -> loadVal(id={ident}, addr={entry.addr}, val={entry.val}, is_const={isConst},
+               is_global={entry.isGlobal}, type_denoter={typeDenoter})
   ;
 
 

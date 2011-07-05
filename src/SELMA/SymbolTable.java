@@ -14,6 +14,9 @@ public class SymbolTable<Entry extends IdEntry> {
 	public int nextAddr = 1;
     public int funclevel = 0;
 
+    // Set of global variables along with their type denoters that should become fields
+    public Set<String> globals = new HashSet<String>();
+
     private int currentLevel;
     private Map<String, Stack<Entry>> entries;
 
@@ -97,6 +100,13 @@ public class SymbolTable<Entry extends IdEntry> {
         } else {
         	throw new SymbolTableException(tree, "Entry "+id+" already exists in current scope.");
         }
+
+        if (entry instanceof CompilerEntry) {
+            CompilerEntry e = (CompilerEntry) entry;
+            e.isGlobal = funclevel == 0;
+            if (e.isGlobal && e.kind == SR_Kind.VAR && e.func != SR_Func.YES)
+                globals.add(e.getIdentifier(id) + " " + getTypeDenoter(e.type, false));
+        }
     }
 
 
@@ -162,27 +172,6 @@ public class SymbolTable<Entry extends IdEntry> {
         } else {
             throw new RuntimeException(":( Invalid type: " + type);
         }
-    }
-
-    /**
-     * Get a list of strings for each local variable along with its type denoter.
-     * This is used for global variables that are to become fields
-     * @return
-     */
-    public List<String> getAllLocalVariablesWithTypes() {
-        List<String> localVars = new ArrayList<String>();
-
-        for (Map.Entry<String, Stack<Entry>> entry: entries.entrySet()){
-    		Stack<Entry> stack = entry.getValue();
-    		if (stack != null && !stack.isEmpty()) {
-                CheckerEntry e = (CheckerEntry) stack.peek();
-                if (e.kind != SR_Kind.CONST && e.func != SR_Func.YES) {
-                    localVars.add(entry.getKey() + " " + getTypeDenoter(e.type, false));
-                }
-            }
-        }
-
-        return localVars;
     }
 
     public void enterFuncScope() {

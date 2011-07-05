@@ -47,12 +47,12 @@ if @checkjaar(jaar,); then
 	function nest(stap,w: integer;): integer {
 		var returnvalue: integer;
 		if stap==1; then
-			returnvalue := 3*w;	
+			returnvalue := 3*w;
 		else
 			if stap == 2; then
 				returnvalue := w/4;
 				var loop: integer;
-				loop := 1;				
+				loop := 1;
 				while loop <= twaalf; do
 					returnvalue := returnvalue-1;
 					loop := loop + 1;
@@ -72,15 +72,16 @@ if @checkjaar(jaar,); then
 		Y := (8*C)/25 - 5;
 	fi;
 
+    function copy(jaar: integer;): integer {
+        42;
+        return jaar;
+    };
+
 //    Zoek de zondag:
 //    Vermenigvuldig het jaartal met 5, geheeldeel de uitkomst door 4, trek er X en 10 vanaf, en noem dit getal Z. Voor 1991 geldt: Z = 2475.
 	function nested(): integer {
 		var Z: integer;
 		Z := (((jaar*5)/4)-X)+-10;
-		function copy(jaar: integer;): integer {
-			42;
-			return jaar;
-		};
 		Z := @copy(Z,);
 		return Z;
 	};
@@ -89,9 +90,9 @@ if @checkjaar(jaar,); then
 
 //    Bepaal de epacta:
 //    11 maal G + 20 + Y. Trek daarvan X af, geheeldeel het resultaat door 30 en noem de rest E. Als E gelijk is aan 24, of als E gelijk is aan 25 en het gulden getal is groter dan 11, tel dan 1 bij E op. De Epacta voor 1991 is 14.
-	var E,EE: integer;	
+	var E,EE: integer;
 	E := EE := ({const elf: integer = 11; elf*(G+20+Y);}-X)/30;
-	const mnope: boolean = false;	
+	const mnope: boolean = false;
 	if EE==24 || (E==25&&G>11) || mnope; then
 		E := 1+E;
 	fi;
@@ -103,7 +104,7 @@ if @checkjaar(jaar,); then
 	N := minus2-E;
 	var tosmall: boolean;
 	tosmall := N<21;
-	N := N+	
+	N := N+
 		if tosmall; then
 			30;
 		else
@@ -117,7 +118,7 @@ if @checkjaar(jaar,); then
 
 //    Paasdatum: Als P groter is dan 31, trek er dan 31 vanaf, en de paasdatum valt in April. Anders is de paasdag P in Maart. Zo wordt voor 1991 gevonden 31 maart.
 	var month: integer;
-	var day: integer;	
+	var day: integer;
 	if P>31; then
 		month := 4;
 		day := P%31;
@@ -128,14 +129,14 @@ if @checkjaar(jaar,); then
 
 	function printdatum() {
 		print(day);
-		var under: character;		
+		var under: character;
 		under := print('_');
 		if month==3; then
 			print('M','a','a','r','t');
 		else
 			print('A','p','r','i','l');
 		fi;
-		print(under,jaar);		
+		print(under,jaar);
 	};
 	@printdatum();
 fi;

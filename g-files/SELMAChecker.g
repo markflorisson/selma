@@ -108,7 +108,7 @@ declaration
              break;
          }
     }
-	| ^(FUNCDEF funcname=ID
+	| ^(node=FUNCDEF funcname=ID
    {
        //enter as void
        if (st.funclevel != 0)
@@ -122,12 +122,13 @@ declaration
    }
 		)*
 		(
-			^(node=FUNCRETURN type compoundexpression expression
+			^(node=FUNCRETURN type
    {
 	SELMATree type = (SELMATree) node.getChild(0);
-	SELMATree expr = (SELMATree) node.getChild(2);
-	st.retrieve($funcname).type = expr.SR_type;
-	
+	st.retrieve($funcname).type = type.getSelmaType();
+   } compoundexpression expression 
+   {
+        SELMATree expr = (SELMATree) node.getChild(2);
 	matchType(type, expr.SR_type);
    })
  	| (compoundexpression))

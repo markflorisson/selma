@@ -1,0 +1,28 @@
+function fac(n : integer;) : integer {
+    var result : integer;
+    if n == 1; then
+        result := 1;
+    else
+        result := n * @fac(n - 1,);
+    fi;
+
+    return result;
+};
+
+<output>3628800</output>
+print(@fac(10,));
+
+var result : integer;
+
+function fac2(n : integer;) {
+    if n <> 1; then
+        result := result * n;
+        @fac2(n - 1,);
+    fi;
+};
+
+result := 1;
+@fac2(10,);
+
+<output>3628800</output>
+print(result);
