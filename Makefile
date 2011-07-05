@@ -24,6 +24,9 @@ astNC: build
 tests:
 	$(PYTHON) test.py
 
+bigprog:
+	java -cp "./src/:./:./antlr-3.3-complete.jar:./jasmin.jar" SELMA.SELMA -code_generator pasen/pasen.SELMA > pasen/pasen.jasmin
+
 runonly:
 	$(JAVA) SELMA.SELMA -code_generator $(PROGRAM).SELMA > $(PROGRAM).jasmin
 	$(JAVA) -jar jasmin.jar -g $(PROGRAM).jasmin

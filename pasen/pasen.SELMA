@@ -22,12 +22,11 @@ function checkjaar(jaar: integer;): boolean {
 print('H','a','l','l','o','_','v','a','n','_','w','e','l','k','_','j','a','a','r','_','w','i','l','_','j','e','_','d','e','_','p','a','a','s','d','a','t','u','m','_','w','e','t','e','n');
 
 var jaar: integer;
-<input>1991</input>
 read(jaar);
 
 const negentien: integer = 19;
 
-if @checkjaar(jaar); then
+if @checkjaar(jaar,); then
 //    Bepaal het gulden getal:
 //    Deel het jaartal door 19, neem de rest en tel er 1 bij op (zoals Dionysius). Noem dit getal G. Voor het jaar 1991 geldt G = 16.
 	var G: integer;
@@ -43,12 +42,12 @@ if @checkjaar(jaar); then
 //    Corrigeer vervolgens voor jaren die geen schrikkeljaar zijn:
 //    Vermenigvuldig C met 3, geheeldeel het resultaat door 4 en trek er 12 van af. Noem dit getal X. Voor de twintigste en eenentwintigste eeuw geldt X = 3.
 	var X: integer;
-	var stap: integer = 1;
+	const stap: integer = 1;
 	const twaalf: integer = 12;
-	function recursief(stap,w: integer;): integer {
+	function nest(stap,w: integer;): integer {
 		var returnvalue: integer;
 		if stap==1; then
-			returnvalue := recursief(stap+1,3*w);	
+			returnvalue := 3*w;	
 		else
 			if stap == 2; then
 				returnvalue := w/4;
@@ -62,7 +61,7 @@ if @checkjaar(jaar); then
 		fi;
 		return returnvalue;
 	};
-	X := @recursief(stap,waarde);
+	X := @nest(stap+1,@nest(stap,C,),);
 
 //    Maancorrectie:
 //    Neem 8 maal C, tel er 5 bij op, deel het geheel door 25 en trek er 5 vanaf. Noem dit getal Y. Voor de twintigste en eenentwintigste eeuw geldt: Y = 1.
@@ -81,12 +80,12 @@ if @checkjaar(jaar); then
 		function copy(jaar: integer;): integer {
 			42;
 			return jaar;
-		}
-		Z := @copy(Z);
+		};
+		Z := @copy(Z,);
 		return Z;
 	};
 	var Z: integer;
-	Z := nested();
+	Z := @nested();
 
 //    Bepaal de epacta:
 //    11 maal G + 20 + Y. Trek daarvan X af, geheeldeel het resultaat door 30 en noem de rest E. Als E gelijk is aan 24, of als E gelijk is aan 25 en het gulden getal is groter dan 11, tel dan 1 bij E op. De Epacta voor 1991 is 14.
@@ -127,7 +126,7 @@ if @checkjaar(jaar); then
 		day := P;
 	fi;
 
-	function printdatum {
+	function printdatum() {
 		print(day);
 		var under: character;		
 		under := print('_');
@@ -138,7 +137,6 @@ if @checkjaar(jaar); then
 		fi;
 		print(under,jaar);		
 	};
-	<output>31_Maart_1991</output>
 	@printdatum();
 fi;
 

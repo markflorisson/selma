@@ -181,7 +181,6 @@ expr_arithmetic
 		;
 
 	expr_al6
-//		: (PLUS|MINUS|NOT)? expr_al7
 		: PLUS expr_al7
 			-> ^(UPLUS expr_al7)
 		| MINUS expr_al7

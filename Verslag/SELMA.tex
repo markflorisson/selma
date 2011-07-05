@@ -452,7 +452,7 @@ read(foo,bar);
 \subsection{Print}
 De taal heeft ook de mogelijkheid om dat wat er bijvoorbeeld berekend is naar buiten te communiceren.
 \subsubsection{Syntax}
-\lstinputlisting[style=ANTLR,linerange={209-202}]{../g-files/SELMA.g}
+\lstinputlisting[style=ANTLR,linerange={209-212}]{../g-files/SELMA.g}
 \subsubsection{Context}
 \begin{itemize}
 \item -
@@ -1103,5 +1103,14 @@ listing van het oorspronkelijk programma, de listing van de gegenereerde TAM-cod
 standsnaam met extensie .tam) en een of meer executie voorbeelden met in- en uitvoer
 waaruit de juiste werking van de gegenereerde code blijkt.
 
+\newpage
+\subsubsection{SELMA-code van pasen}
+\lstinputlisting[style=SELMAfile]{../pasen/pasen.SELMA}
+
+\newpage
+\subsubsection{Jasmin-code van pasen}
+\begin{landscape}
+\lstinputlisting[style=JVMfile]{../pasen/pasen.jasmin}
+\end{landscape}
 
 \end{document}
