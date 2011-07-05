@@ -3,12 +3,17 @@
 \title{SELMA}
 \author{ 
 Vonk, J\\
+(herhaler)\\
 s0132778\\
 Matenweg 75-201\\
 \\
 Florisson, M\\
+(herhaler)\\
 s0165972\\
-Box Calslaan 60-30}
+Box Calslaan 60-30\\
+\\
+Studentassistent:\\
+Edwin Smulders}
 
 \usepackage{listings}
 \usepackage{lscape}
@@ -62,7 +67,7 @@ Voor vertalerbouw dient als eindopdracht een eigen taal geschreven te worden. De
 Voor deze zelfbedachte taal dient een parser en lexer geschreven te worden, een checker en een compiler. Hierbij dient een verslag met een uitgebreide beschrijving van de taal en een goede kijk op hoe alles onder de motorkap werkt. Ook moet er een bewijs worden geleverd dat de taal werkt, dit kan door een testprogramma te schrijven dat tamelijk uitgebreid is en te kijken of dit werkt naar behoren. (exhaustive testing) \\
 Hoe uitgebreid de te definieren taal wordt is aan de studenten zelf - dit is echter terug te zien in het te behalen cijfer.\\
 Voor onze taal, SELMA, hebben wij gekozen voor het volgende:
-\todo{Klopt?}
+
 \begin{itemize}
 \item Basic Expression Language
 \item If- \& while-statements
@@ -290,8 +295,8 @@ De eerste expr\_al2 zal op de stack worden gezet. Hierna wordt er telkens een ex
 \subsubsection{Voorbeeld}
 \begin{lstlisting}[style=SELMA]
 7*6;
-true OR false;
-true OR false OR foo;
+true || false;
+true || false || foo;
 \end{lstlisting}
 
 \subsection{Expressies - AND}
@@ -311,8 +316,8 @@ Hetzelfde als bij het OR-statement. De waardes zullen op de stack geladen worden
 \subsubsection{Voorbeeld}
 \begin{lstlisting}[style=SELMA]
 7*6;
-foo AND bar;
-foo AND false AND bar;
+foo && bar;
+foo && false && bar;
 \end{lstlisting}
 
 \subsection{Expressies - Relaties}
@@ -372,7 +377,7 @@ Hetzelfde als bij optellen. Goed om te weten is dat de geretouneerde waarde een 
 \begin{lstlisting}[style=SELMA]
 foo := 6;
 foo := 6*7;
-foo := 21*6%84;
+foo := 21*6\%84;
 \end{lstlisting}
 
 
@@ -397,7 +402,7 @@ Bij NOT zal expr\_al6 == ! expr\_al7
 \begin{lstlisting}[style=SELMA]
 one := +1;
 evil := -42;
-foo := not foobar;
+foo := ! foobar;
 \end{lstlisting}
 
 \subsection{Expressies - toplevel}
@@ -496,15 +501,15 @@ Om keuzes in het programma mogelijk te maken zal er een conditioneel statement n
 \subsubsection{Context}
 \begin{itemize}
 \item De eerste compoundexpression moet een boolean-type retouneren
-\item De if retouneerd een type void
-\todo{retourtype}
+\item De if retouneerd de waarde en type van de expressie die wordt uitgevoerd. (na de then of else)
+\item De if retouneerd void als er geen expressie wordt uitgevoerd.
 \end{itemize}
 \subsubsection{Semantiek}
 Als de waarde binnen het ifstatement waar is dan zal de eerste compoundexpressie worden uitgevoerd (na de then). Anders zal de andere compoundexpressie worden uitgevoerd, mits deze is gedeclareerd.
 \subsubsection{Voorbeeld}
 \begin{lstlisting}[style=SELMA]
-if true; then i := 42; fi
-if false; then i := 0; else i:=42; fi
+if true; then i := 42; fi;
+if false; then i := 0; else i:=42; fi;
 \end{lstlisting}
 
 \subsection{While}
@@ -523,11 +528,11 @@ De tweede compoundexpression zal worden uitgevoerd tot de eerste compoundexpress
 while false; do 
 \\ this is not gonna be executed
 tru := false;
-od
+od;
 
 while foo<5; do
 foo := foo + 1;
-od
+od;
 \end{lstlisting}
 
 \subsection{Functieaanroep}
@@ -564,7 +569,7 @@ Een expressie tussen haakjes is soms handig, bijvoorbeeld bij sommetjes: (5+2)*6
 De expressie binnen de haakjes zal worden uitgevoerd binnen de haakjes.
 \subsubsection{Voorbeeld}
 \begin{lstlisting}[style=SELMA]
-(3*(6+8))%102;
+(3*(6+8))\%102;
 \end{lstlisting}
 
 \subsection{Closed compoundexpression}
@@ -587,7 +592,6 @@ foo+2;
 \end{lstlisting}
 
 
-\todo{expression\_statement}
 
 %
 %expression_statement
