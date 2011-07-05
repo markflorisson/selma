@@ -112,8 +112,10 @@ De checker heeft vrijwel geen problemen opgeleverd, aangezien onze randcode - Ja
 Waar we wel consequent tegenaan liepen waren de wat vage manieren waarop er data uit de boom te halen is. Dollartekens voor Tokens, of juist niet, het was soms wat onduidelijk.
 \subsection{Compiler}
 In eerste instantie is de compiler in TAM geschreven, toen het echter een project van 2 werdt in plaats van 1, is er besloten om een tandje bij te zetten en SELMA in een wat algemener geaccepteerde code-vorm te compilen: JVM.\\
-\todo{Mark, wat barft aan JVM?}
-\todo{En barfen stringtemplates?}
+\subsubsection{Jasmin \& JVM}
+Er waren niet echt problemen met Jasmin of met de JVM. Een hindernis was het gebrek aan closures en global scope, dus om globale variabelen beschikbaar te maken tot functies moeten deze (statische) velden gemaakt worden en speciaal behandeld worden bij het laden van identifiers of assignment daaraan. Dit was vooral vervelend door het grote ongemak van string templates.\\
+\subsubsection{String Templates}
+String Templates is niet de meest flexibele template library. De syntax is raar en de restricties zijn enorm. Zo is het niet mogelijk een simpele comparison te doen in een 'if', en moet je dus een hoop booleans als argumenten meegeven (of wellicht een object de template in sturen met de juiste getters). Er is ook geen enkele mogelijkheid voor insertion points (e.g. code op bepaalde plekken te genereren, in plaats van "op de huidige positie"). Dit was vooral een probleem met functies, waarvoor we nieuwe methoden genereren die buiten de \texttt{main} methode moeten komen te staan. Hiervoor hebben we in \texttt{SELMA.java} een simpele vorm van post-processing gedaan waarbij we methoden in methoden buiten methoden zetten, zodat we een platte hierarchy krijgen.
 \subsection{Randcode}
 De randcode is deels gebaseerd op de symboltables gebruikt tijdens het practicum en neemt een hoop werk uit handen. De symboltable-entries zijn per onderdeel (checker,compiler) anders. Dit omdat we merkten dat er soms te weinig gegevens waren over declaraties. \\
 In de boom zelf konden we ook niet genoeg info kwijt, vandaar dat we een extension op de normale Tree hebben gemaakt, SELMATree, waarin is op te slaan wat het type is van elke expressie en of er variabele onderdelen in een expressie zitten.
