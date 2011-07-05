@@ -112,10 +112,8 @@ De checker heeft vrijwel geen problemen opgeleverd, aangezien onze randcode - Ja
 Waar we wel consequent tegenaan liepen waren de wat vage manieren waarop er data uit de boom te halen is. Dollartekens voor Tokens, of juist niet, het was soms wat onduidelijk.
 \subsection{Compiler}
 In eerste instantie is de compiler in TAM geschreven, toen het echter een project van 2 werdt in plaats van 1, is er besloten om een tandje bij te zetten en SELMA in een wat algemener geaccepteerde code-vorm te compilen: JVM.\\
-\subsubsection{Jasmin \& JVM}
-Er waren niet echt problemen met Jasmin of met de JVM. Een hindernis was het gebrek aan closures en global scope, dus om globale variabelen beschikbaar te maken tot functies moeten deze (statische) velden gemaakt worden en speciaal behandeld worden bij het laden van identifiers of assignment daaraan. Dit was vooral vervelend door het grote ongemak van string templates.\\
-\subsubsection{String Templates}
-String Templates is niet de meest flexibele template library. De syntax is raar en de restricties zijn enorm. Zo is het niet mogelijk een simpele comparison te doen in een 'if', en moet je dus een hoop booleans als argumenten meegeven (of wellicht een object de template in sturen met de juiste getters). Er is ook geen enkele mogelijkheid voor insertion points (e.g. code op bepaalde plekken te genereren, in plaats van "op de huidige positie"). Dit was vooral een probleem met functies, waarvoor we nieuwe methoden genereren die buiten de \texttt{main} methode moeten komen te staan. Hiervoor hebben we in \texttt{SELMA.java} een simpele vorm van post-processing gedaan waarbij we methoden in methoden buiten methoden zetten, zodat we een platte hierarchy krijgen.
+\todo{Mark, wat barft aan JVM?}
+\todo{En barfen stringtemplates?}
 \subsection{Randcode}
 De randcode is deels gebaseerd op de symboltables gebruikt tijdens het practicum en neemt een hoop werk uit handen. De symboltable-entries zijn per onderdeel (checker,compiler) anders. Dit omdat we merkten dat er soms te weinig gegevens waren over declaraties. \\
 In de boom zelf konden we ook niet genoeg info kwijt, vandaar dat we een extension op de normale Tree hebben gemaakt, SELMATree, waarin is op te slaan wat het type is van elke expressie en of er variabele onderdelen in een expressie zitten.
@@ -1056,19 +1054,17 @@ Run        test/sample.selma                                  ...  FAIL (exit st
 --------------------------------------------------------------------------------
 Run        test/test_if.selma                                 ...  OK
 Run        test/test_operators.selma                          ...  OK
+Run        test/test_pasen.selma                              ...  OK
 Run        test/test_while.selma                              ...  OK
-Run        test/test_functions/correct_functions.SELMA        ...  FAIL (exit status 1)
-        ERROR: recognition exception thrown by compiler: null
-        org.antlr.runtime.EarlyExitException
-        at SELMA.SELMACompiler.compoundexpression(SELMACompiler.java:271)
-        at SELMA.SELMACompiler.program(SELMACompiler.java:170)
-        at SELMA.SELMA.main(SELMA.java:99)
---------------------------------------------------------------------------------
+Run        test/test_functions/correct_functions.SELMA        ...  OK
 Error      test/test_functions/error_doublefunction.selma     ...  OK
+Error      test/test_functions/error_nested.selma             ...  OK
 Error      test/test_functions/error_wrongparamcount.selma    ...  OK
 Error      test/test_functions/error_wrongparamtype.selma     ...  OK
 Error      test/test_functions/error_wrongreturntype.selma    ...  OK
-Ran 17 test(s), SUCCESS=15, FAILURE=2
+Run        test/test_functions/recursion.selma                ...  OK
+Ran 24 test(s), SUCCESS=22, FAILURE=2
+
 \end{lstlisting}
 
 Hier zien we dat \texttt{test/sample.selma} niet de correcte output heeft, maar wel executeerde zonder fouten (exit status 0), terwijl \texttt{test/test\_functions/correct\_functions.SELMA} een compilatie fout had met een exit status 1. De eerste colom geeft het type test aan, in dit geval 'Error' of 'Run'. Ter demonstratie is \texttt{test/sample.selma} bijgevoegd:
@@ -1084,6 +1080,11 @@ Hier zien we dat \texttt{test/sample.selma} niet de correcte output heeft, maar 
 </output>
 print('h', 'a', 'l', 'l', 'o');
 \end{lstlisting}
+
+\subsection{Pasen}
+Het grootste testprogramma heet pasen, deze wordt ook meegenomen in de test. Pasen berekent middels het algorithme van Gauss wanneer pasen valt in een gegeven jaar. \\
+De SELMA-code is goed gedocumenteerd. De rekenstappen zijn soms wat omslachtig geschreven om gebruik te maken van alle mogelijkheden van de taal.\\
+In de appendix is de code te vinden van pasen, zowel in SELMA als Jasmin.
 
 \newpage
 \section{Conclusies}
@@ -1130,20 +1131,20 @@ De uitdaging aan de optimizer was denk ik het puzzelen geweest, om net overal de
 
 \newpage
 \subsection{Invoer- en uitvoer van een uitgebreid testprogramma}
-Van een correct en uitgebreid test-
-programma (met daarin alle features van uw programmeertaal) moet worden bijgevoegd: de
-listing van het oorspronkelijk programma, de listing van de gegenereerde TAM-code (be-
-standsnaam met extensie .tam) en een of meer executie voorbeelden met in- en uitvoer
-waaruit de juiste werking van de gegenereerde code blijkt.
+%Van een correct en uitgebreid test-
+%programma (met daarin alle features van uw programmeertaal) moet worden bijgevoegd: de
+%listing van het oorspronkelijk programma, de listing van de gegenereerde TAM-code (be-
+%standsnaam met extensie .tam) en een of meer executie voorbeelden met in- en uitvoer
+%waaruit de juiste werking van de gegenereerde code blijkt.
+De code van pasen.
 
-\newpage
 \subsubsection{SELMA-code van pasen}
-\lstinputlisting[style=SELMAfile]{../pasen/pasen.SELMA}
+\lstinputlisting[style=SELMAfile]{../test/test_pasen.selma}
 
 \newpage
-\subsubsection{Jasmin-code van pasen}
 \begin{landscape}
-\lstinputlisting[style=JVMfile]{../pasen/pasen.jasmin}
+\subsubsection{Jasmin-code van pasen}
+\lstinputlisting[style=JVMfile]{../test/test_pasen.jasmin}
 \end{landscape}
 
 \end{document}

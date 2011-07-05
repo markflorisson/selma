@@ -21,6 +21,7 @@ astNC: build
 
 tests:
 	$(PYTHON) test.py
+	$(JAVA) SELMA.SELMA -code_generator test/test_pasen.selma > test/test_pasen.jasmin
 
 runonly:
 	$(JAVA) SELMA.SELMA -code_generator $(PROGRAM).SELMA > $(PROGRAM).jasmin
