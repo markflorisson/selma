@@ -48,7 +48,7 @@ class TestRunner(object):
         output, err = p.communicate(input)
         exit_status = p.wait()
 
-        if output.lstrip().startswith('Generated: Main.class'):
+        if re.match(r'Generated: .*Main\.class', output):
             _, output = output.split('\n', 1)
 
         def test_failed():

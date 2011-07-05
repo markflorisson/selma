@@ -14,9 +14,7 @@ build:
 	CLASSPATH="antlr-3.3-complete.jar" $(JAVAC) src/SELMA/*.java
 
 run: build
-	$(JAVA) SELMA.SELMA -code_generator $(PROGRAM).SELMA > $(PROGRAM).jasmin
-	$(JAVA) -jar jasmin.jar -g $(PROGRAM).jasmin
-	$(JAVA) -classpath . Main
+	selma $(PROGRAM).SELMA
 
 astNC: build
 	$(JAVA) SELMA.SELMA -no_checker -ast $(PROGRAM).SELMA 
@@ -25,7 +23,7 @@ tests:
 	$(PYTHON) test.py
 
 bigprog:
-	java -cp "./src/:./:./antlr-3.3-complete.jar:./jasmin.jar" SELMA.SELMA -code_generator pasen/pasen.SELMA > pasen/pasen.jasmin
+	selma pasen/pasen.SELMA
 
 runonly:
 	$(JAVA) SELMA.SELMA -code_generator $(PROGRAM).SELMA > $(PROGRAM).jasmin
