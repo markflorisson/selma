@@ -1,0 +1,27 @@
+.source test/test_operators.selma
+.class public Main
+.super java/lang/Object
+.field public static scanner_field Ljava/util/Scanner;
+.field public static v_1 I 
+.method public <init>()V
+    aload_0
+    invokespecial java/lang/Object/<init>()V
+    return
+.end method
+.method public static main([Ljava/lang/String;)V
+.limit stack 4
+.limit locals 3
+    new java/util/Scanner
+    dup                                       ; dup for <init>
+    getstatic java/lang/System/in Ljava/io/InputStream;
+    invokespecial java/util/Scanner/<init>(Ljava/io/InputStream;)V
+    putstatic Main/scanner_field Ljava/util/Scanner;
+.line 1
+.line 4
+    bipush 6
+                            ; e1 right hand for assignment
+    dup
+    putstatic Main/v_1 I
+    pop
+    return
+.end method

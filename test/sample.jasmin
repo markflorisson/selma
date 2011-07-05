@@ -1,0 +1,44 @@
+.source test/sample.selma
+.class public Main
+.super java/lang/Object
+.field public static scanner_field Ljava/util/Scanner;
+.method public <init>()V
+    aload_0
+    invokespecial java/lang/Object/<init>()V
+    return
+.end method
+.method public static main([Ljava/lang/String;)V
+.limit stack 8
+.limit locals 2
+    new java/util/Scanner
+    dup                                       ; dup for <init>
+    getstatic java/lang/System/in Ljava/io/InputStream;
+    invokespecial java/util/Scanner/<init>(Ljava/io/InputStream;)V
+    putstatic Main/scanner_field Ljava/util/Scanner;
+.line 8
+    bipush 104                ; ldc 'h'
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(C)V
+ .line 8
+    bipush 97                ; ldc 'a'
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(C)V
+ .line 8
+    bipush 108                ; ldc 'l'
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(C)V
+ .line 8
+    bipush 108                ; ldc 'l'
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(C)V
+ .line 8
+    bipush 111                ; ldc 'o'
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(C)V
+    return
+.end method

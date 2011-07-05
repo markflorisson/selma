@@ -1,0 +1,359 @@
+.source test/correct.selma
+.class public Main
+.super java/lang/Object
+.field public static scanner_field Ljava/util/Scanner;
+.field public static ivar_1 I 
+.field public static ivar2_1 I 
+.field public static cvar2_1 C 
+.field public static var1_1 I 
+.field public static cvar1_1 C 
+.field public static cvar_1 C 
+.field public static var2_1 I 
+.field public static bvar_1 I 
+.field public static ivar1_1 I 
+.field public static vvar_1 I 
+.method public <init>()V
+    aload_0
+    invokespecial java/lang/Object/<init>()V
+    return
+.end method
+.method public static main([Ljava/lang/String;)V
+.limit stack 5
+.limit locals 12
+    new java/util/Scanner
+    dup                                       ; dup for <init>
+    getstatic java/lang/System/in Ljava/io/InputStream;
+    invokespecial java/util/Scanner/<init>(Ljava/io/InputStream;)V
+    putstatic Main/scanner_field Ljava/util/Scanner;
+.line 1
+.line 10
+    ldc 1                   ; load constant bconst_1
+    dup
+    ifeq L0
+    ldc "true"
+    goto L1
+L0:
+    ldc "false"
+L1:
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+    pop
+.line 12
+    iconst_1
+    iconst_2
+    iadd
+    pop
+.line 15
+.line 45
+.line 16
+.line 17
+.line 22
+    ; read ivar1_1 78 false true
+    getstatic Main/scanner_field Ljava/util/Scanner;
+    invokevirtual java/util/Scanner/nextInt()I
+        putstatic Main/ivar1_1 I 
+    ; read ivar2_1 78 false true
+    getstatic Main/scanner_field Ljava/util/Scanner;
+    invokevirtual java/util/Scanner/nextInt()I
+        putstatic Main/ivar2_1 I 
+.line 28
+    getstatic Main/ivar1_1 I ; load global ivar1_1
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(I)V
+     getstatic Main/ivar2_1 I ; load global ivar2_1
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(I)V
+.line 31
+    bipush 16
+.line 31
+    iconst_2
+.line 31                    ; -     bipush 8
+    bipush 8
+    ineg
+    imul
+    iadd                            ; e1 right hand for assignment
+    dup
+    putstatic Main/ivar1_1 I
+                            ; e1 right hand for assignment
+    dup
+    putstatic Main/ivar2_1 I
+    pop
+.line 37
+    getstatic Main/ivar1_1 I ; load global ivar1_1
+    getstatic Main/ivar2_1 I ; load global ivar2_1
+    if_icmplt L2        ; e1 < e2
+    iconst_0
+    goto L3
+L2:
+    iconst_1
+L3:
+.line 37
+    ldc 1                   ; load constant iconst1_1
+    ldc 2                   ; load constant iconst2_1
+    if_icmple L4        ; e1 <= e2
+    iconst_0
+    goto L5
+L4:
+    iconst_1
+L5:
+    iand
+    ifeq L8
+    ldc "true"
+    goto L9
+L8:
+    ldc "false"
+L9:
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+ .line 38
+.line 38
+    ldc 1                   ; load constant iconst1_1
+    ldc 2                   ; load constant iconst2_1
+    imul
+.line 38
+    getstatic Main/ivar2_1 I ; load global ivar2_1
+    getstatic Main/ivar1_1 I ; load global ivar1_1
+    isub
+    if_icmpgt L6        ; e1 > e2
+    iconst_0
+    goto L7
+L6:
+    iconst_1
+L7:
+    ifeq L10
+    ldc "true"
+    goto L11
+L10:
+    ldc "false"
+L11:
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+.line 41
+    getstatic Main/ivar1_1 I ; load global ivar1_1
+.line 41
+    ; read ivar2_1 8 false true
+    getstatic Main/scanner_field Ljava/util/Scanner;
+    invokevirtual java/util/Scanner/nextInt()I
+    dup
+        putstatic Main/ivar2_1 I 
+    if_icmplt L12        ; e1 < e2
+    iconst_0
+    goto L13
+L12:
+    iconst_1
+L13:
+.line 41
+    ldc 1                   ; load constant iconst1_1
+    ldc 2                   ; load constant iconst2_1
+    if_icmple L14        ; e1 <= e2
+    iconst_0
+    goto L15
+L14:
+    iconst_1
+L15:
+    iand
+    pop
+.line 44
+    getstatic Main/ivar2_1 I ; load global ivar2_1
+    dup
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(I)V
+    iconst_1
+    iadd                            ; e1 right hand for assignment
+    dup
+    putstatic Main/ivar2_1 I
+    iconst_1
+    iadd                            ; e1 right hand for assignment
+    dup
+    putstatic Main/ivar_1 I
+    pop
+.line 49
+.line 64
+.line 50
+.line 51
+.line 54
+    ; read bvar_1 8 true false
+    getstatic Main/scanner_field Ljava/util/Scanner;
+    invokevirtual java/util/Scanner/nextBoolean()Z
+    dup
+        putstatic Main/bvar_1 I
+    pop
+.line 57
+    getstatic Main/bvar_1 I ; load global bvar_1
+    dup
+    ifeq L16
+    ldc "true"
+    goto L17
+L16:
+    ldc "false"
+L17:
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+    pop
+.line 59
+    bipush 12
+    iconst_5
+    idiv
+    iconst_5
+    imul
+.line 59
+    bipush 12
+    iconst_5
+    irem
+    iadd
+    bipush 12
+    if_icmpeq L18        ; e1 = e2
+    iconst_0
+    goto L19
+L18:
+    iconst_1
+L19:
+.line 59
+    bipush 6
+    bipush 6
+    if_icmpge L20        ; e1 >= e2
+    iconst_0
+    goto L21
+L20:
+    iconst_1
+L21:
+    iand                            ; e1 right hand for assignment
+    dup
+    putstatic Main/bvar_1 I
+    pop
+.line 63
+        iconst_0
+	ifeq L22
+	iconst_0
+	goto L23
+L22:
+	iconst_1
+L23:
+.line 63
+    getstatic Main/bvar_1 I ; load global bvar_1
+    ldc 1                   ; load constant bconst_1
+    if_icmpeq L24        ; e1 = e2
+    iconst_0
+    goto L25
+L24:
+    iconst_1
+L25:
+    iand
+.line 63
+    iconst_1
+    iconst_0
+    if_icmpne L26        ; e1 != e2
+    iconst_0
+    goto L27
+L26:
+    iconst_1
+L27:
+    ior
+    dup
+    ifeq L28
+    ldc "true"
+    goto L29
+L28:
+    ldc "false"
+L29:
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+    iconst_1
+    iand                            ; e1 right hand for assignment
+    dup
+    putstatic Main/bvar_1 I
+    pop
+.line 67
+.line 68
+.line 69
+.line 72
+    ; read cvar1_1 9 false false
+    getstatic Main/scanner_field Ljava/util/Scanner;
+    invokevirtual java/util/Scanner/nextByte()B
+    dup
+        putstatic Main/cvar1_1 C 
+    pop
+.line 74
+    bipush 122                ; ldc 'z'                            ; e1 right hand for assignment
+    dup
+    putstatic Main/cvar2_1 C
+    pop
+.line 80
+    bipush 97                ; ldc 'a'
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(C)V
+ .line 80
+.line 80
+    getstatic Main/cvar1_1 C ; load global cvar1_1
+    ldc 99                   ; load constant cconst_1
+    if_icmpeq L30        ; e1 = e2
+    iconst_0
+    goto L31
+L30:
+    iconst_1
+L31:
+.line 80
+    getstatic Main/cvar2_1 C ; load global cvar2_1
+.line 80
+    bipush 98                ; ldc 'b'
+    if_icmpne L32        ; e1 != e2
+    iconst_0
+    goto L33
+L32:
+    iconst_1
+L33:
+.line 80
+        iconst_1
+	ifeq L34
+	iconst_0
+	goto L35
+L34:
+	iconst_1
+L35:
+    ior
+    iand
+    ifeq L36
+    ldc "true"
+    goto L37
+L36:
+    ldc "false"
+L37:
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+.line 81
+    bipush 98                ; ldc 'b'
+                            ; e1 right hand for assignment
+    dup
+    putstatic Main/cvar_1 C
+    pop
+.line 89
+    getstatic Main/ivar_1 I ; load global ivar_1
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(I)V
+     getstatic Main/bvar_1 I ; load global bvar_1
+    ifeq L38
+    ldc "true"
+    goto L39
+L38:
+    ldc "false"
+L39:
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V
+     getstatic Main/cvar_1 C ; load global cvar_1
+    getstatic java/lang/System/out Ljava/io/PrintStream;
+    swap
+    invokevirtual java/io/PrintStream/println(C)V
+    return
+.end method

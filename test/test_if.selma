@@ -6,7 +6,7 @@ if { i := 1; } == 1; then
     var i : integer;
 
     i := 20;
-    <output>20</output>
+    //<output>20</output>
     print(i);
 else
     print('h', 'e', 'l', 'l', 'o');
@@ -14,13 +14,13 @@ fi;
 
 const b : boolean = true;
 
-<output>b</output>
+//<output>b</output>
 print(
     if b; then
         var b : character;
         b := 'b';
 
-        <output>b</output>
+        //<output>b</output>
         print(b);
     else
         'c';
