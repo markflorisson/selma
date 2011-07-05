@@ -16,6 +16,7 @@ Box Calslaan 60-30}
 \usepackage[pdftex,bookmarks=true]{hyperref}
 \usepackage{hyperref}
 \usepackage{verbatim}
+\usepackage{url}
 % \usepackage[T1]{fontenc}
 
 \hypersetup{
@@ -82,20 +83,40 @@ Vanaf nu enkel nog naar te verwijzen als SELMA.\\
 %van de programmeertaal (maximaal een A4-tje).
 Onze taal is gemaakt naar de gegeven instructies van de practicumhandleiding en alles is of een expressie of declaration in deze taal. Bij sommige expressies is het echter niet mogelijk een resultaat te geven, hier kunnen die expressies niet anders dan een void-resultaat retouneren, wat ze effectief een statement maakt. De structuur van de taal en de keywords lijken qua layout op een hybride tussen C en Pascal. \\
 De volledige taal is LL(1) wij hebben hierdoor vooral tijdens het ontwerpen goed moeten nadenken hoe we de taal zo logisch mogelijk opbouwden zodat de parser er mee uit de voeten kon. Eventueel is er de mogelijkheid om lokaal 1 stap verder te kijken, wij hebben dit echter niet nodig gehad omdat wij voldoende keywords hebben gebruikt, zoals voor een functie een @ zetten - en we in de parser bewust rekening hebben gehouden met de LL(1) limitatie.\\
-\todo{@?}
 \\
 SELMA compileerde in eerste instantie naar TAM, op de cd is een fragment van deze code te zien. We hebben echter besloten dat het mooier was om JVM te gebruiken, niet zo zeer uit praktisch oogpunt, maar meer omdat JVM-bytecode ook door "echte" talen wordt gebruikt en omdat het een pluspunt is in de eindbeoordeling.\\
 Op het moment dat we besloten om te schakelen waren we blij dat we haddne gekozen voor het gebruik van stringTemplates bij de codegeneratie, dit heeft ons wat werk gescheeld. En technisch gezien zouden we zo een extra compiler naar TAM-code erbij kunnen doen, aangezien er geen andere reden is dan "omdat het kan" hebben we onszelf die moeite bespaard.\\
 \\
 Lees verder - of probeer eens een testprogramma te compileren in SELMA - om te leren hoe de vork nou precies in de steel zit met deze taal.\\
 \\
-\textit{- Mark \& Jeroen}
+\\
+\textit{- Mark \& Jeroen}\\
+\\
+NB: Aangezien CD's lang niet zo hip zijn als wat het internet heeft te bieden is ons gehele werk \'{o}\'{o}k te vinden op github: \\
+\\
+\url{http://github.com/markflorisson88/selma/}
 
 
 \newpage
 \section{Problemen en oplossingen}
-uitleg over de wijze waarop je de problemen die je bent tegenge-
-komen bij het maken van de opdracht hebt opgelost (maximaal twee A4-tjes).
+%uitleg over de wijze waarop je de problemen die je bent tegenge-
+%komen bij het maken van de opdracht hebt opgelost (maximaal twee A4-tjes).
+Tijdens het maken van de taal zijn we uiteraard af en toe tegen problemen aangelopen. Nu hebben wij tijdens het practicum de calc-taal al ontwikkeld dus we hadden al wat handigheid met ANTLR - en ANTLR's soms wat aparte foutmeldingen.\\
+\subsection{Taalconstructie}
+Wat ons is opgevallen is dat je van te voren goed moet specificeren hoe je taal er uit moet zien. Door bijvoorbeeld onze keuze om overal SEMICOLON's achter te zetten - wat op zich logisch is - kregen we soms wat onwennige taalconstructies. Zo dien je ook een semicolon na een functiedeclaratie te zetten, want het is een declaratie - en ook een semicolon na een if-expressie voelt wat ongebruikelijk. Omdat echter alles een expressie is in deze taal vonden we het passend hier geen uitzonderingen op te gaan maken door sommige expressies niet met een semicolon af te sluiten. \\
+De eis om een taal LL(1) te maken heeft echter niet echt problemen opgeleverd, behalve dat we de declaratie voor een assignment op een andere plek wouden doen in eerste instantie (onder expressies-toplevel), hierbij was echter met LL(1) geen onderscheid te maken tussen een identifier en een assignment.\\
+Een ander punt waar het onderscheid moeilijk was, waren functies. Deze zijn namelijk niet te onderscheiden van identifiers, tot je een haakje-openen na een identifier ziet. We hebben overwogen om een lokale forward-lookup te gebruiken, dit hebben we echter snel bestempeld als "slim valsspelen" en we hebben een '@' voor alle functie-aanroepen gezet. Klinkt ook mooi, aangezien je ook daadwerkelijk verwijst naar een stuk eerder gedefineerde code.\\
+Soms was het noodzakelijk om een stevige herschrijfregel te gebruiken, om in de checker en compiler wat meer gemak te hebben. Zo hebben we UMIN en EXPRESSION\_STATEMENT toegevoegd. En hebben we vormen zoals (ID (COMMA ID)* COLON type) naar \^(ID TYPE)+ omgeschreven.
+\subsection{Checker}
+De checker heeft vrijwel geen problemen opgeleverd, aangezien onze randcode - Java-helperclasses etc. - gewoon netjes aansloot en een hoop werk uit handen nam.\\
+Waar we wel consequent tegenaan liepen waren de wat vage manieren waarop er data uit de boom te halen is. Dollartekens voor Tokens, of juist niet, het was soms wat onduidelijk.
+\subsection{Compiler}
+In eerste instantie is de compiler in TAM geschreven, toen het echter een project van 2 werdt in plaats van 1, is er besloten om een tandje bij te zetten en SELMA in een wat algemener geaccepteerde code-vorm te compilen: JVM.\\
+\todo{Mark, wat barft aan JVM?}
+\todo{En barfen stringtemplates?}
+\subsection{Randcode}
+De randcode is deels gebaseerd op de symboltables gebruikt tijdens het practicum en neemt een hoop werk uit handen. De symboltable-entries zijn per onderdeel (checker,compiler) anders. Dit omdat we merkten dat er soms te weinig gegevens waren over declaraties. \\
+In de boom zelf konden we ook niet genoeg info kwijt, vandaar dat we een extension op de normale Tree hebben gemaakt, SELMATree, waarin is op te slaan wat het type is van elke expressie en of er variabele onderdelen in een expressie zitten.
 
 \newpage
 \section{Syntax, context-beperkingen en semantiek}
@@ -105,7 +126,7 @@ komen bij het maken van de opdracht hebt opgelost (maximaal twee A4-tjes).
 %de beschrijving van Triangle in Watt \& Brown (hoofdstuk 1 en appendix B).
 
 \subsection{Lexer - terminals}
-Om de code te kunnen parsen zal deze eerst door de lexer moeten gaan. Hier definieren wij een aantal terminal symbolen. Dit is een eindige set van een aantal symbolen of woorden, de lexer zal deze herkennen. Mits ze in de juiste volgorde worden gebruikt krijg je taalconstructies die de parser vervolgens weer begrijpt. We hebben een aantal speciale terminals die zijn opgebouwd uit meerdere karakters bijvoorbeeld. Deze vormen de lexicon. En een drietal terminals zonder textuele vorm. Deze zijn enkel voor de interne boekhouding van de parser.
+Om de code te kunnen parsen zal deze eerst door de lexer moeten gaan. Hier definieren wij een aantal terminal symbolen. Dit is een eindige set van een aantal symbolen of woorden, de lexer zal deze herkennen. Mits ze in de juiste volgorde worden gebruikt krijg je taalconstructies die de parser vervolgens weer begrijpt. We hebben een aantal speciale terminals die zijn opgebouwd uit meerdere karakters bijvoorbeeld. Deze vormen de lexicon. En een zestal terminals zonder textuele vorm. Deze zijn enkel voor de interne boekhouding van de parser.
 \\
 \begin{lstlisting}[style=ANTLR]
 CHARV		APOSTROPHE LETTER APOSTROPHE;
@@ -122,7 +143,10 @@ FALSE		'false';
 
 UMIN;
 UPLUS;
-COMPOUND;			
+BEGIN;
+END;
+COMPOUND;
+EXPRESSION_STATEMENT;			
 \end{lstlisting}
 
 \newpage 
@@ -141,16 +165,16 @@ RCURLY		'}';	BOOL		'boolean';
 COMMA		',';	CHAR		'character';
 EQ		'=';	BEGIN		'begin';
 APOSTROPHE	''';	END		'end.';
-			IF		'if';
+UNDERSCORE	'_';	IF		'if';
 			THEN		'then';
 			ELSE		'else';
 			FI		'fi';
 			WHILE		'while';
 	Operators	DO		'do';
 			OD		'od';
-NOT		'!';	PROC		'procedure';
-MULT		'*';	FUNC		'function';
-DIV		'/';
+NOT		'!';	FUNCDEF		'function';
+MULT		'*';	FUNCRETURN	'return';
+DIV		'/';	FUNCTION	'@';
 MOD		'%';
 PLUS		'+';
 MINUS		'-';
@@ -522,8 +546,8 @@ De functie wordt aangeroepen.
 De functie returned en het result staat op de stack.
 \subsubsection{Voorbeeld}
 \begin{lstlisting}[style=SELMA]
-foo();
-i := foo('b','a','r',);
+@foo();
+i := @foo('b','a','r',);
 \end{lstlisting}
 
 
@@ -600,15 +624,16 @@ De vertaling wordt gedaan door middel van een compiler (g-files/SELMACompiler.g)
 We gebruiken de volgende code functies:
 
 \begin{itemize}
-	\item run       : Program     $\rightarrow$ Instruction*
-	\item execute   : ExpressionStatement $\rightarrow$ Instruction*
- 	\item evaluate  : Expression  $\rightarrow$ Instruction*
- 	\item elaborate : Declaration $\rightarrow$ Instruction*
+	\item run       : Program     -> Instruction*
+	\item execute   | ExpressionStatement -> Instruction*
+ 	\item evaluate  : Expression  -> Instruction*
+ 	\item fetch		  : Identifier  -> Instruction*
+ 	\item assign    : Identifier   -> Instruction*
+ 	\item elaborate : VarDeclaration -> Instruction*
 \end{itemize}
 
 \begin{tabular}{| l | c | l |}
-    \hline
-	Phase   & Code Function & Effect \\ 
+	Phare   & Code Function & Effect \\ 
 	\hline \hline
   Program & run P       & Run P en begin en eindig met een lege stack. Doe ook de \\
   &&                      nodige declaraties om classen en methoden te genereren. \\
@@ -621,13 +646,13 @@ We gebruiken de volgende code functies:
   Expression & evaluate E & Evalueer expressie E en laat de nieuwe waarde op de stack staan.\\
   &&												 Een expressie kan 1 of 2 oude waarden van de stack halen (e.g. AND). \\ 
   \hline
-  Declaration & elaborate & Behandel een declaratie voor constanten, variabelen en functies.\\
-  &&                        Dit maakt entries aan in de symbol table en genereerd simpele \\
-  &&                        declaratie code zoals methoden en velden.\\
+  ID				   & fetch I    & Laad de waarde van I en zet het op de stack. \\
+  \hline
+  ID					 & assign I   & Pop de top van de stack en sla het op in I. \\
   \hline
 \end{tabular}
-\\
-In onze vertaalregels zullen we variabelen omringen met \textless en \textgreater. Soms zijn er hulpvariabelen nodig die geen deel uitmaken van de syntax. We zullen dit aanduiden als extra argumenten aan de code function, e.g. \texttt{evaluate[ID := E, is\_global, type]}, waarbij \texttt{is\_global} en \texttt{type} extra argumenten zijn die geen deel uitmaken van de syntax maar van de context.
+
+In onze vertaalregels zullen we variabelen omringen met \textless en \textgreater.
 
 \subsection{Run}
 \subsubsection{Program}
@@ -731,17 +756,15 @@ evaluate[if E1 then E2 (else E3)?] =
 \label{Identifier}
 
 \begin{verbatim}
-evaluate[ID, kind, is_global, type] =
+evaluate[ID, kind] =
     if kind == CONST:
         ldc getvalue(<ID>)
-    else if is_global:
-        getstatic Main/<ID> <type>   
     else:
         iload address_of(<ID>)
 \end{verbatim}
 
 Als de variabele een constante is wordt de waarde bijgehouden in de symbol table. De functie \texttt{getvalue} haalt hier de waarde van de constante op.
-\texttt{address\_of} is hier een functie die gegeven een identifier zijn address als locale variabele ophaalt. Als de waarde een globale variabele is, is het een field zodat functies beschikking hebben tot deze variabele (als het een locale variabele in de statische \texttt{main} functie zou zijn zou dit niet het geval zijn). In dit geval is de \texttt{is\_global} boolean true en is \texttt{type} het type van de variabele.
+\texttt{address\_of} is hier een functie die gegeven een identifier zijn address als locale variabele ophaalt.
 
 \subsubsection{Integer Literal}
 \begin{verbatim}
@@ -844,17 +867,13 @@ L2:
 
 \subsubsection{Assignment}
 \begin{verbatim}
-evaluate[ID := E, is_global, type] =    
+evaluate[ID := E, address] =
     evaluate[E]
     dup
-    
-    if is_global:
-        putstatic Main/<ID> <type>
-    else: 
-        istore address_of(<ID>)
+    istore <address>
 \end{verbatim}
 
-\texttt{address\_of} is hier een functie die gegeven een identifier zijn address als locale variabele ophaalt. De boolean \texttt{is\_global} geeft aan of de variabele een globale variabele variabele is (in welk geval het een statisch veld is van de \texttt{Main} class). \texttt{type} geeft vervolgens aan van welk type dit veld (de variabele) is. De \texttt{dup} is nodig om de waarde eerst te dupliceren aangezien assignment een expressie is. 
+\texttt{address} is het address van de locale variabele. De \texttt{dup} is nodig om de waarde eerst te dupliceren aangezien assignment een expressie is.
 
 \subsubsection{Print}
 \begin{verbatim}
@@ -896,80 +915,26 @@ evaluate[read(ID+), bools, ints, dup_top] =
         if <dup_top>:
             dup		
 		
-        evaluate[ID := top of stack]
+        istore address_of(<id>)
 \end{verbatim}
 
-Hier krijgt de vertaalregel voor elke expressie mee of het type \texttt{boolean} of int is (\texttt{bools}, texttt{ints}) en of de read een expressie is (\texttt{dup\_top}). Afhankelijk van het type (boolean, integer of character) wordt een aanroep gedaan naar de methoden nextBoolean(), nextInt() of nextByte() van Scanner.
-
-\subsubsection{Function Call}
-\begin{verbatim}
-evaluate[FUNCCALL ID (expr)*, param_types, return_type] =
-    for each expr:	
-        evaluate[expr]
-    invokestatic Main/<ID>(<param_type> for param_type in <param_types>)<return_type>
-\end{verbatim}
-
-We evalueren eerst alle argumenten (\texttt{expr}), waarna we een statische aanroep doen naar de methode in \texttt{Main} met de naam van de functie aanroep. \texttt{param\_types} zijn de typen van de parameters van de functie en \texttt{return\_type} is het return type van de functie.
+Hier krijgt de vertaalregel voor elke expressie mee of het type \texttt{boolean} of int is (\texttt{bools}, texttt{ints}) en of de read een expressie is (\texttt{dup\_top}). \texttt{address\_of} is hier een functie die gegeven een identifier zijn address als locale variabele ophaalt. Afhankelijk van het type (boolean, integer of character) wordt een aanroep gedaan naar de methoden nextBoolean(), nextInt() of nextByte() van Scanner.
 
 \subsection{Elaborate}
-De elaborate code functie handeld declaraties af van constanten en variabelen en van functie definities. In elk geval worden er symbol table entries aangemaakt. In het geval van constanten wordt er geen code gegenereerd, maar wordt de constante waarde onthouden in de symbol table.
+De elaborate code functie genereerd geen code, maar maakt entries aan in de compiler's symbol table.
 
-\subsubsection{Variabelen en Constanten}
 \begin{verbatim}
 elaborate[VarDeclaration type ID] =
-    entry = enter <ID> of <type> and kind VAR in symbol table
-    if entry.level == 0:
-        ; global scope, declare field
-        .field public static <ID> <type>
-    else:
-        increase amount of local variables by one
+    increase amount of local variables by one
+    enter <ID> of <type> in symbol table
 
 elaborate[ConstDeclaration type ID value] =
-    enter <ID> of <type> and kind CONST in symbol table
+    increase amount of local variables by one
+    enter <ID> of <type> in symbol table
     set value on symbol table entry of <ID>
 \end{verbatim}
 
-\subsubsection{Function definition}
-\begin{verbatim}
-elaborate[FUNCTION ID (param_type param)* body (RETURN return_expr)? return_type] =
-    enter <ID> of <type> and kind FUNC in symbol table
-    
-    .method public static <funcname>(<param_type for each param_type>)<return_type>
-    .limit stack <stack_limit>
-    .limit locals <locals_limit>
-        execute[body]
-        if <return_expr>:
-            evaluate[return_expr]
-            ireturn
-        else:
-            return
-    .end method
-\end{verbatim}
-
-Hier is \texttt{ID} de naam van de functie, \texttt{param\_type} en \texttt{param} het type en naam van elke respectievelijke parameter, \texttt{body} de function body, de optionele \texttt{return\_expr} de expressie waarvan de waarde returned wordt, en \texttt{return\_type} het return type van de functie.
-We genereren dus een statische methode, aangezien we de \texttt{Main} class nooit instantieren.
-\\
-Aangezien methoden niet gegeneerd kunnen worden in een andere methode, herschrijft onze "post-processor" methoden in methoden naar een lijst van methoden. i.e.
-
-\begin{verbatim}
-.method A
-    .method B
-        ...
-    .end method
-.end method        
-\end{verbatim}
-
-wordt
-
-\begin{verbatim}
-.method A
-    ...
-.end method
-
-.method B
-    ...
-.end method
-\end{verbatim}
+Constanten nemen geen ruimte in op de stack of als locale variabelen maar worden in de symbol table bijgehouden. Variabelen zijn locale variabelen in de JVM. Dit betekent dat variabelen in de global scope niet beschikbaar zijn voor functies, aangezien dat andere methoden zijn en geen closures over de main functie. Hiervoor zouden het statische of non-statische fields moeten zijn. Zie ook de subsectie over Identifiers \ref{Identifier}.
 
 \newpage
 \section{Beschrijving van Java programmatuur}
@@ -1120,8 +1085,15 @@ print('h', 'a', 'l', 'l', 'o');
 
 \newpage
 \section{Conclusies}
-
-
+We hebben een taal gedefineerd, uitgeschreven, regels aan toegevoegd en dit omgezet naar een stuk Jasmin. Zonder ons in al te veel bochten te moeten wringen om de taal werkend te krijgen of binnen de LL(1) restrictie zien te krijgen. \\ 
+Tot zover lijkt ons dat het over het algemeen wel goed gegaan is - begrijp ons niet verkeerd, we hadden graag nog arrays geimplementeerd - maar we hebben een werkende taal, welke niet aan elkaar geplakt zit van de lelijke oplossingen. \\
+\\
+We hebben zeker 40 pagina's verslaglegging (met appendices 100+). Waarin we hebben geprobeerd alles uit te leggen, hier en daar op een wat informele toon, maar we weten wie het leest. En om de lezer continu met 'u' aan te spreken - en geen kleine grapjes te kunnen maken - is het wel een erg droog verslag om te lezen.\\
+\\
+Het had ons persoonlijk erg leuk geleken om een optimizer te schrijven, dit is echter nogal wat werk en we zijn daar niet aan toegekomen. Bovendien dienen we aan de boekhouding te denken, in het verslag stond niet duidelijk of dat ons pluspunten zou opleveren.
+De uitdaging aan de optimizer was denk ik het puzzelen geweest, om net overal de code net iets vlotter te maken. Zo is er bijvoorbeeld al rekening gehouden door van elke expressie bij te houden of deze variabele onderdelenbevat, als een expressie compleet constant zou zijn dan zou je immers het net zo goed een maal kunnen uitrekenen en als dergelijk in de code te zetten.\\
+\\
+\todo{Mark, mening?}
 
 \newpage
 \section{Appendix}
