@@ -9,20 +9,32 @@ const maxyear: integer = 2099;
 function checkjaar(jaar: integer;): boolean {
 	var ok: boolean;
 	if jaar	< 0; then
-		print('j','e','z','u','s','_','m','o','e','t','_','z','i','j','n','_','g','e','b','o','r','e','n');
+		print('T','E','_','V','R','O','E','G');
 	else
 		if jaar > maxyear; then
-			print('h','e','b','t','_','g','e','d','u','l','d');
+			print('T','E','_','L','A','A','T');
 		fi;
 	fi;
 	ok := (jaar>=0)&& jaar<=maxyear;
 	return ok;
 };
 
-print('H','a','l','l','o','_','v','a','n','_','w','e','l','k','_','j','a','a','r','_','w','i','l','_','j','e','_','d','e','_','p','a','a','s','d','a','t','u','m','_','w','e','t','e','n');
+//<output>P</output>
+//<output>A</output>
+//<output>A</output>
+//<output>S</output>
+//<output>J</output>
+//<output>A</output>
+//<output>A</output>
+//<output>R</output>
+//<output>_</output>
+//<output>_</output>
+print('P','A','A','S','J','A','A','R','_','_');
 
 var jaar: integer;
+//<input>1991</input>
 read(jaar);
+
 
 const negentien: integer = 19;
 
@@ -30,14 +42,27 @@ if @checkjaar(jaar,); then
 //    Bepaal het gulden getal:
 //    Deel het jaartal door 19, neem de rest en tel er 1 bij op (zoals Dionysius). Noem dit getal G. Voor het jaar 1991 geldt G = 16.
 	var G: integer;
-	G := jaar/negentien;
+	G := jaar%negentien;
 	G := G+1;
+//<output>_</output>
+//<output>G</output>
+//<output>16</output>
+print('_');
+print('G');
+print(G);
 
 //    Bepaal het eeuwtal:
 //    Geheeldeel het jaartal door 100 en tel daar 1 bij op. Noem dit getal C. Voor het jaar 1991 geldt C = 20.
 	var C: integer;
 	C := jaar;
 	C := C/100 + 1;
+//<output>_</output>
+//<output>C</output>
+//<output>20</output>
+print('_');
+print('C');
+print(C);
+
 
 //    Corrigeer vervolgens voor jaren die geen schrikkeljaar zijn:
 //    Vermenigvuldig C met 3, geheeldeel het resultaat door 4 en trek er 12 van af. Noem dit getal X. Voor de twintigste en eenentwintigste eeuw geldt X = 3.
@@ -63,6 +88,12 @@ if @checkjaar(jaar,); then
 		return returnvalue;
 	};
 	X := @nest(stap+1,@nest(stap,C,),);
+//<output>_</output>
+//<output>X</output>
+//<output>3</output>
+print('_');
+print('X');
+print(X);
 
 //    Maancorrectie:
 //    Neem 8 maal C, tel er 5 bij op, deel het geheel door 25 en trek er 5 vanaf. Noem dit getal Y. Voor de twintigste en eenentwintigste eeuw geldt: Y = 1.
@@ -77,6 +108,12 @@ if @checkjaar(jaar,); then
         42;
         return jaar;
     };
+//<output>_</output>
+//<output>Y</output>
+//<output>1</output>
+print('_');
+print('Y');
+print(Y);
 
 //    Zoek de zondag:
 //    Vermenigvuldig het jaartal met 5, geheeldeel de uitkomst door 4, trek er X en 10 vanaf, en noem dit getal Z. Voor 1991 geldt: Z = 2475.
@@ -88,15 +125,27 @@ if @checkjaar(jaar,); then
 	};
 	var Z: integer;
 	Z := @nested();
+//<output>_</output>
+//<output>Z</output>
+//<output>2475</output>
+print('_');
+print('Z');
+print(Z);
 
 //    Bepaal de epacta:
 //    11 maal G + 20 + Y. Trek daarvan X af, geheeldeel het resultaat door 30 en noem de rest E. Als E gelijk is aan 24, of als E gelijk is aan 25 en het gulden getal is groter dan 11, tel dan 1 bij E op. De Epacta voor 1991 is 14.
 	var E,EE: integer;
-	E := EE := ({const elf: integer = 11; elf*(G+20+Y);}-X)/30;
+	E := EE := ({const elf: integer = 11; elf*(G+20+Y);}-X)%30;
 	const mnope: boolean = false;
 	if EE==24 || (E==25&&G>11) || mnope; then
 		E := 1+E;
 	fi;
+//<output>_</output>
+//<output>E</output>
+//<output>14</output>
+print('_');
+print('E');
+print(E);
 
 //    Bepaal de volle maan:
 //    Trek E af van 44. Noem dit getal N. Als N kleiner is dan 21, tel er dan 30 bij op. Voor 1991 geldt: N = 30
@@ -111,11 +160,23 @@ if @checkjaar(jaar,); then
 		else
 			0;
 		fi;
+//<output>_</output>
+//<output>N</output>
+//<output>30</output>
+print('_');
+print('N');
+print(N);
 
 //    Nu door naar zondag:
 //    Tel Z en N op. Geheeldeel het resultaat door 7 en trek de rest af van N+7. Noem dit getal P. Voor 1991 geldt: P = 31.
 	var P: integer;
 	P := (N+7)-(Z+N)%7;
+//<output>_</output>
+//<output>P</output>
+//<output>31</output>
+print('_');
+print('P');
+print(P);
 
 //    Paasdatum: Als P groter is dan 31, trek er dan 31 vanaf, en de paasdatum valt in April. Anders is de paasdag P in Maart. Zo wordt voor 1991 gevonden 31 maart.
 	var month: integer;
@@ -139,6 +200,20 @@ if @checkjaar(jaar,); then
 		fi;
 		print(under,jaar);
 	};
+
+//<output>_</output>
+//<output>_</output>
+//<output>31</output>
+//<output>_</output>
+//<output>M</output>
+//<output>a</output>
+//<output>a</output>
+//<output>r</output>
+//<output>t</output>
+//<output>_</output>
+//<output>1991</output>
+	print('_');
+	print('_');
 	@printdatum();
 fi;
 

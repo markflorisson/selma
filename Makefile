@@ -22,9 +22,6 @@ astNC: build
 tests:
 	$(PYTHON) test.py
 
-bigprog:
-	selma pasen/pasen.SELMA
-
 runonly:
 	$(JAVA) SELMA.SELMA -code_generator $(PROGRAM).SELMA > $(PROGRAM).jasmin
 	$(JAVA) -jar jasmin.jar -g $(PROGRAM).jasmin
