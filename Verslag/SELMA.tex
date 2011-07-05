@@ -600,16 +600,15 @@ De vertaling wordt gedaan door middel van een compiler (g-files/SELMACompiler.g)
 We gebruiken de volgende code functies:
 
 \begin{itemize}
-	\item run       : Program     -> Instruction*
-	\item execute   | ExpressionStatement -> Instruction*
- 	\item evaluate  : Expression  -> Instruction*
- 	\item fetch		  : Identifier  -> Instruction*
- 	\item assign    : Identifier   -> Instruction*
- 	\item elaborate : VarDeclaration -> Instruction*
+	\item run       : Program     $\rightarrow$ Instruction*
+	\item execute   : ExpressionStatement $\rightarrow$ Instruction*
+ 	\item evaluate  : Expression  $\rightarrow$ Instruction*
+ 	\item elaborate : Declaration $\rightarrow$ Instruction*
 \end{itemize}
 
 \begin{tabular}{| l | c | l |}
-	Phare   & Code Function & Effect \\ 
+    \hline
+	Phase   & Code Function & Effect \\ 
 	\hline \hline
   Program & run P       & Run P en begin en eindig met een lege stack. Doe ook de \\
   &&                      nodige declaraties om classen en methoden te genereren. \\
@@ -622,13 +621,13 @@ We gebruiken de volgende code functies:
   Expression & evaluate E & Evalueer expressie E en laat de nieuwe waarde op de stack staan.\\
   &&												 Een expressie kan 1 of 2 oude waarden van de stack halen (e.g. AND). \\ 
   \hline
-  ID				   & fetch I    & Laad de waarde van I en zet het op de stack. \\
-  \hline
-  ID					 & assign I   & Pop de top van de stack en sla het op in I. \\
+  Declaration & elaborate & Behandel een declaratie voor constanten, variabelen en functies.\\
+  &&                        Dit maakt entries aan in de symbol table en genereerd simpele \\
+  &&                        declaratie code zoals methoden en velden.\\
   \hline
 \end{tabular}
-
-In onze vertaalregels zullen we variabelen omringen met \textless en \textgreater.
+\\
+In onze vertaalregels zullen we variabelen omringen met \textless en \textgreater. Soms zijn er hulpvariabelen nodig die geen deel uitmaken van de syntax. We zullen dit aanduiden als extra argumenten aan de code function, e.g. \texttt{evaluate[ID := E, is\_global, type]}, waarbij \texttt{is\_global} en \texttt{type} extra argumenten zijn die geen deel uitmaken van de syntax maar van de context.
 
 \subsection{Run}
 \subsubsection{Program}
@@ -732,15 +731,17 @@ evaluate[if E1 then E2 (else E3)?] =
 \label{Identifier}
 
 \begin{verbatim}
-evaluate[ID, kind] =
+evaluate[ID, kind, is_global, type] =
     if kind == CONST:
         ldc getvalue(<ID>)
+    else if is_global:
+        getstatic Main/<ID> <type>   
     else:
         iload address_of(<ID>)
 \end{verbatim}
 
 Als de variabele een constante is wordt de waarde bijgehouden in de symbol table. De functie \texttt{getvalue} haalt hier de waarde van de constante op.
-\texttt{address\_of} is hier een functie die gegeven een identifier zijn address als locale variabele ophaalt.
+\texttt{address\_of} is hier een functie die gegeven een identifier zijn address als locale variabele ophaalt. Als de waarde een globale variabele is, is het een field zodat functies beschikking hebben tot deze variabele (als het een locale variabele in de statische \texttt{main} functie zou zijn zou dit niet het geval zijn). In dit geval is de \texttt{is\_global} boolean true en is \texttt{type} het type van de variabele.
 
 \subsubsection{Integer Literal}
 \begin{verbatim}
@@ -843,13 +844,17 @@ L2:
 
 \subsubsection{Assignment}
 \begin{verbatim}
-evaluate[ID := E, address] =
+evaluate[ID := E, is_global, type] =    
     evaluate[E]
     dup
-    istore <address>
+    
+    if is_global:
+        putstatic Main/<ID> <type>
+    else: 
+        istore address_of(<ID>)
 \end{verbatim}
 
-\texttt{address} is het address van de locale variabele. De \texttt{dup} is nodig om de waarde eerst te dupliceren aangezien assignment een expressie is.
+\texttt{address\_of} is hier een functie die gegeven een identifier zijn address als locale variabele ophaalt. De boolean \texttt{is\_global} geeft aan of de variabele een globale variabele variabele is (in welk geval het een statisch veld is van de \texttt{Main} class). \texttt{type} geeft vervolgens aan van welk type dit veld (de variabele) is. De \texttt{dup} is nodig om de waarde eerst te dupliceren aangezien assignment een expressie is. 
 
 \subsubsection{Print}
 \begin{verbatim}
@@ -891,26 +896,80 @@ evaluate[read(ID+), bools, ints, dup_top] =
         if <dup_top>:
             dup		
 		
-        istore address_of(<id>)
+        evaluate[ID := top of stack]
 \end{verbatim}
 
-Hier krijgt de vertaalregel voor elke expressie mee of het type \texttt{boolean} of int is (\texttt{bools}, texttt{ints}) en of de read een expressie is (\texttt{dup\_top}). \texttt{address\_of} is hier een functie die gegeven een identifier zijn address als locale variabele ophaalt. Afhankelijk van het type (boolean, integer of character) wordt een aanroep gedaan naar de methoden nextBoolean(), nextInt() of nextByte() van Scanner.
+Hier krijgt de vertaalregel voor elke expressie mee of het type \texttt{boolean} of int is (\texttt{bools}, texttt{ints}) en of de read een expressie is (\texttt{dup\_top}). Afhankelijk van het type (boolean, integer of character) wordt een aanroep gedaan naar de methoden nextBoolean(), nextInt() of nextByte() van Scanner.
+
+\subsubsection{Function Call}
+\begin{verbatim}
+evaluate[FUNCCALL ID (expr)*, param_types, return_type] =
+    for each expr:	
+        evaluate[expr]
+    invokestatic Main/<ID>(<param_type> for param_type in <param_types>)<return_type>
+\end{verbatim}
+
+We evalueren eerst alle argumenten (\texttt{expr}), waarna we een statische aanroep doen naar de methode in \texttt{Main} met de naam van de functie aanroep. \texttt{param\_types} zijn de typen van de parameters van de functie en \texttt{return\_type} is het return type van de functie.
 
 \subsection{Elaborate}
-De elaborate code functie genereerd geen code, maar maakt entries aan in de compiler's symbol table.
+De elaborate code functie handeld declaraties af van constanten en variabelen en van functie definities. In elk geval worden er symbol table entries aangemaakt. In het geval van constanten wordt er geen code gegenereerd, maar wordt de constante waarde onthouden in de symbol table.
 
+\subsubsection{Variabelen en Constanten}
 \begin{verbatim}
 elaborate[VarDeclaration type ID] =
-    increase amount of local variables by one
-    enter <ID> of <type> in symbol table
+    entry = enter <ID> of <type> and kind VAR in symbol table
+    if entry.level == 0:
+        ; global scope, declare field
+        .field public static <ID> <type>
+    else:
+        increase amount of local variables by one
 
 elaborate[ConstDeclaration type ID value] =
-    increase amount of local variables by one
-    enter <ID> of <type> in symbol table
+    enter <ID> of <type> and kind CONST in symbol table
     set value on symbol table entry of <ID>
 \end{verbatim}
 
-Constanten nemen geen ruimte in op de stack of als locale variabelen maar worden in de symbol table bijgehouden. Variabelen zijn locale variabelen in de JVM. Dit betekent dat variabelen in de global scope niet beschikbaar zijn voor functies, aangezien dat andere methoden zijn en geen closures over de main functie. Hiervoor zouden het statische of non-statische fields moeten zijn. Zie ook de subsectie over Identifiers \ref{Identifier}.
+\subsubsection{Function definition}
+\begin{verbatim}
+elaborate[FUNCTION ID (param_type param)* body (RETURN return_expr)? return_type] =
+    enter <ID> of <type> and kind FUNC in symbol table
+    
+    .method public static <funcname>(<param_type for each param_type>)<return_type>
+    .limit stack <stack_limit>
+    .limit locals <locals_limit>
+        execute[body]
+        if <return_expr>:
+            evaluate[return_expr]
+            ireturn
+        else:
+            return
+    .end method
+\end{verbatim}
+
+Hier is \texttt{ID} de naam van de functie, \texttt{param\_type} en \texttt{param} het type en naam van elke respectievelijke parameter, \texttt{body} de function body, de optionele \texttt{return\_expr} de expressie waarvan de waarde returned wordt, en \texttt{return\_type} het return type van de functie.
+We genereren dus een statische methode, aangezien we de \texttt{Main} class nooit instantieren.
+\\
+Aangezien methoden niet gegeneerd kunnen worden in een andere methode, herschrijft onze "post-processor" methoden in methoden naar een lijst van methoden. i.e.
+
+\begin{verbatim}
+.method A
+    .method B
+        ...
+    .end method
+.end method        
+\end{verbatim}
+
+wordt
+
+\begin{verbatim}
+.method A
+    ...
+.end method
+
+.method B
+    ...
+.end method
+\end{verbatim}
 
 \newpage
 \section{Beschrijving van Java programmatuur}
