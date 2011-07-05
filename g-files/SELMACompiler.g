@@ -13,7 +13,7 @@ options {
   import SELMA.SELMATree.SR_Type;
   import SELMA.SELMATree.SR_Kind;
   import SELMA.SELMATree.SR_Func;
-  
+
   import java.lang.StringBuilder;
 }
 
@@ -25,9 +25,9 @@ options {
 
 @members {
     public SymbolTable<CompilerEntry> st = new SymbolTable<CompilerEntry>();
-    
-    int curStackDepth;
-    int maxStackDepth;
+
+    int curStackDepth = 0;
+    int maxStackDepth = 0;
     int labelNum = 0;
 
     class StackDepthLabelCounter {
@@ -41,7 +41,7 @@ options {
     Stack<StackDepthLabelCounter> stack = new Stack<StackDepthLabelCounter>();
 
     private void incrStackDepth() {
-    	if (curStackDepth > maxStackDepth)
+    	if (++curStackDepth > maxStackDepth)
     	    maxStackDepth = curStackDepth;
     }
 
@@ -53,13 +53,13 @@ options {
         o.nextAddr = st.nextAddr;
         o.localCount = st.localCount;
 
-        stack.push(o); 
-        
+        stack.push(o);
+
         st.enterFuncScope();
         curStackDepth = maxStackDepth = labelNum = st.localCount = 0;
         st.nextAddr = 0;
     }
-    
+
     private void leaveFuncScope() {
         StackDepthLabelCounter o = stack.pop();
         st.leaveFuncScope();
@@ -67,13 +67,13 @@ options {
         maxStackDepth = o.maxStackDepth;
         labelNum = o.labelNum;
         st.nextAddr = o.nextAddr;
-        st.localCount = o.localCount; 
+        st.localCount = o.localCount;
     }
 
     private String getTypeDenoter(SR_Type type) {
         return st.getTypeDenoter(type, false);
     }
-    
+
     private String getTypeDenoter(SR_Type type, boolean printing) {
         return st.getTypeDenoter(type, printing);
     }
@@ -81,7 +81,7 @@ options {
 
 program
   : ^(node=BEGIN {st.openScope();} compoundexpression END)
-  { SELMATree expr = (SELMATree) $node.getChild(0); 
+  { SELMATree expr = (SELMATree) $node.getChild(0);
     int localsCount = st.getLocalsCount();
     st.closeScope();
   }
@@ -122,7 +122,7 @@ declaration
 
   | ^(node=CONST CHAR val=CHARV (id=ID)+)
   { char c = $val.text.charAt(1);
-    st.enter($id, new CompilerEntry(SR_Type.CHAR, SR_Kind.CONST, 0).setChar(c)); 
+    st.enter($id, new CompilerEntry(SR_Type.CHAR, SR_Kind.CONST, 0).setChar(c));
   }
   //-> declareConst(id={$id.text}, val={(int) c}, type={"character"}, addr={st.nextAddr()-1})
 
@@ -142,17 +142,17 @@ declaration
   	//paramTypeDenoters.add(getTypeDenoter(type1.getSelmaType()));
   	st.addParamToFunc($funcname, param, type1);
   })*
-  ( ^(return_node=FUNCRETURN (INT|BOOL|CHAR) 
+  ( ^(return_node=FUNCRETURN (INT|BOOL|CHAR)
   {
   	SELMATree returnTypeNode = (SELMATree) $return_node.getChild(0);
-  	
+
   	signatureBuilder.append(")");
   	signatureBuilder.append(getTypeDenoter(returnTypeNode.getSelmaType()));
 	funcentry.signature = signatureBuilder.toString();
-	
+
 	hasReturnType = true;
   }
-  
+
   (body+=compoundexpression) retexpr=expression)
   | ({funcentry.signature = signatureBuilder.toString() + ")V";} body+=compoundexpression)
   )
@@ -160,19 +160,19 @@ declaration
         SELMATree funcbody;
   	int stackLimit = maxStackDepth + 3;
   	int localsLimit = st.getLocalsCount();
-  	  	
+
   	if ($return_node == null)
-  	    funcbody = (SELMATree) $node.getChild(paramCount * 2 + 1);  
+  	    funcbody = (SELMATree) $node.getChild(paramCount * 2 + 1);
   	else
   	    funcbody = (SELMATree) $return_node.getChild(1);
-  	    
+
 	leaveFuncScope();
   }
   )
-  -> function(funcname={$funcname.text}, 
+  -> function(funcname={$funcname.text},
               body={$body},
               signature={funcentry.signature},
-              return_expression={$retexpr.st}, 
+              return_expression={$retexpr.st},
               is_void={funcentry.signature.endsWith("V")},
               pop={funcbody.SR_type != SR_Type.VOID},
               stack_limit={stackLimit},
@@ -244,7 +244,7 @@ expression
   	 label_num1={labelNum++}, label_num2={labelNum++})
 
 //CONDITIONAL
-  | ^(node=IF { st.openScope(); } ec1=compoundexpression { st.closeScope(); } THEN 
+  | ^(node=IF { st.openScope(); } ec1=compoundexpression { st.closeScope(); } THEN
   	      { st.openScope(); } ec2=compoundexpression { st.closeScope(); }
   	(ELSE { st.openScope(); } ec3=compoundexpression { st.closeScope(); })?)
   	{ boolean ec3NotEmpty = $ec3.st != null;
@@ -258,15 +258,15 @@ expression
   	pop1={$node.SR_type == SR_Type.VOID && expr2.SR_type != SR_Type.VOID},
   	pop2={ec3NotEmpty && $node.SR_type == SR_Type.VOID && expr3.SR_type != SR_Type.VOID})
 
-  | ^(node=WHILE 
-      { st.openScope(); } ec1=compoundexpression { st.closeScope(); } DO 
+  | ^(node=WHILE
+      { st.openScope(); } ec1=compoundexpression { st.closeScope(); } DO
       { st.openScope(); } ec2=compoundexpression { st.closeScope(); } OD)
   { SELMATree expr2 = (SELMATree) node.getChild(2);
-    boolean pop = expr2.SR_type != SR_Type.VOID; 
-    if (pop) 
-        curStackDepth--; 
+    boolean pop = expr2.SR_type != SR_Type.VOID;
+    if (pop)
+        curStackDepth--;
   }
-  -> while(ec1={$ec1.st}, ec2={$ec2.st}, pop={pop}, 
+  -> while(ec1={$ec1.st}, ec2={$ec2.st}, pop={pop},
            label_num1={labelNum++}, label_num2={labelNum++})
 
 //IO
@@ -338,16 +338,16 @@ expression
     -> print(exprs={$exprs}, type_denoters={typeDenoters}, dup_top={isExpr},
              expr_is_bool={exprIsBool},
              label_nums1={labelNums1}, label_nums2={labelNums2}, line={$node.getLine()})
-  
+
   | ^(node=FUNCTION id=ID (exprs+=expression)*)
   	-> funccall(id={$id.text}, signature={st.retrieve($id).signature}, exprs={$exprs})
 //ASSIGN
-  | ^(BECOMES node=ID e1=expression) 
-  {  
+  | ^(BECOMES node=ID e1=expression)
+  {
       CompilerEntry entry = st.retrieve(node);
       String ident = entry.getIdentifier($node.text);
       boolean isConst = entry.kind == SR_Kind.CONST;
-      
+
       String typeDenoter = getTypeDenoter(entry.type);
       // System.err.println("assign " + ident + " " + entry + " " + typeDenoter);
   }

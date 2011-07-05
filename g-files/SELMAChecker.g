@@ -31,7 +31,7 @@ options {
 	public SymbolTable<CheckerEntry> st = new SymbolTable<CheckerEntry>();
 	// Keep track of whether we are assigning to an identifier
 	int assigning = 0;
-	
+
 	public void matchType(Tree expectedType, SR_Type exprType) {
 	    matchType(((SELMATree) expectedType).getSelmaType(), exprType);
 	}
@@ -126,7 +126,7 @@ declaration
    {
 	SELMATree type = (SELMATree) node.getChild(0);
 	st.retrieve($funcname).type = type.getSelmaType();
-   } compoundexpression expression 
+   } compoundexpression expression
    {
         SELMATree expr = (SELMATree) node.getChild(2);
 	matchType(type, expr.SR_type);
@@ -346,7 +346,7 @@ for (int i=1; i<func.getChildCount(); i++){
 
    CheckerEntry ident = st.retrieve(e1);
    ident.initialized = true;
-   
+
    if (ident.kind!=SR_Kind.VAR)
     throw new SELMAException(e1,"Must be a variable");
    if (ident.type!=e2.SR_type)
@@ -385,7 +385,7 @@ for (int i=1; i<func.getChildCount(); i++){
 	 {
 	 CheckerEntry entry = st.retrieve($node);
 	 if (assigning == 0 && !entry.isInitialized(st))
-	     throw new SELMAException($node, 
+	     throw new SELMAException($node,
 	            "Variable " + $node.text + " is not initialized yet.");
 	 $node.SR_type=entry.type;
 	 $node.SR_kind=entry.kind;

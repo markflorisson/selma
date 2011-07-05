@@ -46,6 +46,7 @@ if @checkjaar(jaar,); then
 	const twaalf: integer = 12;
 	function nest(stap,w: integer;): integer {
 		var returnvalue: integer;
+        returnvalue := 0;
 		if stap==1; then
 			returnvalue := 3*w;
 		else
