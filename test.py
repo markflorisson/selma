@@ -125,8 +125,8 @@ class TestRunner(object):
             "Preserve line numbers from the original source file"
             return '\n' * match.group().count('\n')
 
-        open('temp.selma', 'w').write(
-            re.sub(sub_pattern, replacement, data, flags=re.DOTALL))
+        regex = re.compile(sub_pattern, re.DOTALL)
+        open('temp.selma', 'w').write(regex.sub(replacement, data))
 
         inputs = re.findall(input_pattern, data, re.DOTALL)
         outputs = re.findall(output_pattern, data, re.DOTALL)
