@@ -1,7 +1,7 @@
 \documentclass[]{article}
 
 \title{SELMA}
-\author{ 
+\author{
 Vonk, J\\
 (herhaler)\\
 s0132778\\
@@ -43,20 +43,20 @@ Edwin Smulders}
 \lstdefinestyle{JVM}
 	{frame=shadowbox, breaklines=true,basicstyle=\small}
 \lstdefinestyle{ANTLRfile}
-	{frame=LB, breaklines=true, basicstyle=\scriptsize, numbers=left, stepnumber=5, firstnumber=1, numberstyle=\tiny}	
+	{frame=LB, breaklines=true, basicstyle=\scriptsize, numbers=left, stepnumber=5, firstnumber=1, numberstyle=\tiny}
 \lstdefinestyle{SELMAfile}
-	{frame=LB, breaklines=true, basicstyle=\scriptsize, numbers=left, stepnumber=5, firstnumber=1, numberstyle=\tiny}	
+	{frame=LB, breaklines=true, basicstyle=\scriptsize, numbers=left, stepnumber=5, firstnumber=1, numberstyle=\tiny}
 \lstdefinestyle{JAVAfile}
-	{frame=LB, language=Java, breaklines=true, numbers=left, stepnumber=5, firstnumber=1, numberstyle=\tiny}	
+	{frame=LB, language=Java, breaklines=true, numbers=left, stepnumber=5, firstnumber=1, numberstyle=\tiny}
 \lstdefinestyle{JVMfile}
-	{frame=LB, breaklines=true, numbers=left, stepnumber=5, firstnumber=1, numberstyle=\tiny}	
+	{frame=LB, breaklines=true, numbers=left, stepnumber=5, firstnumber=1, numberstyle=\tiny}
 
 \newcommand{\todo}[1]{\marginpar{\fcolorbox{red}{yellow}{\textbf{#1}}}}
 
 
 
 \begin{titlepage}
-\maketitle 
+\maketitle
 \end{titlepage}
 \setcounter{secnumdepth}{5}
 \setcounter{tocdepth}{5}
@@ -142,7 +142,7 @@ CHARV		APOSTROPHE LETTER APOSTROPHE;
 BOOLEAN		(TRUE | FALSE);
 ID		LETTER (LETTER | DIGIT)*;
 NUMBER		DIGIT+;
-	
+
 DIGIT		('0'..'9');
 LOWER		('a'..'z');
 UPPER		('A'..'Z');
@@ -155,16 +155,16 @@ UPLUS;
 BEGIN;
 END;
 COMPOUND;
-EXPRESSION_STATEMENT;			
+EXPRESSION_STATEMENT;
 \end{lstlisting}
 
-\newpage 
+\newpage
 
 Verder zijn er nog de 'gewone' terminals. Te verdelen in keywords, tokens en operators. Keywords geven aan dat er een bepaalde actie gedaan wordt, zoals een variabele declareren of een if statement. Tokens zijn er om de taal iets meer structuur te geven, denk aan comma's tussen de variabelen. En operators zijn bewerkingen die je kunt uitvoeren op 1 of meer expressies.
 \\
 \begin{lstlisting}[style=ANTLR]
 	Tokens			Keywords
-	
+
 COLON		':';	PRINT		'print';
 SEMICOLON	';';	READ		'read';
 LPAREN		'(';	VAR		'var';
@@ -246,13 +246,13 @@ function foo() {
 }
 function foo(awesome,less:boolean;bar:integer;): integer {
 	var i: integer;
-	
+
 	if (awesome;) then
 		i := 42;
 	else
 		i := 2;
 	fi;
-	
+
 	return i;
 }
 \end{lstlisting}
@@ -269,7 +269,7 @@ Het hoogste niveau is de assignment.
 \item deze identiefier moet dan verwijzen naar een geldige variabele
 \item het type van expression en expression\_arithmetic moet hetzelfde zijn
 \item expression is van het type van expr\_assignment
-\item expr\_assignment is van het type van expr\_arithmetic 
+\item expr\_assignment is van het type van expr\_arithmetic
 \end{itemize}
 \subsubsection{Semantiek}
 De waarde van expression zal worden toegekend aan het linker deel van de assignment.
@@ -402,7 +402,7 @@ Als er geen operator voor de expressie staat dan is expr\_al6 gewoon een expr\_a
 \subsubsection{Semantiek}
 Bij UMIN zal expr\_al6 == - expr\_al7 \\
 Bij UPLUS zal expr\_al6 == expr\_al7 \\
-Bij NOT zal expr\_al6 == ! expr\_al7 
+Bij NOT zal expr\_al6 == ! expr\_al7
 \subsubsection{Voorbeeld}
 \begin{lstlisting}[style=SELMA]
 one := +1;
@@ -466,7 +466,7 @@ Answer42;
 \end{lstlisting}
 
 \subsection{Read}
-Om contact te hebben met de buitenwereld kan onze taal lezen en schrijven naar de standard-out. 
+Om contact te hebben met de buitenwereld kan onze taal lezen en schrijven naar de standard-out.
 \subsubsection{Syntax}
 \lstinputlisting[style=ANTLR,linerange={205-207}]{../g-files/SELMA.g}
 \subsubsection{Context}
@@ -493,7 +493,7 @@ De taal heeft ook de mogelijkheid om dat wat er bijvoorbeeld berekend is naar bu
 \item -
 \end{itemize}
 \subsubsection{Semantiek}
-De waarde van de expressie staat op de stack. Vervolgens wordt deze netjes naar het scherm uitgevoerd. Afhankelijk van het type zal dat anders gebeuren. 
+De waarde van de expressie staat op de stack. Vervolgens wordt deze netjes naar het scherm uitgevoerd. Afhankelijk van het type zal dat anders gebeuren.
 \subsubsection{Voorbeeld}
 \begin{lstlisting}[style=SELMA]
 print(42);
@@ -531,7 +531,7 @@ De while zal net zolang een blok code uitvoeren tot een gegeven expressie waar i
 De tweede compoundexpression zal worden uitgevoerd tot de eerste compoundexpression waar is. Het kan zijn dat de tweede compoundexpression nooit wordt uitgevoerd dus.
 \subsubsection{Voorbeeld}
 \begin{lstlisting}[style=SELMA]
-while false; do 
+while false; do
 \\ this is not gonna be executed
 tru := false;
 od;
@@ -634,46 +634,45 @@ De vertaling wordt gedaan door middel van een compiler (g-files/SELMACompiler.g)
 We gebruiken de volgende code functies:
 
 \begin{itemize}
-	\item run       : Program     -> Instruction*
-	\item execute   | ExpressionStatement -> Instruction*
- 	\item evaluate  : Expression  -> Instruction*
- 	\item fetch		  : Identifier  -> Instruction*
- 	\item assign    : Identifier   -> Instruction*
- 	\item elaborate : VarDeclaration -> Instruction*
+    \item run       : Program     $\rightarrow$ Instruction*
+    \item execute   : ExpressionStatement $\rightarrow$ Instruction*
+    \item evaluate  : Expression  $\rightarrow$ Instruction*
+    \item elaborate : Declaration $\rightarrow$ Instruction*
 \end{itemize}
 
 \begin{tabular}{| l | c | l |}
-	Phare   & Code Function & Effect \\ 
-	\hline \hline
+  \hline
+  Phase   & Code Function & Effect \\
+  \hline \hline
   Program & run P       & Run P en begin en eindig met een lege stack. Doe ook de \\
   &&                      nodige declaraties om classen en methoden te genereren. \\
-  &&											 Return hierna.\\ 
+  &&											 Return hierna.\\
   \hline
   ExprStat & execute S  & Executeer statement S. Als S een expressie is dat \\
   && 										 een waarde op de stack genereerd, pop. Dit veranderd de \\
-  &&											 stack niet. \\ 
+  &&											 stack niet. \\
   \hline
   Expression & evaluate E & Evalueer expressie E en laat de nieuwe waarde op de stack staan.\\
-  &&												 Een expressie kan 1 of 2 oude waarden van de stack halen (e.g. AND). \\ 
+  &&												 Een expressie kan 1 of 2 oude waarden van de stack halen (e.g. AND). \\
   \hline
-  ID				   & fetch I    & Laad de waarde van I en zet het op de stack. \\
-  \hline
-  ID					 & assign I   & Pop de top van de stack en sla het op in I. \\
+  Declaration & elaborate & Behandel een declaratie voor constanten, variabelen en functies.\\
+  &&                        Dit maakt entries aan in de symbol table en genereerd simpele \\
+  &&                        declaratie code zoals methoden en velden.\\
   \hline
 \end{tabular}
 \\
-In onze vertaalregels zullen we variabelen omringen met \textless en \textgreater.
+In onze vertaalregels zullen we variabelen omringen met \textless en \textgreater. Soms zijn er hulpvariabelen nodig die geen deel uitmaken van de syntax. We zullen dit aanduiden als extra argumenten aan de code function, e.g. \texttt{evaluate[ID := E, is\_global, type]}, waarbij \texttt{is\_global} en \texttt{type} extra argumenten zijn die geen deel uitmaken van de syntax maar van de context.\\
 
 \subsection{Run}
 \subsubsection{Program}
 \lstinputlisting[style=ANTLR,linerange={122-122,131-134}]{../g-files/SELMACodeJasmin.stg}
 \begin{verbatim}
-run[P, source_file, stack_limit, locals_limit, pop] = 
+run[P, source_file, stack_limit, locals_limit, pop] =
 	  .source <source_file>
 	  .class public Main
 	  .super java/lang/Object
 	  .field public static scanner_field Ljava/Util/Scanner;
-	  
+
 	  .method public static main([Ljava/lang/String;)V
 	  .limit stack <stack_limit>
 	  .limit locals <locals_limit>
@@ -697,7 +696,7 @@ De \texttt{source\_file}, \texttt{stack\_limit} en \texttt{locals\_limit} geven 
     program -> expression_statement
     expression_statement -> expression
     expression -> ... | compoundexpression
-    compoundexpression -> (declaration | expression_statement)* 
+    compoundexpression -> (declaration | expression_statement)*
 \end{verbatim}
 
 in plaats van
@@ -727,7 +726,7 @@ execute[S, pop] =
 execute[while E; do S; od] =
     L1:
         evaluate[E]
-        ifeq	 L2	
+        ifeq	 L2
         execute[S]
         goto L1
     L2:
@@ -767,24 +766,26 @@ evaluate[if E1 then E2 (else E3)?] =
 \label{Identifier}
 
 \begin{verbatim}
-evaluate[ID, kind] =
+evaluate[ID, kind, is_global, type] =
     if kind == CONST:
         ldc getvalue(<ID>)
+    else if is_global:
+        getstatic Main/<ID> <type>
     else:
         iload address_of(<ID>)
 \end{verbatim}
 
 Als de variabele een constante is wordt de waarde bijgehouden in de symbol table. De functie \texttt{getvalue} haalt hier de waarde van de constante op.
-\texttt{address\_of} is hier een functie die gegeven een identifier zijn address als locale variabele ophaalt.
+\texttt{address\_of} is hier een functie die gegeven een identifier zijn address als locale variabele ophaalt. Als de waarde een globale variabele is, is het een field zodat functies beschikking hebben tot deze variabele (als het een locale variabele in de statische \texttt{main} functie zou zijn zou dit niet het geval zijn). In dit geval is de \texttt{is\_global} boolean true en is \texttt{type} het type van de variabele.
 
 \subsubsection{Integer Literal}
 \begin{verbatim}
 evaluate[literal, iconst, bipush, ldc] =
-    if iconst:	
+    if iconst:
         iconst_<literal>
     elif bipush:
         bipush <literal>
-    else:	
+    else:
         ldc <literal>
 \end{verbatim}
 
@@ -825,7 +826,7 @@ Hierbij is op een binaire arithmetic operator zoals \texttt{+}, \texttt{-}, etc,
 	\item \texttt{*} : \texttt{imul}
 	\item \texttt{/} : \texttt{idiv}
 	\item \texttt{\%} : \texttt{irem}
-	
+
 	\item \texttt{\&\&} : \texttt{iand}
 	\item || : \texttt{ior}
 \end{itemize}
@@ -859,7 +860,7 @@ Voor elke relational relational operator zoals \texttt{\textless=}, \texttt{==} 
 \begin{verbatim}
 evaluate[-E] =
     evaluate[E]
-    ineg	
+    ineg
 \end{verbatim}
 
 Voor unary \texttt{+} hoeft er niets te gebeuren.
@@ -878,13 +879,16 @@ L2:
 
 \subsubsection{Assignment}
 \begin{verbatim}
-evaluate[ID := E, address] =
+evaluate[ID := E, is_global, type] =
     evaluate[E]
     dup
-    istore <address>
+    if is_global:
+        putstatic Main/<ID> <type>
+    else:
+        istore address_of(<ID>)
 \end{verbatim}
 
-\texttt{address} is het address van de locale variabele. De \texttt{dup} is nodig om de waarde eerst te dupliceren aangezien assignment een expressie is.
+\texttt{address\_of} is hier een functie die gegeven een identifier zijn address als locale variabele ophaalt. De boolean \texttt{is\_global} geeft aan of de variabele een globale variabele variabele is (in welk geval het een statisch veld is van de \texttt{Main} class). \texttt{type} geeft vervolgens aan van welk type dit veld (de variabele) is. De \texttt{dup} is nodig om de waarde eerst te dupliceren aangezien assignment een expressie is.
 
 \subsubsection{Print}
 \begin{verbatim}
@@ -893,8 +897,8 @@ evaluate[print(E+), type_denoters, bools, dup_top] =
         evaluate[expr]
 
         if <dup_top>:
-            dup		
-		
+            dup
+
         if <is_bool>:
                 ifeq L1
                 ldc "true"
@@ -902,7 +906,7 @@ evaluate[print(E+), type_denoters, bools, dup_top] =
             L1:
                 ldc "false"
             L2:
-		
+
         getstatic java/lang/System/out Ljava/io/PrintStream;
         swap
         invokevirtual java/io/PrintStream/println(<type_denoter>)V
@@ -915,37 +919,93 @@ Hier krijgt de vertaalregel voor elke expressie mee of het type \texttt{boolean}
 evaluate[read(ID+), bools, ints, dup_top] =
     for id, is_bool, is_int in ID, bools, ints:
 		    getstatic Main/scanner_field Ljava/util/Scanner;
-		
+
         if <is_bool>:
             invokevirtual java/util/Scanner/nextBoolean()Z
         elif <is_int>:
             invokevirtual java/util/Scanner/nextInt()I
         else:
-            invokevirtual java/util/Scanner/nextByte()I		
-				
+            invokevirtual java/util/Scanner/nextByte()I
+
         if <dup_top>:
-            dup		
-		
-        istore address_of(<id>)
+            dup
+
+                evaluate[ID := top of stack]
 \end{verbatim}
 
 Hier krijgt de vertaalregel voor elke expressie mee of het type \texttt{boolean} of int is (\texttt{bools}, texttt{ints}) en of de read een expressie is (\texttt{dup\_top}). \texttt{address\_of} is hier een functie die gegeven een identifier zijn address als locale variabele ophaalt. Afhankelijk van het type (boolean, integer of character) wordt een aanroep gedaan naar de methoden nextBoolean(), nextInt() of nextByte() van Scanner.
 
-\subsection{Elaborate}
-De elaborate code functie genereerd geen code, maar maakt entries aan in de compiler's symbol table.
+\subsubsection{Function Call}
+\begin{verbatim}
+evaluate[FUNCCALL ID (expr)*, param_types, return_type] =
+    for each expr:
+        evaluate[expr]
+    invokestatic Main/<ID>(<param_type> for param_type in <param_types>)<return_type>
+ \end{verbatim}
 
+We evalueren eerst alle argumenten (\texttt{expr}), waarna we een statische aanroep doen naar de methode in \texttt{Main} met de naam van de functie aanroep. \texttt{param\_types} zijn de typen van de parameters van de functie en \texttt{return\_type} is het return type van de functie.
+
+\subsection{Elaborate}
+De elaborate code functie handeld declaraties af van constanten en variabelen en van functie definities. In elk geval worden er symbol table entries aangemaakt. In het geval van constanten wordt er geen code gegenereerd, maar wordt de constante waarde onthouden in de symbol table.
+
+\subsubsection{Variabelen en Constanten}
 \begin{verbatim}
 elaborate[VarDeclaration type ID] =
     increase amount of local variables by one
-    enter <ID> of <type> in symbol table
+    entry = enter <ID> of <type> and kind VAR in symbol table
+    if entry.level == 0:
+       ; global scope, declare field
+        .field public static <ID> <type>
+    else:
+        increase amount of local variables by one
 
 elaborate[ConstDeclaration type ID value] =
     increase amount of local variables by one
-    enter <ID> of <type> in symbol table
+    enter <ID> of <type> and kind CONST in symbol table
     set value on symbol table entry of <ID>
 \end{verbatim}
 
-Constanten nemen geen ruimte in op de stack of als locale variabelen maar worden in de symbol table bijgehouden. Variabelen zijn locale variabelen in de JVM. Dit betekent dat variabelen in de global scope niet beschikbaar zijn voor functies, aangezien dat andere methoden zijn en geen closures over de main functie. Hiervoor zouden het statische of non-statische fields moeten zijn. Zie ook de subsectie over Identifiers \ref{Identifier}.
+\subsubsection{Function definition}
+\begin{verbatim}
+elaborate[FUNCTION ID (param_type param)* body (RETURN return_expr)? return_type] =
+    enter <ID> of <type> and kind FUNC in symbol table
+
+    .method public static <funcname>(<param_type for each param_type>)<return_type>
+    .limit stack <stack_limit>
+    .limit locals <locals_limit>
+        execute[body]
+        if <return_expr>:
+            evaluate[return_expr]
+            ireturn
+        else:
+            return
+    .end method
+\end{verbatim}
+
+Hier is \texttt{ID} de naam van de functie, \texttt{param\_type} en \texttt{param} het type en naam van elke respectievelijke parameter, \texttt{body} de function body, de optionele \texttt{return\_expr} de expressie waarvan de waarde returned wordt, en \texttt{return\_type} het return type van de functie.
+We genereren dus een statische methode, aangezien we de \texttt{Main} class nooit instantieren.
+\\
+Aangezien methoden niet gegeneerd kunnen worden in een andere methode, herschrijft onze "post-processor" methoden in methoden naar een lijst van methoden. i.e.
+
+\begin{verbatim}
+.method A
+    .method B
+        ...
+    .end method
+.end method
+\end{verbatim}
+
+wordt
+
+\begin{verbatim}
+.method A
+    ...
+.end method
+
+.method B
+    ...
+.end method
+\end{verbatim}
 
 \newpage
 \section{Beschrijving van Java programmatuur}
@@ -975,12 +1035,12 @@ Lexer \>  Parser \> -no\_checker 	\>   		\> -ast \>  Ast-diagram \\
 Lexer \>  Parser \> -no\_checker 	\>   		\> -dot \>  Dot-diagram \\
 Lexer \>  Parser \>  				\>  Checker \> -ast \>  Ast-diagram \\
 Lexer \>  Parser \>  				\>  Checker \> -dot \>  Dot-diagram \\
-Lexer \>  Parser \>  				\>  Checker \> -code\_generator \>  Code 
-\end{tabbing} 
+Lexer \>  Parser \>  				\>  Checker \> -code\_generator \>  Code
+\end{tabbing}
 Alle resultaten zullen altijd naar de stdOut worden geprint.
 
 \subsection{SELMAException}
-Als er wat fout gaat in bijvoorbeeld de checker dan zal er een exception worden gegooid. Deze exception is een SELMAException. Aan de exception wordt de node meegegeven waar de checker op dat moment mee bezig is. En de toString()-functie van SELMAException zal dat dan ook mooi formatten in de vorm van "(regelnummer:columnnummer) Errormessage", toch wel fijn als je moet debuggen. 
+Als er wat fout gaat in bijvoorbeeld de checker dan zal er een exception worden gegooid. Deze exception is een SELMAException. Aan de exception wordt de node meegegeven waar de checker op dat moment mee bezig is. En de toString()-functie van SELMAException zal dat dan ook mooi formatten in de vorm van "(regelnummer:columnnummer) Errormessage", toch wel fijn als je moet debuggen.
 
 \subsection{SELMATreeAdaptor}
 Deze TreeAdaptor heeft SELMATree als nodes, in plaats van een normale Tree.
@@ -1110,7 +1170,7 @@ Tenslotte is de output van een testrun van \texttt{test.py} opgeslagen in \textt
 
 \newpage
 \section{Conclusies}
-We hebben een taal gedefineerd, uitgeschreven, regels aan toegevoegd en dit omgezet naar een stuk Jasmin. Zonder ons in al te veel bochten te moeten wringen om de taal werkend te krijgen of binnen de LL(1) restrictie zien te krijgen. \\ 
+We hebben een taal gedefineerd, uitgeschreven, regels aan toegevoegd en dit omgezet naar een stuk Jasmin. Zonder ons in al te veel bochten te moeten wringen om de taal werkend te krijgen of binnen de LL(1) restrictie zien te krijgen. \\
 Tot zover lijkt ons dat het over het algemeen wel goed gegaan is - begrijp ons niet verkeerd, we hadden graag nog arrays geimplementeerd - maar we hebben een werkende taal, welke niet aan elkaar geplakt zit van de lelijke oplossingen. \\
 \\
 We hebben zeker 40 pagina's verslaglegging (met appendices 100+). Waarin we hebben geprobeerd alles uit te leggen, hier en daar op een wat informele toon, maar we weten wie het leest. En om de lezer continu met 'u' aan te spreken - en geen kleine grapjes te kunnen maken - is het wel een erg droog verslag om te lezen.\\
