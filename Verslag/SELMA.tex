@@ -456,7 +456,8 @@ Een identifier van een bestaande variabele of constante in de huidige of een hog
 \item Het type is het type van de variabele of declaratie waar de identifier naar verwijst.
 \end{itemize}
 \subsubsection{Semantiek}
-Er zal een commando aangeroepen worden om de waarde uit het geheugen te laden. Deze waarde wordt dan op de stack gezet. Bij constanten gebeurd dit ook. Eventueel zou je ook de constante zelf al kunnen neerzetten op de stack, dit scheelt weer wat werk voor de processor. Dit doen wij echter niet momenteel.
+Er zal een commando aangeroepen worden om de waarde uit het geheugen te laden. Deze waarde wordt dan op de stack gezet. Bij constanten gebeurd dit ook. Eventueel zou je ook de constante zelf al kunnen neerzetten op de stack, dit scheelt weer wat werk voor de processor. Dit doen wij echter niet momenteel. - Last minute update - Nu doen wij dat wel, constanten zullen direct uit de symboltable getrokken worden.
+/todo{Mark}
 \subsubsection{Voorbeeld}
 \begin{lstlisting}[style=SELMA]
 Answer42;
