@@ -1,0 +1,23 @@
+#!/bin/sh
+
+# Test het pasen programma met meerde inputs/outputs.
+
+echo paasjaar 1800: >output
+sh selma test/test_pasen.selma <<< 1800 >>output
+
+echo paasjaar 2000: >output
+sh selma test/test_pasen.selma <<< 2000 >>output
+
+echo paasjaar 2011: >output
+sh selma test/test_pasen.selma <<< 2011 >>output
+
+echo paasjaar 3000: >output
+sh selma test/test_pasen.selma <<< 3000 >>output
+
+
+if diff -q output expected; then
+    echo "Program output matches expected output :)"
+else
+    echo "ERROR: Program output does not match expected output :("
+    diff output expected
+fi
