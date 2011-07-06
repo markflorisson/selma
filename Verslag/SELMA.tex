@@ -1035,7 +1035,6 @@ De tests in de test directory testen alle constructen uit de taal, zoals arithme
 \begin{lstlisting}[style=SELMA]
 [0] [11:11] ~/selma git(master!) ➤ python test.py
 Run        test/correct.selma                                 ...  OK
-Error      test/error_compiletime_uninitialized.selma         ...  OK
 Error      test/error_context.selma                           ...  OK
 Error      test/error_if.selma                                ...  OK
 Error      test/error_runtime_uninitialized.selma             ...  OK
@@ -1068,7 +1067,7 @@ Error      test/test_functions/error_wrongparamcount.selma    ...  OK
 Error      test/test_functions/error_wrongparamtype.selma     ...  OK
 Error      test/test_functions/error_wrongreturntype.selma    ...  OK
 Run        test/test_functions/recursion.selma                ...  OK
-Ran 23 test(s), SUCCESS=22, FAILURE=1
+Ran 24 test(s), SUCCESS=22, FAILURE=2
 
 \end{lstlisting}
 
@@ -1086,12 +1085,6 @@ Hier zien we dat \texttt{test/sample.selma} niet de correcte output heeft, maar 
 print('h', 'a', 'l', 'l', 'o');
 \end{lstlisting}
 
-Verder kan een selma programma gecompileerd en gerunt worden met de command
-
-\begin{verbatim}
-$ sh selma path/to/program.selma
-\end{verbatim}
-
 \subsection{Pasen}
 Het grootste testprogramma heet pasen, deze wordt ook meegenomen in de test. Pasen berekent middels het algorithme van Gauss wanneer pasen valt in een gegeven jaar. \\
 De SELMA-code is goed gedocumenteerd. De rekenstappen zijn soms wat omslachtig geschreven om gebruik te maken van alle mogelijkheden van de taal.\\
@@ -1107,7 +1100,7 @@ We hebben zeker 40 pagina's verslaglegging (met appendices 100+). Waarin we hebb
 Het had ons persoonlijk erg leuk geleken om een optimizer te schrijven, dit is echter nogal wat werk en we zijn daar niet aan toegekomen. Bovendien dienen we aan de boekhouding te denken, in het verslag stond niet duidelijk of dat ons pluspunten zou opleveren.
 De uitdaging aan de optimizer was denk ik het puzzelen geweest, om net overal de code net iets vlotter te maken. Zo is er bijvoorbeeld al rekening gehouden door van elke expressie bij te houden of deze variabele onderdelenbevat, als een expressie compleet constant zou zijn dan zou je immers het net zo goed een maal kunnen uitrekenen en als dergelijk in de code te zetten.\\
 \\
-Verder hadden nog leuke dingen toegevoegd kunnen worden aan de taal, die wellicht niet allen even makkelijk zijn met de JVM, maar wel uitdagend. Vooral generators en closures zouden leuk geweest zijn. En de taal heeft erg weinig typen, het zou leuk zijn als de taal toestaat Java classen te importeren en vrij te gebruiken. Ook \texttt{try/catch} en \texttt{try/finally} zouden een meest welkome additie zijn geweest.\\
+\todo{Mark, mening?}
 
 \newpage
 \section{Appendix}
