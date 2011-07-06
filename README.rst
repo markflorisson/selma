@@ -24,6 +24,11 @@ Documentation can be found in::
 
     ./Versag/SELMA.pdf
 
+You can build the report as follows::
+
+    $ cd Verslag
+    $ make
+
 Source can be found in::
 
     ./src/SELMA
