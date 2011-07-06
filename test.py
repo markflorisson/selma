@@ -166,7 +166,8 @@ class TestRunner(object):
                     self.compile_and_run(path, input, output,
                                          test_type=test_type)
 
-                total += 1
+                    total += 1
+
                 self.cleanup()
 
         print 'Ran %d test(s), SUCCESS=%d, FAILURE=%d' % (total,

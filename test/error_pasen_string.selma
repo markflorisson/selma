@@ -1,13 +1,21 @@
-//<output>P</output>
-//<output>A</output>
-//<output>A</output>
-//<output>S</output>
-//<output>J</output>
-//<output>A</output>
-//<output>A</output>
-//<output>R</output>
-//<output>_</output>
-//<output>_</output>
+/*<output>
+        P
+        A
+        A
+        S
+        J
+        A
+        A
+        R
+        _
+        _
+        Exception in thread "main" java.util.InputMismatchException
+        at java.util.Scanner.throwFor(Scanner.java:840)
+        at java.util.Scanner.next(Scanner.java:1461)
+        at java.util.Scanner.nextInt(Scanner.java:2091)
+        at java.util.Scanner.nextInt(Scanner.java:2050)
+        at Main.main(temp.selma:47)
+</output>*/
 
 //<input>geen_jaar</input>
 

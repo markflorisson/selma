@@ -2,6 +2,7 @@ Run        test/correct.selma                                 ...  OK
 Error      test/error_compiletime_uninitialized.selma         ...  OK
 Error      test/error_context.selma                           ...  OK
 Error      test/error_if.selma                                ...  OK
+Error      test/error_pasen_string.selma                      ...  OK
 Error      test/error_runtime_uninitialized.selma             ...  OK
 Error      test/error_runtime_zerodivision.selma              ...  OK
 Error      test/error_syntax.selma                            ...  OK
@@ -24,6 +25,8 @@ Run        test/sample.selma                                  ...  FAIL (exit st
 Run        test/test_if.selma                                 ...  OK
 Run        test/test_operators.selma                          ...  OK
 Run        test/test_pasen.selma                              ...  OK
+Run        test/test_pasen_-5.selma                           ...  OK
+Run        test/test_pasen_3000.selma                         ...  OK
 Run        test/test_while.selma                              ...  OK
 Run        test/test_functions/correct_functions.SELMA        ...  OK
 Error      test/test_functions/error_doublefunction.selma     ...  OK
@@ -32,4 +35,4 @@ Error      test/test_functions/error_wrongparamcount.selma    ...  OK
 Error      test/test_functions/error_wrongparamtype.selma     ...  OK
 Error      test/test_functions/error_wrongreturntype.selma    ...  OK
 Run        test/test_functions/recursion.selma                ...  OK
-Ran 32 test(s), SUCCESS=31, FAILURE=1
+Ran 24 test(s), SUCCESS=23, FAILURE=1

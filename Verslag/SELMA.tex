@@ -1102,8 +1102,10 @@ De tests in de test directory testen alle constructen uit de taal, zoals arithme
 \begin{lstlisting}[style=SELMA]
 [0] [11:11] ~/selma git(master!) ➤ python test.py
 Run        test/correct.selma                                 ...  OK
+Error      test/error_compiletime_uninitialized.selma         ...  OK
 Error      test/error_context.selma                           ...  OK
 Error      test/error_if.selma                                ...  OK
+Error      test/error_pasen_string.selma                      ...  OK
 Error      test/error_runtime_uninitialized.selma             ...  OK
 Error      test/error_runtime_zerodivision.selma              ...  OK
 Error      test/error_syntax.selma                            ...  OK
@@ -1126,6 +1128,8 @@ Run        test/sample.selma                                  ...  FAIL (exit st
 Run        test/test_if.selma                                 ...  OK
 Run        test/test_operators.selma                          ...  OK
 Run        test/test_pasen.selma                              ...  OK
+Run        test/test_pasen_-5.selma                           ...  OK
+Run        test/test_pasen_3000.selma                         ...  OK
 Run        test/test_while.selma                              ...  OK
 Run        test/test_functions/correct_functions.SELMA        ...  OK
 Error      test/test_functions/error_doublefunction.selma     ...  OK
@@ -1134,7 +1138,7 @@ Error      test/test_functions/error_wrongparamcount.selma    ...  OK
 Error      test/test_functions/error_wrongparamtype.selma     ...  OK
 Error      test/test_functions/error_wrongreturntype.selma    ...  OK
 Run        test/test_functions/recursion.selma                ...  OK
-Ran 24 test(s), SUCCESS=22, FAILURE=2
+Ran 24 test(s), SUCCESS=23, FAILURE=1
 
 \end{lstlisting}
 
@@ -1156,14 +1160,13 @@ print('h', 'a', 'l', 'l', 'o');
 Het grootste testprogramma heet pasen, deze wordt ook meegenomen in de test. Pasen berekent middels het algorithme van Gauss wanneer pasen valt in een gegeven jaar. \\
 De SELMA-code is goed gedocumenteerd. De rekenstappen zijn soms wat omslachtig geschreven om gebruik te maken van alle mogelijkheden van de taal.\\
 In de appendix is de code te vinden van pasen, zowel in SELMA als Jasmin.\\
-De testrunner ondersteund alleen een enkele input en een enkele output. Om dit programma iets grondiger te testen hebben we meerdere inputs en outputs gegeven in het programma \texttt{runpasen}. Dit is een simpel shell script met regels als
+De testrunner ondersteund alleen een enkele input en een enkele output. Om een programma makkelijk en snel te testen met verschillende in- en outputs hebben we ook wel commandos als het volgende gebruikt:
+
 \begin{verbatim}
-	sh selma test/test_pasen.selma <<< $inputjaar >>output
+	sh selma test/test_pasen.selma <<< 2011
 \end{verbatim}
 
-Aan het eind van het script wordt de \texttt{output} file met de \texttt{expected} output file vergeleken (deze files staan beide in de root directory van het project). Het shell script werkt met shells als bash en zsh, maar niet met shells als dash die strict POSIX-compliant proberen te zijn.\\
-
-Op deze manier kunnen tests in de test directory overigens ook getest worden, als de \texttt{input} en \texttt{output} tags in SELMA comments staan.\\
+Op deze manier kunnen tests in de test directory overigens ook getest worden, als de \texttt{input} en \texttt{output} tags in SELMA comments staan (hetgeen het geval is voor de meeste tests).\\
 
 Tenslotte is de output van een testrun van \texttt{test.py} opgeslagen in \texttt{output.testrun}
 
